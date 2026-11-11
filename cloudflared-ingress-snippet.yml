@@ -1,0 +1,6 @@
+# Add ABOVE the final http_status:404 rule in /etc/cloudflared/config.yml, then: sudo systemctl restart cloudflared
+# (also create DNS: cloudflared tunnel route dns dell-secret-tunnel quant.joeysvault.app)
+  - hostname: quant.joeysvault.app
+    service: http://127.0.0.1:8090
+    originRequest:
+      connectTimeout: 10s

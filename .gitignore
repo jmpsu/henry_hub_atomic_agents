@@ -1,0 +1,5 @@
+.env
+.venv/
+audit/
+artifacts/mcp_credentials.json
+henry_hub_pit.db
