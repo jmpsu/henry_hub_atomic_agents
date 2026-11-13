@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import httpx
 import chromadb
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import scenario
 
 app = FastAPI()
@@ -14,7 +15,8 @@ if not DB_PATH or not os.path.isabs(DB_PATH) or not os.path.isfile(DB_PATH):
     # No silent fallback to a cwd-relative or default database.
     raise RuntimeError("DB_PATH must be set to an existing absolute path (see .env)")
 
-chroma_client = chromadb.PersistentClient(path="./chroma_pit_kb")
+_HERE = os.path.dirname(os.path.realpath(__file__))
+chroma_client = chromadb.PersistentClient(path=os.path.join(_HERE, "chroma_pit_kb"))
 kb_collection = chroma_client.get_or_create_collection(name="henry_hub_alpha_graph")
 
 class CommandRequest(BaseModel):
@@ -144,15 +146,9 @@ async def generate_pit_analysis(user_query: str, sql_ctx: str, vec_ctx: str, as_
         resp.raise_for_status()
         return json.loads(resp.json()["response"])
 
-def execute_readonly_sql(sql: str) -> list:
-    if not sql.strip().upper().startswith("SELECT"):
-        raise ValueError("Blocked non-SELECT query for safety.")
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    cursor = conn.cursor()
-    cursor.execute(sql)
-    results = cursor.fetchall()
-    conn.close()
-    return results
+def execute_readonly_sql(sql: str, as_of: str) -> list:
+    """Model/fallback SQL runs only inside the PIT sandbox (cutoff view + authorizer + row cap + step limit)."""
+    return scenario.run_sandboxed(DB_PATH, sql, as_of)
 
 def log_to_github_gist(command: str, as_of: str, result_payload: dict) -> str:
     timestamp_slug = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
@@ -168,14 +164,21 @@ def log_to_github_gist(command: str, as_of: str, result_payload: dict) -> str:
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as tmp:
         tmp.write(markdown_body)
         tmp_path = tmp.name
-    proc = subprocess.run(
-        [shutil.which("gh") or "/home/joey/.local/bin/gh", "gist", "create", tmp_path, "--desc", f"PIT Alpha Hub: {command[:60]}"],
-        capture_output=True, text=True
-    )
-    return proc.stdout.strip() if proc.returncode == 0 else f"Gist Error: {proc.stderr}"
+    try:
+        proc = subprocess.run(
+            [shutil.which("gh") or "/home/joey/.local/bin/gh", "gist", "create", tmp_path, "--desc", f"PIT Alpha Hub: {command[:60]}"],
+            capture_output=True, text=True, timeout=45, stdin=subprocess.DEVNULL
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.strip()[:300] or f"gh exit {proc.returncode}")
+        return proc.stdout.strip()
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
 _INGEST_LOCK = asyncio.Lock()
-_HERE = os.path.dirname(os.path.realpath(__file__))
 
 @app.post("/ingest")
 async def ingest_now():
@@ -200,9 +203,12 @@ async def health():
 
 @app.post("/execute")
 async def handle_remote_command(req: CommandRequest):
-    as_of = req.as_of_timestamp or datetime.now(timezone.utc).isoformat()
+    try:
+        as_of = scenario.norm_ts(req.as_of_timestamp or datetime.now(timezone.utc).isoformat())
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail="as_of_timestamp must be an ISO-8601 timestamp")
     est = scenario.estimate_delta(req.query)
-    sql_ctx = retrieve_sql_context(as_of, req.query)
+    sql_ctx = await asyncio.to_thread(retrieve_sql_context, as_of, req.query)
     vec_ctx, parent_ids = await retrieve_vector_nodes(req.query, as_of)
     try:
         analysis = await generate_pit_analysis(req.query, sql_ctx, vec_ctx, as_of, est)
@@ -217,9 +223,13 @@ async def handle_remote_command(req: CommandRequest):
     analysis["model_scenario_delta_bcf_ignored"] = analysis.get("scenario_delta_bcf")
     analysis["scenario_delta_bcf"] = est["value"]
     try:
-        db_rows = execute_readonly_sql(analysis["sql_query"])
+        db_rows = await asyncio.to_thread(execute_readonly_sql, analysis["sql_query"], as_of)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        if sql_source == "deterministic_fallback":
+            raise HTTPException(status_code=500, detail=f"fallback SQL failed: {e}")
+        sql_source, sql_rejected = "deterministic_fallback", f"model SQL failed in sandbox: {str(e)[:120]}"
+        analysis["sql_query"] = scenario.fallback_sql(as_of)
+        db_rows = await asyncio.to_thread(execute_readonly_sql, analysis["sql_query"], as_of)
     result = {
         "as_of_timestamp": as_of,
         "linked_parent_nodes": parent_ids,
@@ -233,9 +243,13 @@ async def handle_remote_command(req: CommandRequest):
                               "alpha_thesis": "model_hypothesis"},
         "data_quality": scenario.data_quality(DB_PATH, as_of, db_rows),
     }
-    gist_url = log_to_github_gist(req.query, as_of, result)
-    new_node_id = await store_compounding_node(req.query, as_of, analysis, parent_ids, gist_url)
+    try:
+        gist_url, audit_error = await asyncio.to_thread(log_to_github_gist, req.query, as_of, result), None
+    except Exception as e:  # audit failure is reported, never disguised as a URL
+        gist_url, audit_error = None, str(e)[:300]
+    new_node_id = await store_compounding_node(req.query, as_of, analysis, parent_ids, gist_url or "")
     result["audit_gist_url"] = gist_url
+    result["audit_error"] = audit_error
     result["new_vector_node_id"] = new_node_id
     result["total_knowledge_nodes"] = kb_collection.count()
     return result

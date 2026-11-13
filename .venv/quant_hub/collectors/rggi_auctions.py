@@ -49,14 +49,19 @@ def collect(conn, fetcher=fetch, now=None) -> list:
         raise RuntimeError(f"RGGI HTTP {status}")
     h = ingest.archive_payload(conn, body, "rggi_auction_results", URL, status, retrieved, ctype)
     new = 0
+    known = {r[1][:10]: r[3] for r in ingest.pit_snapshot(conn, "2100-01-01T00:00:00Z", [AGENT], measured_only=False)}
     for auction, day, price in parse(body.decode("utf-8", "ignore")):
+        if known.get(day) == price:
+            continue
+        revised = day in known
         d = datetime.strptime(day, "%Y-%m-%d")
-        avail = (d + timedelta(days=1, hours=16)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        avail = retrieved if revised else (d + timedelta(days=1, hours=16)).strftime("%Y-%m-%dT%H:%M:%SZ")
         new += int(ingest.record_observation(
             conn, agent_id=AGENT, target_timestamp=day + "T00:00:00Z", available_timestamp=avail, value=price,
             source_id="rggi_auction_results", source_url=URL, unit="USD/short ton", retrieved_timestamp=retrieved,
             geographic_scope="RGGI states", series_id=auction.replace(" ", "_").upper(), raw_payload_hash=h,
-            extraction_version="rggi_auctions/1", quality_status="validated_availability_assumed_d+1", provenance="measured"))
+            extraction_version="rggi_auctions/1", revision_timestamp=retrieved if revised else None,
+            quality_status="revision_vintage" if revised else "validated_availability_assumed_d+1", provenance="measured"))
     conn.commit()
     return [{"agent": AGENT, "observations_new": new}]
 

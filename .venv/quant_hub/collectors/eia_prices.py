@@ -51,12 +51,13 @@ def load(conn, name, rows, raw_hash, retrieved, url) -> int:
     for day, val in rows:
         if known.get(day.isoformat()) == val:
             continue
-        avail = (datetime(day.year, day.month, day.day, tzinfo=timezone.utc) + timedelta(hours=21)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        revised = day.isoformat() in known   # value differs from the stored vintage -> new vintage, available now
+        avail = retrieved if revised else (datetime(day.year, day.month, day.day, tzinfo=timezone.utc) + timedelta(hours=21)).strftime("%Y-%m-%dT%H:%M:%SZ")
         new += int(ingest.record_observation(
             conn, agent_id=agent, target_timestamp=day.isoformat() + "T00:00:00Z", available_timestamp=avail, value=val,
             source_id="eia_dnav_ng", source_url=url, unit=unit, retrieved_timestamp=retrieved, geographic_scope="Henry Hub, LA",
-            series_id=key, raw_payload_hash=raw_hash, extraction_version="eia_prices/1",
-            quality_status="historical_only_source_discontinued_2024-04" if discontinued else "validated_availability_assumed_close",
+            series_id=key, raw_payload_hash=raw_hash, extraction_version="eia_prices/1", revision_timestamp=retrieved if revised else None,
+            quality_status="revision_vintage" if revised else "historical_only_source_discontinued_2024-04" if discontinued else "validated_availability_assumed_close",
             provenance="measured"))
     return new
 

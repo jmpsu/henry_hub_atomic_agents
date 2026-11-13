@@ -21,6 +21,10 @@ def main() -> int:
             ("rggi_auctions", lambda: rggi_auctions.collect(conn)),
             ("gfs_hdd", lambda: gfs_hdd.collect(conn)),
             ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn))]
+    now = datetime.now(timezone.utc)
+    if now.month == 1:  # year-end observations and late-December revisions live in the prior-year file
+        jobs += [("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
+                 ("cpc_cooling_prev_year", lambda: cpc_degree_days.collect(conn, "Cooling", now.year - 1))]
     for name, job in jobs:
         try:
             print("OK  ", name, job())

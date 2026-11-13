@@ -28,24 +28,73 @@ def estimate_delta(query: str) -> dict:
                      "mapped to balance = supply - demand; scenario assumption, no price elasticity applied"}
 
 
-_BAD = re.compile(r"(;|--|/\*|\b(pragma|attach|insert|update|delete|drop|alter|create|replace|vacuum|load_extension)\b)", re.I)
+_BAD = re.compile(r"(;|--|/\*|\b(pragma|attach|insert|update|delete|drop|alter|create|replace|vacuum|load_extension|with|main|temp|sqlite_\w*)\b)", re.I)
+_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+_FUNCS = {"count", "sum", "avg", "min", "max", "round", "abs", "substr", "lower", "upper", "coalesce", "like", "date", "strftime", "total", "length"}
+MAX_ROWS = 200
+
+
+def norm_ts(ts: str) -> str:
+    """Parse any ISO-8601 timestamp, convert to UTC and return the stored 'YYYY-MM-DDTHH:MM:SSZ' form. Raises ValueError."""
+    from datetime import datetime, timezone
+    dt = datetime.fromisoformat(str(ts).strip().replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def validate_sql(sql: str, as_of: str) -> str | None:
-    """Return None if acceptable, else the rejection reason. Must be one SELECT on pit_market_data/pit_snapshot-safe table
-    and enforce the PIT cutoff literally."""
+    """Textual pre-check (None = acceptable). The hard guarantee is run_sandboxed(), which enforces the cutoff and table
+    restriction regardless of the SQL text."""
     s = (sql or "").strip()
+    if len(s) > 800:
+        return "too long"
     if not s.upper().startswith("SELECT"):
         return "not a SELECT"
     if _BAD.search(s):
         return "forbidden token"
-    if re.search(r"\bjoin\b|\bunion\b", s, re.I):
+    if len(re.findall(r"\bselect\b", s, re.I)) != 1:
+        return "subqueries not allowed"
+    if re.search(r"\bjoin\b|\bunion\b|\bintersect\b|\bexcept\b", s, re.I):
         return "join/union not allowed"
-    if not re.search(r"\bfrom\s+pit_market_data\b", s, re.I):
+    if len(re.findall(r"\bfrom\b", s, re.I)) != 1 or not re.search(r"\bfrom\s+pit_market_data\b(?!\s*,)", s, re.I):
         return "must read pit_market_data only"
+    if re.search(r"\bor\b", s, re.I):
+        return "OR not allowed"
     if not re.search(r"available_timestamp\s*<=\s*'" + re.escape(as_of) + r"'", s, re.I):
         return "PIT cutoff not enforced"
     return None
+
+
+def run_sandboxed(db_path: str, sql: str, as_of: str, max_rows: int = MAX_ROWS, max_steps: int = 20_000_000) -> list:
+    """Execute a SELECT so that it can only see pit_market_data rows with available_timestamp <= as_of, whatever the SQL says:
+    read-only connection + TEMP VIEW shadowing the table with the cutoff + authorizer denying every other table/function."""
+    if not _TS.fullmatch(as_of):
+        raise ValueError("as_of must be normalised with norm_ts first")
+    if not sql.strip().upper().startswith("SELECT"):
+        raise ValueError("Blocked non-SELECT query for safety.")
+    conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        conn.execute(f"CREATE TEMP VIEW pit_market_data AS SELECT * FROM main.pit_market_data WHERE available_timestamp <= '{as_of}'")
+
+        def auth(action, a1, a2, db, src):
+            if action == sqlite3.SQLITE_SELECT:
+                return sqlite3.SQLITE_OK
+            if action == sqlite3.SQLITE_READ and a1 == "pit_market_data" and (db == "temp" or src == "pit_market_data"):
+                return sqlite3.SQLITE_OK
+            if action == sqlite3.SQLITE_FUNCTION and (a2 or "").lower() in _FUNCS:
+                return sqlite3.SQLITE_OK
+            return sqlite3.SQLITE_DENY
+        conn.set_authorizer(auth)
+        steps = [0]
+
+        def tick():
+            steps[0] += 100_000
+            return 1 if steps[0] > max_steps else 0
+        conn.set_progress_handler(tick, 100_000)
+        return conn.execute(sql).fetchmany(max_rows)
+    finally:
+        conn.close()
 
 
 def fallback_sql(as_of: str, agent_hint: str | None = None) -> str:
@@ -62,6 +111,6 @@ def data_quality(db_path: str, as_of: str, rows: list) -> dict:
         latest = conn.execute("SELECT MAX(available_timestamp) FROM pit_market_data WHERE available_timestamp<=?", (as_of,)).fetchone()[0]
     finally:
         conn.close()
-    return {"pit_rows_by_provenance": prov, "latest_available_timestamp": latest, "total_matching_rows": len(rows),
+    return {"pit_rows_by_provenance": prov, "latest_available_timestamp": latest, "returned_rows": len(rows), "row_cap": MAX_ROWS,
             "unverified_seed_rows_in_pit": prov.get("unverified_seed", 0),
             "note": "measured = source data; extracted_estimate/model_hypothesis/synthetic_scenario are not observed facts"}

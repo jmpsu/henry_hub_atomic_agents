@@ -15,3 +15,14 @@ class T(unittest.TestCase):
     def test_layout_change_raises(self):
         with self.assertRaises(ValueError): g.parse("<table><tr><th>X</th></tr></table>")
 if __name__ == "__main__": unittest.main()
+
+class Correction(unittest.TestCase):
+    def test_corrected_price_is_a_new_vintage_available_at_retrieval(self):
+        from datetime import datetime, timezone
+        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        g.collect(c, fetcher=lambda u: (200, HTML.encode(), "text/html"))
+        fixed = HTML.replace("$37.65", "$38.00")
+        r = g.collect(c, fetcher=lambda u: (200, fixed.encode(), "text/html"), now=datetime(2026, 11, 13, 12, tzinfo=timezone.utc))
+        self.assertEqual(r[0]["observations_new"], 1)
+        rows = c.execute("select available_timestamp,value,quality_status from pit_market_data where target_timestamp like '2026-09-09%' order by 1").fetchall()
+        self.assertEqual(rows, [("2026-09-10T16:00:00Z", 37.65, "validated_availability_assumed_d+1"), ("2026-11-13T12:00:00Z", 38.0, "revision_vintage")])
