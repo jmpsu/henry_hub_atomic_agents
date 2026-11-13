@@ -207,6 +207,7 @@ class ExperimentJob(BaseModel):
     horizon_days: int = 1
     cost_bps: float = 0.0
     n_decisions: int = 250
+    slippage_bps: float = 0.0
 
 
 @app.post("/experiments/run")
@@ -216,12 +217,12 @@ async def run_experiment(job: ExperimentJob):
     import experiments
     if job.model not in experiments.MODELS or job.model == "persistence":
         raise HTTPException(status_code=422, detail=f"model must be one of {sorted(m for m in experiments.MODELS if m != 'persistence')}")
-    if job.horizon_days not in (1, 2, 3, 5, 10) or not 0 <= job.cost_bps <= 100 or not 50 <= job.n_decisions <= 1000:
+    if job.horizon_days not in (1, 2, 3, 5, 10) or not 0 <= job.cost_bps <= 100 or not 50 <= job.n_decisions <= 1000 or not 0 <= job.slippage_bps <= 100:
         raise HTTPException(status_code=422, detail="horizon_days in {1,2,3,5,10}, cost_bps 0..100, n_decisions 50..1000")
     if _EXP_LOCK.locked():
         raise HTTPException(status_code=409, detail="an experiment is already running")
     async with _EXP_LOCK:
-        out = await asyncio.to_thread(experiments.run, DB_PATH, job.n_decisions, (job.horizon_days,), (job.cost_bps,), (job.model,))
+        out = await asyncio.to_thread(experiments.run, DB_PATH, job.n_decisions, (job.horizon_days,), (job.cost_bps,), (job.model,), job.slippage_bps)
     return {"ok": True, "results": [{"id": r[0], "model": r[1], "horizon_days": r[2], "cost_bps": r[3], "test_period": r[6],
                                      "metrics": r[7], "baseline_metrics": r[8], "promoted": r[9], "result": r[10], "pit_data_version": r[11]} for r in out]}
 

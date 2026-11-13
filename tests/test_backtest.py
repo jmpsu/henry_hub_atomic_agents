@@ -107,3 +107,14 @@ class WeatherModel(unittest.TestCase):
     def test_no_features_means_no_signal(self):
         import backtest as bt
         self.assertEqual(bt.hdd_anomaly([("2025-01-01T00:00:00Z", 3.0), ("2025-01-02T00:00:00Z", 3.1)], None), 3.1)
+
+
+class RiskMetrics(unittest.TestCase):
+    def test_drawdown_sharpe_regime_and_slippage(self):
+        import backtest as bt
+        rows = [{"pred": 1, "actual": 1, "last": 1, "dir_hit": True, "ret": r, "target": t} for r, t in
+                [(0.02, "2026-01-05T00:00:00Z"), (-0.05, "2026-01-06T00:00:00Z"), (0.01, "2026-07-01T00:00:00Z"), (0.04, "2026-07-02T00:00:00Z")]]
+        m = bt.metrics(rows)
+        self.assertAlmostEqual(m["max_drawdown"], 0.05); self.assertIsNotNone(m["sharpe_per_decision"])
+        self.assertEqual(m["by_regime"]["heating_season"]["n"], 2); self.assertEqual(m["by_regime"]["non_heating_season"]["n"], 2)
+        self.assertEqual(bt.regime("2026-11-30T00:00:00Z"), "heating_season"); self.assertEqual(bt.regime("2026-04-01T00:00:00Z"), "non_heating_season")

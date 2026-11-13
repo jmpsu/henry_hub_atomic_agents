@@ -31,7 +31,7 @@ def ensure(conn):
         train_period TEXT, val_period TEXT, test_period TEXT, metrics TEXT, baseline_metrics TEXT, promoted INTEGER, reason TEXT)""")
 
 
-def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None):
+def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None, slippage_bps=0.0):
     """models: subset of MODELS to test (persistence baseline is always run). Bonferroni divisor = every non-baseline
     experiment ever recorded plus the new ones, so queue-dispatched jobs cannot dodge the multiple-testing correction."""
     conn = sqlite3.connect(db)
@@ -45,12 +45,12 @@ def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None):
     times = [r[0] for r in rows][-n_decisions:]
     dv = hashlib.sha256(f"{conn.execute('select count(*),max(available_timestamp) from pit_market_data').fetchone()}".encode()).hexdigest()[:12]
     configs = [(m, h, c) for m in names for h in horizons for c in costs]
-    new_ids = {hashlib.sha256(json.dumps([m, h, c, dv]).encode()).hexdigest()[:10] for m, h, c in configs if m != "persistence"}
+    new_ids = {hashlib.sha256(json.dumps([m, h, c, dv] + ([slippage_bps] if slippage_bps else [])).encode()).hexdigest()[:10] for m, h, c in configs if m != "persistence"}
     prior = {r[0] for r in conn.execute("SELECT id FROM experiments WHERE config NOT LIKE '%\"persistence\"%'")}
     alpha = 0.05 / max(len(prior | new_ids), 1)
     res = {}
     for m, h, c in configs:
-        res[(m, h, c)] = bt.walk_forward(conn, AGENT, times, h, MODELS[m], cost_bps=c, feature_fn=FEATURES[m][0] if m in FEATURES else None)
+        res[(m, h, c)] = bt.walk_forward(conn, AGENT, times, h, MODELS[m], cost_bps=c, feature_fn=FEATURES[m][0] if m in FEATURES else None, slippage_bps=slippage_bps)
     out = []
     for (m, h, c), r in res.items():
         tr, va, te = bt.split_chronological(r)
@@ -62,11 +62,11 @@ def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None):
         promoted = bool(m != "persistence" and met and base and met["rmse"] < base["rmse"] and p < alpha and net > 0)
         reason = "baseline" if m == "persistence" else ("promoted" if promoted else
                  f"rejected: rmse {'<' if met and base and met['rmse'] < base['rmse'] else '>='} baseline, dir_p={p:.3f} (alpha {alpha:.4f}), net_ret={net:.4f}")
-        eid = hashlib.sha256(json.dumps([m, h, c, dv]).encode()).hexdigest()[:10]
+        eid = hashlib.sha256(json.dumps([m, h, c, dv] + ([slippage_bps] if slippage_bps else [])).encode()).hexdigest()[:10]
         span = lambda s: f"{s[0]['target']}..{s[-1]['target']}" if s else "n/a"
         met = {**met, "dir_hit": (sum(hits) / len(hits)) if hits else None, "dir_p": p, "net_return": net}
         conn.execute("INSERT OR REPLACE INTO experiments VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": AGENT, "features": FEATURES[m][1] if m in FEATURES else []}),
+                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": AGENT, "slippage_bps": slippage_bps, "features": FEATURES[m][1] if m in FEATURES else []}),
                       dv, span(tr), span(va), span(te), json.dumps(met), json.dumps(base), int(promoted), reason))
         out.append((eid, m, h, c, span(tr), span(va), span(te), met, base, promoted, reason, dv))
     conn.commit()
@@ -81,14 +81,14 @@ def write_leaderboard(conn):
              "Series: Agent_HH_Spot_EIA (measured). Walk-forward PIT (available_timestamp <= decision), forecast scored after publication lag. "
              "Baseline: persistence. Promotion requires lower holdout RMSE than baseline, Bonferroni-corrected directional significance "
              "(divisor = all non-baseline experiments recorded), and positive net return after costs.", "",
-             "| ID | Created | Model | Horizon d | Cost bps | Train | Validation | Out-of-sample | n | RMSE | Baseline RMSE | Dir hit | Dir p | Net ret | PIT data ver | Result |",
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+             "| ID | Created | Model | Horizon d | Cost bps | Train | Validation | Out-of-sample | n | RMSE | Baseline RMSE | Dir hit | Dir p | Net ret | Max DD | Sharpe/decision | PIT data ver | Result |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for eid, created, cfg, dv, tr, va, te, met, base, promoted, reason in conn.execute(
             "SELECT id,created,config,data_version,train_period,val_period,test_period,metrics,baseline_metrics,promoted,reason "
             "FROM experiments ORDER BY created DESC, id"):
         c, met, base = json.loads(cfg), json.loads(met or "{}"), json.loads(base or "{}")
         lines.append(f"| {eid} | {created} | {c.get('model')}{' [' + ', '.join(c['features']) + ']' if c.get('features') else ''} | {c.get('horizon_days')} | {c.get('cost_bps')} | {tr} | {va} | {te} | {met.get('n','n/a')} | "
-                     f"{f(met.get('rmse'))} | {f(base.get('rmse'))} | {f(met.get('dir_hit'))} | {f(met.get('dir_p'))} | {f(met.get('net_return'))} | {dv} | {reason} |")
+                     f"{f(met.get('rmse'))} | {f(base.get('rmse'))} | {f(met.get('dir_hit'))} | {f(met.get('dir_p'))} | {f(met.get('net_return'))} | {f(met.get('max_drawdown'))} | {f(met.get('sharpe_per_decision'))} | {dv} | {reason} |")
     lines += ["", "No model is promoted unless the Result column says `promoted`."]
     (HERE / "LEADERBOARD.md").write_text("\n".join(lines) + "\n")
 

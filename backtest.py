@@ -80,7 +80,7 @@ def hdd_anomaly(history, features):
     return last + (my - b * mx) + b * x_now
 
 
-def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_bps=0.0, eval_lag_days=1, feature_fn=None):
+def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_bps=0.0, eval_lag_days=1, feature_fn=None, slippage_bps=0.0):
     """For each decision time t: build history from the PIT snapshot at t, predict the value for target
     time t+horizon, and score it against the value known at (target+eval_lag), i.e. after the target is published."""
     out = []
@@ -99,7 +99,7 @@ def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_b
             continue
         actual, last = later[0][3], history[-1][1]
         sig = (pred > last) - (pred < last)
-        ret = sig * (actual - last) / (abs(last) or 1.0) - cost_bps / 1e4 * (1 if sig else 0)
+        ret = sig * (actual - last) / (abs(last) or 1.0) - (cost_bps + slippage_bps) / 1e4 * (1 if sig else 0)
         out.append({"decision": t, "target": target_ts, "pred": pred, "actual": actual, "last": last,
                     "dir_hit": (sig == ((actual > last) - (actual < last))) if sig else None, "ret": ret})
     return out
@@ -112,12 +112,38 @@ def split_chronological(rows, train=0.5, validation=0.25):
     return rows[:a], rows[a:b], rows[b:]
 
 
-def metrics(rows):
+def _risk(rows):
+    """Path statistics of the per-decision returns (after costs and slippage). Sharpe is per decision, NOT annualised,
+    and overlapping multi-day horizons make consecutive returns correlated, so treat it as indicative only."""
+    r = [x["ret"] for x in rows]
+    if not r:
+        return {"max_drawdown": None, "sharpe_per_decision": None}
+    eq, peak, dd = 0.0, 0.0, 0.0
+    for x in r:
+        eq += x
+        peak = max(peak, eq)
+        dd = max(dd, peak - eq)
+    mean = sum(r) / len(r)
+    var = sum((x - mean) ** 2 for x in r) / (len(r) - 1) if len(r) > 1 else 0.0
+    return {"max_drawdown": dd, "sharpe_per_decision": (mean / math.sqrt(var)) if var > 0 else None}
+
+
+def regime(target_ts: str) -> str:
+    """Market regime by the forecast target month: heating season (Nov-Mar) vs the rest of the year."""
+    return "heating_season" if int(target_ts[5:7]) in (11, 12, 1, 2, 3) else "non_heating_season"
+
+
+def metrics(rows, by_regime=True):
     if not rows:
         return {"n": 0}
     e = [r["pred"] - r["actual"] for r in rows]
     hits = [r["dir_hit"] for r in rows if r["dir_hit"] is not None]
-    return {"n": len(rows), "rmse": math.sqrt(sum(x * x for x in e) / len(e)), "mae": sum(abs(x) for x in e) / len(e),
-            "bias": sum(e) / len(e), "directional_hit_rate": (sum(hits) / len(hits)) if hits else None,
-            "mean_return_after_costs": sum(r["ret"] for r in rows) / len(rows),
-            "persistence_rmse": math.sqrt(sum((r["last"] - r["actual"]) ** 2 for r in rows) / len(rows))}
+    out = {"n": len(rows), "rmse": math.sqrt(sum(x * x for x in e) / len(e)), "mae": sum(abs(x) for x in e) / len(e),
+           "bias": sum(e) / len(e), "directional_hit_rate": (sum(hits) / len(hits)) if hits else None,
+           "mean_return_after_costs": sum(r["ret"] for r in rows) / len(rows),
+           "persistence_rmse": math.sqrt(sum((r["last"] - r["actual"]) ** 2 for r in rows) / len(rows)), **_risk(rows)}
+    if by_regime:
+        out["by_regime"] = {g: {k: v for k, v in metrics([r for r in rows if regime(r["target"]) == g], by_regime=False).items()
+                                if k in ("n", "rmse", "persistence_rmse", "directional_hit_rate", "mean_return_after_costs", "max_drawdown")}
+                            for g in ("heating_season", "non_heating_season")}
+    return out
