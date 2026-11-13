@@ -51,3 +51,8 @@ class SelfHealTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class VoidTags(unittest.TestCase):
+    def test_void_tag_inside_match_does_not_swallow_it(self):
+        import selfheal
+        self.assertEqual(selfheal.extract('<table><tr><td class="v">3.41<br>USD</td><td class="v">2.9<img src="x"></td></tr></table>', "td.v"), ["3.41USD", "2.9"])

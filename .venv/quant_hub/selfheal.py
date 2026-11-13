@@ -21,7 +21,11 @@ class _Collect(HTMLParser):
         return ((not self.tag or tag == self.tag) and (not self.id or a.get("id") == self.id)
                 and (not self.cls or self.cls in (a.get("class") or "").split()))
 
+    _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+
     def handle_starttag(self, tag, attrs):
+        if tag in self._VOID:   # void elements never get an end tag; counting them would leave the match open forever
+            return
         if self.depth:
             self.depth += 1
         elif self._match(tag, attrs):
