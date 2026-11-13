@@ -1,320 +1,295 @@
-"""Henry Hub zero-trust quant hub. FastAPI on 127.0.0.1:8090 (cloudflared -> quant.joeysvault.app).
-
-POST /execute {"query": str, "as_of_timestamp": ISO-8601}
-  -> {sql_query, scenario_delta_bcf, alpha_thesis, rows, rows_returned, pit_cutoff, audit}
-Every read is restricted to available_timestamp <= as_of_timestamp (no look-ahead bias).
-"""
-import asyncio
-import json
-import os
-import re
-import sqlite3
-import subprocess
+import asyncio, json, os, sqlite3, subprocess, sys, tempfile, hashlib, shutil
 from datetime import datetime, timezone
-from pathlib import Path
-
-import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import httpx
+import chromadb
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+import scenario
 
-BASE = Path(__file__).resolve().parent
+app = FastAPI()
+OLLAMA_GEN_URL = "http://127.0.0.1:11434/api/generate"
+OLLAMA_EMB_URL = "http://127.0.0.1:11434/api/embeddings"
+DB_PATH = os.environ.get("DB_PATH", "")
+if not DB_PATH or not os.path.isabs(DB_PATH) or not os.path.isfile(DB_PATH):
+    # No silent fallback to a cwd-relative or default database.
+    raise RuntimeError("DB_PATH must be set to an existing absolute path (see .env)")
 
+_HERE = os.path.dirname(os.path.realpath(__file__))
+chroma_client = chromadb.PersistentClient(path=os.path.join(_HERE, "chroma_pit_kb"))
+kb_collection = chroma_client.get_or_create_collection(name="henry_hub_alpha_graph")
 
-# ===================== STEP 2/3 support: environment loader =====================
-def load_env(path: Path) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, val = line.split("=", 1)
-        val = val.strip()
-        if len(val) >= 2 and val[0] == val[-1] and val[0] in "'\"":
-            val = val[1:-1]
-        os.environ.setdefault(key.strip(), val)
-
-
-load_env(BASE / ".env")
-DB_PATH = Path(os.environ.get("DB_PATH", BASE / "henry_hub_pit.db"))
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
-MODEL = "qwen3:4b"
-AUDIT_GIST = os.environ.get("AUDIT_GIST", "1") == "1"
-AUDIT_DIR = Path(os.environ.get("AUDIT_DIR", BASE / "audit"))
-GH_BIN = os.environ.get("GH_BIN", "gh")
-CONTEXT_ROWS = 15  # closest chronological rows fed to the model
-MAX_RESULT_ROWS = int(os.environ.get("MAX_RESULT_ROWS", "200"))
-OLLAMA_OPTIONS = {"temperature": 0.0, "num_ctx": 2048, "num_predict": 180}
-
-DEFAULT_AGENTS = ["Agent_HH_M1", "Agent_Storage_East", "Agent_Weather_Actual_HDD"]
-KEYWORD_AGENTS = {
-    r"freeze|pipeline|outage|production|supply": [
-        "Agent_Prod_Appalachia", "Agent_Prod_Haynesville", "Agent_Prod_Permian"],
-    r"lng|export|feedgas": [
-        "Agent_LNG_SabinePass_Flow", "Agent_LNG_CorpusChristi_Flow", "Agent_LNG_Cameron_Flow"],
-    r"winter|cold|hdd|heating|demand": [
-        "Agent_Weather_Actual_HDD", "Agent_GFS_00z_HDD_Day5", "Agent_ECMWF_00z_HDD_Day5"],
-    r"summer|heat|cdd|power|cooling": ["Agent_Weather_Actual_CDD", "Agent_Demand_PowerBurn"],
-    r"storage|inventory|injection|withdrawal": [
-        "Agent_Storage_East", "Agent_Storage_Midwest", "Agent_Storage_SouthCentral_Salt"],
-    r"coal|switch": ["Agent_Coal_PRB_SpotPrice", "Agent_Coal_CAPP_SpotPrice"],
-}
-
-app = FastAPI(title="Henry Hub Quant Hub")
-
-
-class ExecuteRequest(BaseModel):
+class CommandRequest(BaseModel):
     query: str
-    as_of_timestamp: str
+    as_of_timestamp: str | None = None
+
+async def get_embedding(text: str) -> list[float]:
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            OLLAMA_EMB_URL,
+            json={"model": "nomic-embed-text", "prompt": text},
+            timeout=30.0
+        )
+        resp.raise_for_status()
+        return resp.json()["embedding"]
+
+_AGENT_HINTS = [
+    (("storage", "inventory", "salt", "injection", "withdrawal"), "Agent_Storage_%"),
+    (("hdd", "cdd", "weather", "cold", "freeze", "winter", "heat", "temperature"), "Agent_Weather_%"),
+    (("gfs",), "Agent_GFS_%"), (("ecmwf", "euro"), "Agent_ECMWF_%"),
+    (("price", "henry", "spot", "hh", "futures", "m1", "basis"), "Agent_HH_%"),
+    (("lng", "feedgas", "sabine", "export"), "Agent_LNG_%"),
+]
 
 
-def norm_ts(value: str) -> str:
-    try:
-        dt = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
-    except ValueError:
-        raise HTTPException(422, "as_of_timestamp must be ISO-8601")
+def agent_filters(query: str) -> list[str]:
+    q = query.lower()
+    hits = [pat for words, pat in _AGENT_HINTS if any(w in q for w in words)]
+    return hits or ["%"]
+
+
+def retrieve_sql_context(as_of: str, query: str = "") -> str:
+    """15 most recent PIT-eligible rows matching the agent_id filter implied by the query (available_timestamp <= as_of)."""
+    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+    cursor = conn.cursor()
+    pats = agent_filters(query)
+    cond = " OR ".join(["agent_id LIKE ?"] * len(pats))
+    cursor.execute(
+        f"SELECT agent_id, target_timestamp, available_timestamp, value, provenance FROM pit_market_data "
+        f"WHERE available_timestamp <= ? AND ({cond}) ORDER BY available_timestamp DESC, target_timestamp DESC LIMIT 15",
+        (as_of, *pats)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return "\n".join([f"{r[0]} | Target: {r[1]} | Avail: {r[2]} | Val: {r[3]} | {r[4]}" for r in rows])
+
+def to_epoch(ts: str) -> int:
+    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return int(dt.timestamp())
 
-
-# ===================== STEP 3: context & retrieval =====================
-def ro_connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=5)
-    conn.execute("PRAGMA query_only=ON")
-    return conn
-
-
-def select_agents(query: str) -> list:
-    agents = list(DEFAULT_AGENTS)
-    for pattern, ids in KEYWORD_AGENTS.items():
-        if re.search(pattern, query, re.I):
-            agents += ids
-    seen, out = set(), []
-    for a in agents:
-        if a not in seen:
-            seen.add(a)
-            out.append(a)
-    return out[:12]
-
-
-def _fetch_context(agent_ids: list, as_of: str) -> list:
-    marks = ",".join("?" * len(agent_ids))
-    sql = (
-        "SELECT agent_id, target_timestamp, available_timestamp, value FROM pit_market_data "
-        f"WHERE agent_id IN ({marks}) AND available_timestamp <= ? "
-        "ORDER BY available_timestamp DESC, target_timestamp DESC LIMIT ?"
+async def retrieve_vector_nodes(query: str, as_of: str) -> tuple[str, list[str]]:
+    if kb_collection.count() == 0:
+        return "No prior vector nodes indexed yet.", []
+    q_emb = await get_embedding(query)
+    results = kb_collection.query(
+        query_embeddings=[q_emb],
+        n_results=min(5, kb_collection.count()),
+        where={"available_epoch": {"$lte": to_epoch(as_of)}}
     )
-    with ro_connect() as conn:
-        return conn.execute(sql, (*agent_ids, as_of, CONTEXT_ROWS)).fetchall()
+    docs = results.get("documents", [[]])[0]
+    ids = results.get("ids", [[]])[0]
+    metas = results.get("metadatas", [[]])[0]
+    formatted = "\n".join([
+        f"[Node {i} | Avail: {m.get('available_timestamp')} | Linked: {m.get('linked_nodes', 'none')}] {d}"
+        for i, d, m in zip(ids, docs, metas)
+    ])
+    return formatted or "No PIT-eligible vector nodes found.", ids
 
-
-async def retrieve_context(agent_ids: list, as_of: str) -> list:
-    return await asyncio.to_thread(_fetch_context, agent_ids, as_of)
-
-
-def context_text(rows: list) -> str:
-    if not rows:
-        return "no data available at cutoff"
-    return "\n".join(f"{a} tgt={t[:10]} avail={av[:16]} v={v:g}" for a, t, av, v in rows)
-
-
-# ===================== STEP 4: Ollama structural translation =====================
-LLM_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "sql_query": {"type": "string"},
-        "scenario_delta_bcf": {"type": "number"},
-        "alpha_thesis": {"type": "string"},
-    },
-    "required": ["sql_query", "scenario_delta_bcf", "alpha_thesis"],
-    "additionalProperties": False,
-}
-LLM_LOCK = asyncio.Semaphore(1)  # one request at a time keeps the iGPU queue deterministic
-
-
-def build_prompt(query: str, as_of: str, ctx: str) -> str:
-    # "/no_think" is appended at the very end of the prompt.
-    return (
-        "You are a Henry Hub natural gas quant. Output one JSON object with exactly these keys.\n"
-        "sql_query: one SQLite SELECT on pit_market_data(agent_id,target_timestamp,available_timestamp,value) "
-        f"whose WHERE clause contains available_timestamp <= '{as_of}'.\n"
-        "scenario_delta_bcf: your own estimate of the supply-demand balance change in Bcf/d "
-        "(negative = tighter); derive it from the scenario, do not copy the example.\n"
-        "alpha_thesis: exactly 2 short sentences linking the data to Henry Hub price.\n"
-        'Example: {"sql_query":"SELECT agent_id,value FROM pit_market_data WHERE '
-        f"available_timestamp <= '{as_of}' AND agent_id='Agent_HH_M1'\","
-        '"scenario_delta_bcf":-1.2,"alpha_thesis":"Storage draws tighten the balance. '
-        'Prompt-month futures should firm."}\n'
-        f"Scenario: {query}\nData visible at cutoff:\n{ctx}\n/no_think"
+async def store_compounding_node(query: str, as_of: str, analysis: dict, parent_ids: list[str], gist_url: str):
+    node_id = "node_" + hashlib.sha256(f"{as_of}:{query}".encode()).hexdigest()[:12]
+    doc_text = (
+        f"Query: {query} | Thesis: {analysis['alpha_thesis']} | "
+        f"Balance Delta: {analysis['scenario_delta_bcf']} Bcf/d | SQL: {analysis['sql_query']}"
     )
+    emb = await get_embedding(doc_text)
+    kb_collection.upsert(
+        ids=[node_id],
+        embeddings=[emb],
+        documents=[doc_text],
+        metadatas=[{
+            "available_timestamp": as_of,
+            "available_epoch": to_epoch(as_of),
+            "scenario_delta_bcf": float(analysis["scenario_delta_bcf"]),
+            "linked_nodes": ",".join(parent_ids) if parent_ids else "root",
+            "gist_url": gist_url
+        }]
+    )
+    return node_id
 
-
-async def call_ollama(client: httpx.AsyncClient, prompt: str) -> dict:
-    body = {
-        "model": MODEL,
+async def generate_pit_analysis(user_query: str, sql_ctx: str, vec_ctx: str, as_of: str, est: dict | None = None) -> dict:
+    prompt = (
+        f"You are a quantitative natural gas trading engine operating strictly Point-in-Time as of {as_of}.\n"
+        f"User Command: {user_query}\n"
+        + (f"Computed scenario balance delta (supply minus demand, positive=looser): {est['value']} Bcf/d. "
+           "Your thesis MUST be consistent with this sign.\n" if est else "") + "\n"
+        f"Structured PIT SQL Snapshots:\n{sql_ctx}\n\n"
+        f"Retrieved Cross-Node Vector Knowledge:\n{vec_ctx}\n\n"
+        "Return ONLY valid JSON with:\n"
+        "- 'sql_query': A safe read-only SELECT query on 'pit_market_data' filtering available_timestamp <= as_of.\n"
+        "- 'scenario_delta_bcf': Estimated daily supply/demand balance shift in Bcf/d.\n"
+        "- 'alpha_thesis': Concise 2-sentence market impact summary building on linked vector nodes.\n"
+        "Keep sql_query under 150 characters and alpha_thesis under 40 words; do not repeat timestamps in the thesis. "
+        f"Example: {{\"sql_query\":\"SELECT agent_id,value FROM pit_market_data WHERE available_timestamp <= '{as_of}' LIMIT 20\","
+        "\"scenario_delta_bcf\":-1.2,\"alpha_thesis\":\"Supply loss tightens the balance. Prompt-month should firm.\"} /no_think"
+    )
+    payload = {
+        "model": "qwen3:4b",
         "prompt": prompt,
         "stream": False,
         "think": False,
         "keep_alive": -1,
-        "format": LLM_SCHEMA,
-        "options": OLLAMA_OPTIONS,
+        "format": {
+            "type": "object",
+            "properties": {
+                "sql_query": {"type": "string"},
+                "scenario_delta_bcf": {"type": "number"},
+                "alpha_thesis": {"type": "string"}
+            },
+            "required": ["sql_query", "scenario_delta_bcf", "alpha_thesis"]
+        },
+        "options": {"temperature": 0.0, "num_ctx": 2048, "num_predict": 180}
     }
-    async with LLM_LOCK:
-        resp = await client.post(f"{OLLAMA_URL}/api/generate", json=body)
-    resp.raise_for_status()
-    data = json.loads(resp.json()["response"])
-    if not all(k in data for k in LLM_SCHEMA["required"]):
-        raise ValueError("missing keys")
-    return data
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(OLLAMA_GEN_URL, json=payload, timeout=60.0)
+        resp.raise_for_status()
+        return json.loads(resp.json()["response"])
 
+def execute_readonly_sql(sql: str, as_of: str) -> list:
+    """Model/fallback SQL runs only inside the PIT sandbox (cutoff view + authorizer + row cap + step limit)."""
+    return scenario.run_sandboxed(DB_PATH, sql, as_of)
 
-async def translate(query: str, as_of: str, ctx: str) -> dict:
-    prompt = build_prompt(query, as_of, ctx)
-    async with httpx.AsyncClient(timeout=120) as client:
-        last = None
-        for _ in range(2):  # one retry on malformed/truncated JSON
-            try:
-                return await call_ollama(client, prompt)
-            except (json.JSONDecodeError, ValueError, KeyError) as exc:
-                last = exc
-            except httpx.HTTPError as exc:
-                raise HTTPException(502, f"ollama error: {exc}")
-    raise HTTPException(502, f"model returned invalid JSON: {last}")
-
-
-def two_sentences(text: str) -> str:
-    parts = re.findall(r"[^.!?]+[.!?]", text.strip())
-    return " ".join(p.strip() for p in parts[:2]) if parts else text.strip()
-
-
-# ===================== STEP 5: read-only SQL sandbox =====================
-FORBIDDEN = re.compile(
-    r"\b(insert|update|delete|drop|alter|create|attach|detach|pragma|replace|vacuum|reindex|"
-    r"load_extension|union|with)\b|--|/\*|;",
-    re.I,
-)
-
-
-def sql_is_safe(sql: str, as_of: str) -> bool:
-    s = sql.strip()
-    return (
-        s[:6].upper() == "SELECT"  # must explicitly begin with SELECT
-        and not FORBIDDEN.search(s)
-        and len(re.findall(r"\bfrom\b", s, re.I)) == 1
-        and re.search(r"\bfrom\s+pit_market_data\b", s, re.I) is not None
-        and re.search(rf"available_timestamp\s*<=\s*'{re.escape(as_of)}'", s, re.I) is not None
-        and len(s) <= 800
+def log_to_github_gist(command: str, as_of: str, result_payload: dict) -> str:
+    timestamp_slug = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%SZ")
+    markdown_body = (
+        f"# Alpha Command Audit ({timestamp_slug})\n\n"
+        f"**Command:** `{command}`\n**Point-in-Time Cutoff:** `{as_of}`\n"
+        f"**Linked Parent Nodes:** `{result_payload.get('linked_parent_nodes', [])}`\n\n"
+        f"## Synthesis & Thesis\n{result_payload['analysis']['alpha_thesis']}\n\n"
+        f"**Estimated Balance Impact:** `{result_payload['analysis']['scenario_delta_bcf']} Bcf/d`\n\n"
+        f"## Executed PIT Query\n```sql\n{result_payload['analysis']['sql_query']}\n```\n\n"
+        f"## Database Rows Returned\n```json\n{json.dumps(result_payload['db_rows'], indent=2)}\n```\n"
     )
-
-
-def compiled_sql(agent_ids: list, as_of: str) -> str:
-    ids = ",".join(f"'{a}'" for a in agent_ids if re.fullmatch(r"[A-Za-z0-9_]+", a))
-    return (
-        "SELECT agent_id, target_timestamp, available_timestamp, value FROM pit_market_data "
-        f"WHERE available_timestamp <= '{as_of}' AND agent_id IN ({ids}) "
-        f"ORDER BY available_timestamp DESC LIMIT {MAX_RESULT_ROWS}"
-    )
-
-
-def _run_sql(sql: str) -> list:
-    with ro_connect() as conn:  # file:...?mode=ro + PRAGMA query_only
-        cur = conn.execute(sql)
-        cols = [d[0] for d in cur.description]
-        return [dict(zip(cols, r)) for r in cur.fetchmany(MAX_RESULT_ROWS)]
-
-
-async def sandbox_execute(llm_sql: str, agent_ids: list, as_of: str):
-    if llm_sql.strip()[:6].upper() != "SELECT":
-        raise HTTPException(422, "blocked: model SQL does not begin with SELECT")
-    source = "llm"
-    sql = llm_sql.strip()
-    if not sql_is_safe(sql, as_of):
-        # Unsafe or not point-in-time bounded: never run it; use the deterministic compiled query.
-        sql, source = compiled_sql(agent_ids, as_of), "compiled-fallback"
+    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as tmp:
+        tmp.write(markdown_body)
+        tmp_path = tmp.name
     try:
-        rows = await asyncio.to_thread(_run_sql, sql)
-    except sqlite3.Error as exc:
-        sql, source = compiled_sql(agent_ids, as_of), "compiled-fallback"
-        try:
-            rows = await asyncio.to_thread(_run_sql, sql)
-        except sqlite3.Error as exc2:
-            raise HTTPException(422, f"sql execution failed: {exc2}")
-    return sql, source, rows
-
-
-# ===================== STEP 6: immutable audit log (gh gist) =====================
-def write_audit(markdown: str, stamp: str) -> dict:
-    AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-    path = AUDIT_DIR / f"pit_alpha_audit_{stamp}.md"
-    path.write_text(markdown)
-    out = {"local_path": str(path), "gist_url": None, "error": None}
-    if not AUDIT_GIST:
-        return out
-    try:
-        proc = subprocess.run(  # gh gist create is private (secret) unless --public is passed
-            [GH_BIN, "gist", "create", str(path), "--desc", f"PIT Alpha Hub audit {stamp}"],
-            capture_output=True, text=True, timeout=45,
+        proc = subprocess.run(
+            [shutil.which("gh") or "/home/joey/.local/bin/gh", "gist", "create", tmp_path, "--desc", f"PIT Alpha Hub: {command[:60]}"],
+            capture_output=True, text=True, timeout=45, stdin=subprocess.DEVNULL
         )
-        if proc.returncode == 0 and proc.stdout.strip():
-            out["gist_url"] = proc.stdout.strip().splitlines()[-1]
-        else:
-            out["error"] = (proc.stderr or "gh returned no URL").strip()[:300]
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        out["error"] = str(exc)
-    return out
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.strip()[:300] or f"gh exit {proc.returncode}")
+        return proc.stdout.strip()
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+_INGEST_LOCK = asyncio.Lock()
+
+@app.post("/ingest")
+async def ingest_now():
+    """Run every implemented collector (single-flight). Reachable only through the Access-protected tunnel."""
+    if _INGEST_LOCK.locked():
+        raise HTTPException(status_code=409, detail="ingestion already running")
+    async with _INGEST_LOCK:
+        def run():
+            return subprocess.run([sys.executable, os.path.join(_HERE, "collectors", "run_all.py")],
+                                  capture_output=True, text=True, timeout=240,
+                                  env={**os.environ, "DB_PATH": DB_PATH})
+        try:
+            p = await asyncio.to_thread(run)
+        except subprocess.TimeoutExpired:
+            raise HTTPException(status_code=504, detail="ingestion timed out")
+        lines = [l for l in p.stdout.splitlines() if l[:2] in ("OK", "FA")]
+        return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:]}
+
+_EXP_LOCK = asyncio.Lock()
 
 
-def audit_markdown(stamp, now, query, as_of, sql, source, delta, thesis, rows, ctx):
-    table = "\n".join(
-        f"| {r.get('agent_id','')} | {r.get('target_timestamp','')} | "
-        f"{r.get('available_timestamp','')} | {r.get('value','')} |" for r in rows[:50]
-    )
-    return (
-        f"# PIT Alpha Hub audit {stamp}\n\n"
-        f"- Executed (UTC): {now.isoformat()}\n- PIT cutoff (as_of): `{as_of}`\n"
-        f"- Command: {query}\n- Model: {MODEL} (num_ctx 2048, num_predict 180, /no_think)\n\n"
-        f"## SQL ({source})\n```sql\n{sql}\n```\n\n"
-        f"## Analytical output\n- scenario_delta_bcf: {delta}\n- alpha_thesis: {thesis}\n\n"
-        f"## Rows returned: {len(rows)}\n| agent_id | target | available | value |\n|---|---|---|---|\n{table}\n\n"
-        f"## Context given to model\n```\n{ctx}\n```\n"
-    )
+class ExperimentJob(BaseModel):
+    model: str
+    horizon_days: int = 1
+    cost_bps: float = 0.0
+    n_decisions: int = 250
 
 
-# ===================== API =====================
+@app.post("/experiments/run")
+async def run_experiment(job: ExperimentJob):
+    """One walk-forward experiment on local compute (single-flight). Reached only through the Access-protected tunnel
+    (Cloudflare Queue consumer -> Worker -> here). Parameters are whitelisted; nothing here executes caller-supplied code or SQL."""
+    import experiments
+    if job.model not in experiments.MODELS or job.model == "persistence":
+        raise HTTPException(status_code=422, detail=f"model must be one of {sorted(m for m in experiments.MODELS if m != 'persistence')}")
+    if job.horizon_days not in (1, 2, 3, 5, 10) or not 0 <= job.cost_bps <= 100 or not 50 <= job.n_decisions <= 1000:
+        raise HTTPException(status_code=422, detail="horizon_days in {1,2,3,5,10}, cost_bps 0..100, n_decisions 50..1000")
+    if _EXP_LOCK.locked():
+        raise HTTPException(status_code=409, detail="an experiment is already running")
+    async with _EXP_LOCK:
+        out = await asyncio.to_thread(experiments.run, DB_PATH, job.n_decisions, (job.horizon_days,), (job.cost_bps,), (job.model,))
+    return {"ok": True, "results": [{"id": r[0], "model": r[1], "horizon_days": r[2], "cost_bps": r[3], "test_period": r[6],
+                                     "metrics": r[7], "baseline_metrics": r[8], "promoted": r[9], "result": r[10], "pit_data_version": r[11]} for r in out]}
+
+
+@app.get("/experiments")
+async def list_experiments(limit: int = 25):
+    def q():
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+        try:
+            return conn.execute("SELECT id,created,config,promoted,reason FROM experiments ORDER BY created DESC LIMIT ?", (max(1, min(limit, 200)),)).fetchall()
+        except sqlite3.OperationalError:
+            return []
+        finally:
+            conn.close()
+    return {"experiments": [{"id": r[0], "created": r[1], "config": json.loads(r[2]), "promoted": bool(r[3]), "result": r[4]} for r in await asyncio.to_thread(q)]}
+
+
 @app.get("/health")
 async def health():
-    return {"ok": True, "db_exists": DB_PATH.exists()}
-
+    return {"ok": True, "db": os.path.basename(DB_PATH), "vector_nodes": kb_collection.count()}
 
 @app.post("/execute")
-async def execute(req: ExecuteRequest):
-    as_of = norm_ts(req.as_of_timestamp)
-    if not DB_PATH.exists():
-        raise HTTPException(500, "database missing; run init_db.py")
-    query = req.query.strip()[:500]
-    if not query:
-        raise HTTPException(422, "query is empty")
-    agent_ids = select_agents(query)
-    ctx_rows = await retrieve_context(agent_ids, as_of)
-    ctx = context_text(ctx_rows)
-    llm = await translate(query, as_of, ctx)
-    delta = llm["scenario_delta_bcf"]
-    delta = float(delta) if isinstance(delta, (int, float)) and not isinstance(delta, bool) else 0.0
-    thesis = two_sentences(str(llm["alpha_thesis"]))
-    sql, source, rows = await sandbox_execute(str(llm["sql_query"]), agent_ids, as_of)
-    now = datetime.now(timezone.utc)
-    stamp = now.strftime("%Y%m%dT%H%M%S%fZ")
-    md = audit_markdown(stamp, now, query, as_of, sql, source, delta, thesis, rows, ctx)
-    audit = await asyncio.to_thread(write_audit, md, stamp)
-    return {
-        "sql_query": sql, "sql_source": source, "scenario_delta_bcf": delta,
-        "alpha_thesis": thesis, "rows_returned": len(rows), "pit_cutoff": as_of,
-        "rows": rows, "audit": audit, "gist_url": audit["gist_url"],
+async def handle_remote_command(req: CommandRequest):
+    try:
+        as_of = scenario.norm_ts(req.as_of_timestamp or datetime.now(timezone.utc).isoformat())
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail="as_of_timestamp must be an ISO-8601 timestamp")
+    est = scenario.estimate_delta(req.query)
+    sql_ctx = await asyncio.to_thread(retrieve_sql_context, as_of, req.query)
+    vec_ctx, parent_ids = await retrieve_vector_nodes(req.query, as_of)
+    try:
+        analysis = await generate_pit_analysis(req.query, sql_ctx, vec_ctx, as_of, est)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"model output failed: {e}")
+    reason = scenario.validate_sql(analysis.get("sql_query", ""), as_of)
+    if reason:
+        sql_source, sql_rejected = "deterministic_fallback", reason
+        analysis["sql_query"] = scenario.fallback_sql(as_of)
+    else:
+        sql_source, sql_rejected = "validated_model_output", None
+    analysis["model_scenario_delta_bcf_ignored"] = analysis.get("scenario_delta_bcf")
+    analysis["scenario_delta_bcf"] = est["value"]
+    try:
+        db_rows = await asyncio.to_thread(execute_readonly_sql, analysis["sql_query"], as_of)
+    except Exception as e:
+        if sql_source == "deterministic_fallback":
+            raise HTTPException(status_code=500, detail=f"fallback SQL failed: {e}")
+        sql_source, sql_rejected = "deterministic_fallback", f"model SQL failed in sandbox: {str(e)[:120]}"
+        analysis["sql_query"] = scenario.fallback_sql(as_of)
+        db_rows = await asyncio.to_thread(execute_readonly_sql, analysis["sql_query"], as_of)
+    result = {
+        "as_of_timestamp": as_of,
+        "linked_parent_nodes": parent_ids,
+        "analysis": analysis,
+        "db_rows": db_rows[:25],
+        "sql_source": sql_source,
+        "sql_rejection_reason": sql_rejected,
+        "scenario_basis": est["basis"],
+        "provenance_labels": {"db_rows": "mixed; see provenance column / data_quality",
+                              "scenario_delta_bcf": "synthetic_scenario",
+                              "alpha_thesis": "model_hypothesis"},
+        "data_quality": scenario.data_quality(DB_PATH, as_of, db_rows),
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="127.0.0.1", port=int(os.environ.get("PORT", "8090")))
+    try:
+        gist_url, audit_error = await asyncio.to_thread(log_to_github_gist, req.query, as_of, result), None
+    except Exception as e:  # audit failure is reported, never disguised as a URL
+        gist_url, audit_error = None, str(e)[:300]
+    new_node_id = await store_compounding_node(req.query, as_of, analysis, parent_ids, gist_url or "")
+    result["audit_gist_url"] = gist_url
+    result["audit_error"] = audit_error
+    result["new_vector_node_id"] = new_node_id
+    result["total_knowledge_nodes"] = kb_collection.count()
+    return result
