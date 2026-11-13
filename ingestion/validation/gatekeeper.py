@@ -3,6 +3,8 @@ RANGES = {  # agent_id prefix -> (min, max, unit)
     "Agent_Storage_": (0.0, 4500.0, "Bcf"),
     "Agent_HH_": (-10.0, 50.0, "USD/MMBtu"),
     "Agent_Power_CO2_": (0.0, 200.0, "USD/short ton"),
+    "Agent_Crude_": (-50.0, 300.0, "USD/bbl"),
+    "Agent_NGL_": (0.0, 600.0, "cents/gal"),
     "Agent_Prod_": (0.0, 60.0, "Bcf/d"),
     "Agent_Demand_": (0.0, 80.0, "Bcf/d"),
     "Agent_ECMWF_": (0.0, 80.0, "approx HDD"),

@@ -1,4 +1,4 @@
-import os, sqlite3, sys, tempfile, unittest
+import os, sqlite3, sys, _scratch, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import init_db
@@ -8,7 +8,7 @@ HTML = f"<table><tr>{H}</tr><tr><td>Auction 73</td><td>2026-09-09</td><td>1</td>
 class T(unittest.TestCase):
     def test_parse_and_load(self):
         self.assertEqual(g.parse(HTML)[0], ("Auction 73", "2026-09-09", 37.65))
-        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
         self.assertEqual(g.collect(c, fetcher=lambda u: (200, HTML.encode(), "text/html"))[0]["observations_new"], 2)
         self.assertEqual(g.collect(c, fetcher=lambda u: (200, HTML.encode(), "text/html"))[0]["observations_new"], 0)
         self.assertEqual(c.execute("select available_timestamp from pit_market_data where target_timestamp like '2026-09-09%'").fetchone()[0], "2026-09-10T16:00:00Z")
@@ -19,7 +19,7 @@ if __name__ == "__main__": unittest.main()
 class Correction(unittest.TestCase):
     def test_corrected_price_is_a_new_vintage_available_at_retrieval(self):
         from datetime import datetime, timezone
-        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
         g.collect(c, fetcher=lambda u: (200, HTML.encode(), "text/html"))
         fixed = HTML.replace("$37.65", "$38.00")
         r = g.collect(c, fetcher=lambda u: (200, fixed.encode(), "text/html"), now=datetime(2026, 11, 13, 12, tzinfo=timezone.utc))

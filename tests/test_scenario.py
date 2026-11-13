@@ -21,11 +21,11 @@ class T(unittest.TestCase):
         self.assertIsNone(s.validate_sql(s.fallback_sql(A,"Storage"),A))
 if __name__=="__main__": unittest.main()
 
-import os, sqlite3, tempfile
+import os, sqlite3, _scratch
 import init_db
 class Sandbox(unittest.TestCase):
     def setUp(self):
-        self.db = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(self.db)
+        self.db = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(self.db)
         c = sqlite3.connect(self.db)
         c.executemany("INSERT INTO pit_market_data (agent_id,target_timestamp,available_timestamp,value) VALUES (?,?,?,?)",
                       [("A","2026-01-01T00:00:00Z","2026-01-01T12:00:00Z",1.0), ("A","2026-01-02T00:00:00Z","2026-01-09T12:00:00Z",2.0)]); c.commit()

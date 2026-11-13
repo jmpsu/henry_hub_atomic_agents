@@ -2,7 +2,7 @@ import json
 import os
 import sqlite3
 import sys
-import tempfile
+import _scratch
 import unittest
 from pathlib import Path
 
@@ -14,7 +14,7 @@ import init_db  # noqa: E402
 
 class IngestTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = _scratch.TemporaryDirectory()
         self.db = os.path.join(self.tmp.name, "t.db")
         init_db.migrate(self.db)
         ingest.RAW_DIR = Path(self.tmp.name) / "raw"

@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import sys
-import tempfile
+import _scratch
 import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -22,7 +22,7 @@ def iso(d):
 
 class BacktestTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = _scratch.TemporaryDirectory()
         db = os.path.join(self.tmp.name, "b.db")
         init_db.migrate(db)
         self.conn = sqlite3.connect(db)
@@ -81,10 +81,10 @@ if __name__ == "__main__":
 
 class WeatherModel(unittest.TestCase):
     def _db(self):
-        import os, sqlite3, tempfile
+        import os, sqlite3, _scratch
         from datetime import datetime, timedelta, timezone
         import init_db, ingest
-        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
         d0, p = datetime(2025, 1, 1, tzinfo=timezone.utc), 3.0
         iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
         for i in range(200):

@@ -14,7 +14,7 @@ def zipbody(ind=700000, res=100000, com=150000):
 
 class T(unittest.TestCase):
     def conn(self):
-        import tempfile, os; f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); return sqlite3.connect(f)
+        import _scratch, os; f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); return sqlite3.connect(f)
     def test_release_and_units(self):
         self.assertEqual(m.release_ts("202608"), "2026-10-31T16:00:00Z"); self.assertEqual(m.release_ts("202511"), "2026-01-31T16:00:00Z")
         self.assertAlmostEqual(m.bcfd("202608", 31000), 1.0)

@@ -1,4 +1,4 @@
-import os, sqlite3, sys, tempfile, unittest
+import os, sqlite3, sys, _scratch, unittest
 from datetime import date, datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -8,7 +8,7 @@ from collectors import eia_prices as e  # noqa: E402
 
 class T(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(); db = os.path.join(self.tmp.name, "t.db"); init_db.migrate(db)
+        self.tmp = _scratch.TemporaryDirectory(); db = os.path.join(self.tmp.name, "t.db"); init_db.migrate(db)
         self.conn = sqlite3.connect(db)
     def tearDown(self): self.conn.close(); self.tmp.cleanup()
     def load(self, rows, name="RNGWHHDd"): return e.load(self.conn, name, rows, "h", "2026-11-12T00:00:00Z", "u")

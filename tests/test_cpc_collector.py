@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import sys
-import tempfile
+import _scratch
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,7 +19,7 @@ T2 = datetime(2026, 1, 11, 12, tzinfo=timezone.utc)
 
 class CpcTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        self.tmp = _scratch.TemporaryDirectory()
         db = os.path.join(self.tmp.name, "t.db")
         init_db.migrate(db)
         ingest.RAW_DIR = Path(self.tmp.name) / "raw"

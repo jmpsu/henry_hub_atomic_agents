@@ -6,7 +6,6 @@ import json
 import os
 import sqlite3
 import sys
-import tempfile
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -15,6 +14,7 @@ import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import ingest  # noqa: E402
+from runtime_paths import scratch_file  # noqa: E402
 from collectors.gfs_hdd import METROS, weighted_hdd  # noqa: E402
 
 BASE = "https://ecmwf-forecasts.s3.eu-central-1.amazonaws.com/{d}/00z/ifs/0p25/oper/{d}000000-{s}h-oper-fc"
@@ -33,9 +33,8 @@ def parse_index(text: str, param: str = "2t") -> tuple:
 def read_metro_temps(grib_bytes: bytes) -> list:
     import numpy as np
     import pygrib
-    with tempfile.NamedTemporaryFile(suffix=".grib2") as f:
-        f.write(grib_bytes); f.flush()
-        msg = pygrib.open(f.name).message(1)
+    with scratch_file(".grib2", grib_bytes) as grib_path:   # pygrib needs a real file; kept under runtime/scratch/
+        msg = pygrib.open(grib_path).message(1)
         lats, lons = msg.latlons()
         la, lo, vals = lats[:, 0], lons[0, :] % 360, msg.values
         out = []

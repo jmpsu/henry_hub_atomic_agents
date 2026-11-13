@@ -8,7 +8,6 @@ import os
 import re
 import sqlite3
 import sys
-import tempfile
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -17,6 +16,7 @@ import httpx
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import ingest  # noqa: E402
+from runtime_paths import scratch_file  # noqa: E402
 
 BASE = "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{d}/00/atmos/gfs.t00z.pgrb2.0p25.f{f:03d}"
 METROS = [  # (lat, lon, population millions, approximate)
@@ -65,9 +65,8 @@ def fetch_range(url: str, start: int, end: int):
 
 def read_metro_temps(grib_bytes: bytes) -> list:
     import pygrib
-    with tempfile.NamedTemporaryFile(suffix=".grib2") as f:
-        f.write(grib_bytes); f.flush()
-        g = pygrib.open(f.name)
+    with scratch_file(".grib2", grib_bytes) as grib_path:   # pygrib needs a real file; kept under runtime/scratch/
+        g = pygrib.open(grib_path)
         msg = g.message(1)
         vals = msg.values
         if vals.shape != (721, 1440):

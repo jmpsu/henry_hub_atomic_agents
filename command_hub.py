@@ -1,4 +1,4 @@
-import asyncio, json, os, sqlite3, subprocess, sys, tempfile, hashlib, shutil
+import asyncio, json, os, sqlite3, subprocess, sys, hashlib, shutil
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -6,6 +6,7 @@ import httpx
 import chromadb
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import scenario
+import kb_ingest
 
 app = FastAPI()
 OLLAMA_GEN_URL = "http://127.0.0.1:11434/api/generate"
@@ -163,22 +164,15 @@ def log_to_github_gist(command: str, as_of: str, result_payload: dict) -> str:
         f"## Executed PIT Query\n```sql\n{result_payload['analysis']['sql_query']}\n```\n\n"
         f"## Database Rows Returned\n```json\n{json.dumps(result_payload['db_rows'], indent=2)}\n```\n"
     )
-    with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False) as tmp:
-        tmp.write(markdown_body)
-        tmp_path = tmp.name
-    try:
-        proc = subprocess.run(
-            [shutil.which("gh") or "/home/joey/.local/bin/gh", "gist", "create", tmp_path, "--desc", f"PIT Alpha Hub: {command[:60]}"],
-            capture_output=True, text=True, timeout=45, stdin=subprocess.DEVNULL
-        )
-        if proc.returncode != 0:
-            raise RuntimeError(proc.stderr.strip()[:300] or f"gh exit {proc.returncode}")
-        return proc.stdout.strip()
-    finally:
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
+    # The audit body is piped to gh on stdin; nothing is written to disk.
+    proc = subprocess.run(
+        [shutil.which("gh") or "/home/joey/.local/bin/gh", "gist", "create", "-", "--filename", f"audit_{timestamp_slug}.md",
+         "--desc", f"PIT Alpha Hub: {command[:60]}"],
+        input=markdown_body, capture_output=True, text=True, timeout=45
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(proc.stderr.strip()[:300] or f"gh exit {proc.returncode}")
+    return proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else ""
 
 _INGEST_LOCK = asyncio.Lock()
 
@@ -197,7 +191,23 @@ async def ingest_now():
         except subprocess.TimeoutExpired:
             raise HTTPException(status_code=504, detail="ingestion timed out")
         lines = [l for l in p.stdout.splitlines() if l[:2] in ("OK", "FA")]
-        return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:]}
+        try:  # fold what was just collected into the knowledge library; a failure here never fails the ingest
+            kb = await asyncio.to_thread(kb_ingest.ingest, DB_PATH, kb_collection)
+        except Exception as e:  # noqa: BLE001
+            kb = {"error": str(e)[:200]}
+        return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:], "knowledge": kb}
+
+
+_KB_LOCK = asyncio.Lock()
+
+
+@app.post("/kb/ingest")
+async def kb_ingest_now():
+    """Rebuild the knowledge library (SQLite graph + this process's vector store) from the PIT database. Access-protected."""
+    if _KB_LOCK.locked():
+        raise HTTPException(status_code=409, detail="knowledge ingest already running")
+    async with _KB_LOCK:
+        return await asyncio.to_thread(kb_ingest.ingest, DB_PATH, kb_collection)
 
 _EXP_LOCK = asyncio.Lock()
 

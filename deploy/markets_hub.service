@@ -1,0 +1,18 @@
+# Read-only visual intelligence service for markets.joeysvault.app / ngl.joeysvault.app.
+# Installed as a USER unit:  cp deploy/markets_hub.service ~/.config/systemd/user/ && systemctl --user daemon-reload && systemctl --user enable --now markets_hub
+# (user lingering must be on for it to start at boot without a login: loginctl enable-linger joey)
+[Unit]
+Description=NGL & Henry Hub read-only visual intelligence hub (127.0.0.1:8095)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/joey/Projects/henry_hub_atomic_agents
+Environment=DB_PATH=/home/joey/Projects/henry_hub_atomic_agents/henry_hub_pit.db
+Environment=PATH=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin/uvicorn markets_hub:app --host 127.0.0.1 --port 8095 --no-server-header
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,4 +1,4 @@
-import io, json, os, sqlite3, sys, tempfile, unittest, zipfile
+import io, json, os, sqlite3, sys, _scratch, unittest, zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -18,7 +18,7 @@ def body(mc=27.0, fut=99.0):
 NOW = datetime(2026, 11, 20, 12, tzinfo=timezone.utc)
 class T(unittest.TestCase):
     def conn(self):
-        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); return sqlite3.connect(f)
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); return sqlite3.connect(f)
     def test_release_rule(self):
         self.assertEqual(m.release_ts("202610"), "2026-11-15T17:00:00Z"); self.assertEqual(m.release_ts("202612"), "2027-01-15T17:00:00Z")
     def test_history_only_no_forecast_months_and_sum(self):

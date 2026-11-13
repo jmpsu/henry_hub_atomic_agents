@@ -3,3 +3,23 @@
 audit/
 artifacts/mcp_credentials.json
 henry_hub_pit.db
+chroma_pit_kb/
+__pycache__/
+*.pyc
+.wrangler/
+backups/
+raw/
+node_modules/
+
+# Runtime data & secrets (added during consolidation)
+*.db
+*.db-journal
+*.db-wal
+.pytest_cache/
+
+# Project-local runtime scratch (never committed)
+runtime/
+
+# Local assistant/office state (never committed)
+.claude/
+.~lock.*#

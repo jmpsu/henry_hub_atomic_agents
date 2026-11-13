@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NGL Visual Intelligence</title>
+<link rel="stylesheet" href="/static/vendor/maplibre-gl.css">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="home" href="https://joeysvault.app">&larr; joeysvault.app</a>
+  <div class="title" id="host-title">NGL.JOEYSVAULT.APP</div>
+  <div class="asof" id="asof">loading</div>
+</header>
+
+<nav class="controls" aria-label="Market selection">
+  <div class="seg" id="product-seg" role="group" aria-label="Product"></div>
+  <div class="seg" id="timeframe-seg" role="group" aria-label="Timeframe"></div>
+</nav>
+
+<main>
+  <section class="panel hero" aria-labelledby="hero-h">
+    <h2 id="hero-h"><span id="hero-title">Seasonal patterns &amp; key technical levels</span><span class="tags" id="hero-tags"></span></h2>
+    <div class="hero-grid">
+      <div>
+        <div class="chart-cap" id="price-cap">Price, 50/200-day averages, Bollinger bands, triangle, Fibonacci</div>
+        <div id="price-chart" class="chart tall"></div>
+        <div class="chart-cap">RSI (14)</div>
+        <div id="rsi-chart" class="chart short"></div>
+        <div class="chart-cap">MACD (12, 26, 9)</div>
+        <div id="macd-chart" class="chart short"></div>
+      </div>
+      <div>
+        <div class="chart-cap" id="seasonal-cap">Seasonal overlay by day of year</div>
+        <div id="seasonal-chart" class="chart tall"></div>
+        <div class="chart-cap">Key levels</div>
+        <div id="levels" class="levels"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row map-row">
+    <section class="panel" aria-labelledby="map-h">
+      <h2 id="map-h">North American energy hub<span class="tags" id="map-tags"></span></h2>
+      <div id="map"></div>
+      <div class="note" id="map-note"></div>
+    </section>
+    <div class="stack">
+      <section class="panel" aria-labelledby="px-h">
+        <h2 id="px-h">Pricing output &amp; relative value</h2>
+        <div id="pricing"></div>
+      </section>
+      <section class="panel" aria-labelledby="fib-h">
+        <h2 id="fib-h">Fibonacci retracement levels</h2>
+        <div id="fib"></div>
+      </section>
+      <section class="panel" aria-labelledby="al-h">
+        <h2 id="al-h">Production elements &amp; active alerts</h2>
+        <div id="alerts"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="row four">
+    <section class="panel"><h2>NGL as % of WTI crude</h2><div id="wti-chart" class="chart mid"></div></section>
+    <section class="panel"><h2>Mont Belvieu vs Conway</h2><div id="hub-chart" class="chart mid"></div></section>
+    <section class="panel"><h2>Frac spread: ethane vs Henry Hub</h2><div id="frac-chart" class="chart mid"></div></section>
+    <section class="panel"><h2>Henry Hub forward curve<span class="tags" id="fwd-tags"></span></h2><div id="fwd-chart" class="chart mid"></div></section>
+  </div>
+
+  <section class="panel" aria-labelledby="drv-h">
+    <h2 id="drv-h">Production &amp; fundamental elements behind the calculation</h2>
+    <div id="drivers" class="drivers"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="src-h">
+    <h2 id="src-h">Source availability transparency<span class="tags" id="src-tags"></span></h2>
+    <div class="table-tools">
+      <label><input type="checkbox" id="src-all"> show all roster agents</label>
+      <span id="src-legend" class="legend"></span>
+    </div>
+    <div class="table-wrap"><table id="sources"><thead><tr>
+      <th>Agent</th><th>Status</th><th>Provenance</th><th>Source</th><th>Latest target</th><th>Available</th><th>Retrieved</th><th>Quality</th><th>Raw payload hash</th>
+    </tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="kg-h">
+    <h2 id="kg-h">Vector knowledge library<span class="tags" id="kg-tags"></span></h2>
+    <div class="kg-tools">
+      <form id="kg-form"><input id="kg-q" type="search" maxlength="200" placeholder="semantic search, e.g. colder than normal week" aria-label="Semantic search"><button type="submit">Search</button></form>
+      <span class="legend" id="kg-legend"></span>
+    </div>
+    <div class="kg-grid">
+      <svg id="kg" role="img" aria-label="Knowledge graph"></svg>
+      <div id="kg-detail" class="kg-detail">Select a node, or search. Search only returns objects that were available at the cutoff shown above.</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="foot-stats"></span>
+  <span>Read-only. Every figure is read point-in-time from the local database; products without a collector show no value.</span>
+</footer>
+
+<script src="/static/vendor/d3.min.js"></script>
+<script src="/static/vendor/maplibre-gl.js"></script>
+<script src="/static/vendor/deck.gl.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

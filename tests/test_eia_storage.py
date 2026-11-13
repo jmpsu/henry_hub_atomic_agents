@@ -1,4 +1,4 @@
-import os, sqlite3, sys, tempfile, unittest
+import os, sqlite3, sys, _scratch, unittest
 from datetime import datetime, timezone
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
@@ -25,7 +25,7 @@ NOW = datetime(2026, 11, 12, tzinfo=timezone.utc)
 
 class T(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(); db = os.path.join(self.tmp.name, "t.db"); init_db.migrate(db)
+        self.tmp = _scratch.TemporaryDirectory(); db = os.path.join(self.tmp.name, "t.db"); init_db.migrate(db)
         ingest.RAW_DIR = Path(self.tmp.name) / "raw"; self.conn = sqlite3.connect(db)
     def tearDown(self): self.conn.close(); self.tmp.cleanup()
     def fk(self, t, s=200): return lambda u: (s, t.encode(), "text/csv")
