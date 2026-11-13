@@ -17,8 +17,70 @@ function accessHeaders(env) {
   };
 }
 
+// Edge collection (Section 3.1): sources fetched from Cloudflare's network, forwarded with their fetch metadata to the
+// hub's Access-protected /ingest/edge, which archives and parses them. Keys and URLs must match the hub's whitelist.
+const EDGE_SOURCES = {
+  cpc_heating: (y) => `https://ftp.cpc.ncep.noaa.gov/htdocs/degree_days/weighted/daily_data/${y}/Population.Heating.txt`,
+  cpc_cooling: (y) => `https://ftp.cpc.ncep.noaa.gov/htdocs/degree_days/weighted/daily_data/${y}/Population.Cooling.txt`,
+  eia_hh_spot: () => "https://www.eia.gov/dnav/ng/hist_xls/RNGWHHDd.xls",
+  eia_wti: () => "https://www.eia.gov/dnav/pet/hist_xls/RWTCd.xls",
+  eia_propane: () => "https://www.eia.gov/dnav/pet/hist_xls/EER_EPLLPA_PF4_Y44MB_DPGd.xls",
+  eia_storage: () => "https://ir.eia.gov/ngs/wngsr.csv",
+  rggi: () => "https://www.rggi.org/auctions/auction-results/prices-volumes",
+};
+// Per-cron schedule: daily sources at 13:30 UTC; the weekly storage report on Thursdays after its 15:30 UTC release.
+const EDGE_SCHEDULE = {
+  "30 13 * * *": ["cpc_heating", "cpc_cooling", "eia_hh_spot", "eia_wti", "eia_propane", "rggi"],
+  "45 15 * * THU": ["eia_storage"],
+};
+
+function toBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+async function edgeFetch(url) {
+  // One polite retry on a 5xx or network error, after 20 s; sources are fetched at most once per scheduled run.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(url, { headers: { "User-Agent": "joeysvault-quant-edge/1 (scheduled, once daily)" }, cf: { cacheTtl: 0 } });
+      if (r.status < 500 || attempt === 1) return r;
+    } catch (e) {
+      if (attempt === 1) throw e;
+    }
+    await new Promise((res) => setTimeout(res, 20000));
+  }
+}
+
+async function collectAtEdge(key, env) {
+  const url = EDGE_SOURCES[key](new Date().getUTCFullYear());
+  const retrieved = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+  let status = 0, body = new ArrayBuffer(0), headers = {}, ctype = "";
+  try {
+    const r = await edgeFetch(url);
+    status = r.status; ctype = r.headers.get("content-type") || "";
+    for (const [k, v] of r.headers) headers[k] = v;
+    body = await r.arrayBuffer();
+  } catch (e) {
+    console.log(`edge ${key}: fetch failed ${e}`);
+  }
+  const base = (env.INGEST_URL || "https://quant.joeysvault.app/ingest").replace(/\/ingest$/, "");
+  const resp = await fetch(`${base}/ingest/edge`, {
+    method: "POST", headers: accessHeaders(env),
+    body: JSON.stringify({ key, url, status, content_type: ctype, retrieved_timestamp: retrieved, headers, colo: "", body_b64: toBase64(body) }),
+  });
+  console.log(`edge ${key}: source HTTP ${status}, ${body.byteLength} bytes -> hub HTTP ${resp.status}`);
+  return resp.status;
+}
+
 export default {
   async scheduled(event, env, ctx) {
+    for (const key of EDGE_SCHEDULE[event.cron] || []) {
+      try { await collectAtEdge(key, env); } catch (e) { console.log(`edge ${key}: ${e}`); }
+    }
+    // then the local run for the sources that need the workstation (GRIB weather models, bulk files) and the knowledge library
     const resp = await fetch(env.INGEST_URL || "https://quant.joeysvault.app/ingest", {
       method: "POST",
       headers: accessHeaders(env),
@@ -39,7 +101,7 @@ export default {
         if (resp.ok || resp.status === 422) {
           msg.ack();
         } else {
-          msg.retry({ delaySeconds: resp.status === 409 ? 15 : 30 });
+          msg.retry({ delaySeconds: resp.status === 409 ? 120 : 30 });   // 409 = an experiment is already running
         }
       } catch (err) {
         console.error("queue dispatch error:", err);
@@ -63,6 +125,13 @@ export default {
     if (body.length > 4096) return new Response("Payload Too Large", { status: 413 });
 
     const url = new URL(request.url);
+    const edge = url.pathname.match(/^\/edge\/([a-z_]+)$/);
+    if (edge) {
+      if (!EDGE_SOURCES[edge[1]]) return new Response("Unknown edge source", { status: 404 });
+      const st = await collectAtEdge(edge[1], env);
+      return Response.json({ key: edge[1], hub_status: st }, { status: st === 200 ? 200 : 502 });
+    }
+
     if (url.pathname === "/backtest" || url.pathname === "/enqueue") {
       const queue = env.BACKTEST_JOBS;   // bound in wrangler.toml
       if (!queue) return new Response("Queue not bound", { status: 500 });

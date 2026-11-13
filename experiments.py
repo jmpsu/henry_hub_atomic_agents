@@ -15,8 +15,19 @@ def mean_revert_20(history, features=None):
     return sum(v) / len(v) if len(v) >= 5 else None
 
 
-MODELS = {"persistence": bt.persistence, "ar1": bt.ar1, "mean20": mean_revert_20, "hdd_anomaly": bt.hdd_anomaly}
-FEATURES = {"hdd_anomaly": (bt.weather_features, ["Agent_Weather_Actual_HDD", "Agent_Weather_30YrNormal_HDD"])}  # model -> (builder, agents)
+MODELS = {"persistence": bt.persistence, "ar1": bt.ar1, "mean20": mean_revert_20, "hdd_anomaly": bt.hdd_anomaly,
+          "propane_wti_revert": bt.propane_wti_revert, "propane_wti_momentum": bt.propane_wti_momentum, "hh_production_momentum": bt.hh_production_momentum}
+FEATURES = {  # model -> (builder, feature agents)
+    "hdd_anomaly": (bt.weather_features, ["Agent_Weather_Actual_HDD", "Agent_Weather_30YrNormal_HDD"]),
+    "propane_wti_revert": (bt.crude_features, ["Agent_Crude_WTI_Spot"]),
+    "propane_wti_momentum": (bt.crude_features, ["Agent_Crude_WTI_Spot"]),
+    "hh_production_momentum": (bt.production_features, list(bt.PROD_BASINS)),
+}
+TARGETS = {"propane_wti_revert": "Agent_NGL_MontBelvieu_Propane", "propane_wti_momentum": "Agent_NGL_MontBelvieu_Propane"}  # default: AGENT
+
+
+def target_of(model):
+    return TARGETS.get(model, AGENT)
 
 
 def binom_p(k, n):  # two-sided exact-ish via normal approx w/ continuity; fine for n>=30
@@ -36,37 +47,44 @@ def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None, slippa
     experiment ever recorded plus the new ones, so queue-dispatched jobs cannot dodge the multiple-testing correction."""
     conn = sqlite3.connect(db)
     ensure(conn)
-    names = ["persistence"] + [m for m in (models or MODELS) if m != "persistence"]
-    for m in names:
+    picked = [m for m in (models or MODELS) if m != "persistence"]
+    for m in picked:
         if m not in MODELS:
             raise ValueError(f"unknown model: {m}")
-    rows = conn.execute("SELECT DISTINCT available_timestamp FROM pit_market_data WHERE agent_id=? AND provenance='measured' "
-                        "ORDER BY 1", (AGENT,)).fetchall()
-    times = [r[0] for r in rows][-n_decisions:]
+    targets = sorted({target_of(m) for m in picked} or {AGENT})
+    times = {}
+    for tg in targets:
+        rows = conn.execute("SELECT DISTINCT available_timestamp FROM pit_market_data WHERE agent_id=? AND provenance='measured' "
+                            "ORDER BY 1", (tg,)).fetchall()
+        times[tg] = [r[0] for r in rows][-n_decisions:]
     dv = hashlib.sha256(f"{conn.execute('select count(*),max(available_timestamp) from pit_market_data').fetchone()}".encode()).hexdigest()[:12]
-    configs = [(m, h, c) for m in names for h in horizons for c in costs]
-    new_ids = {hashlib.sha256(json.dumps([m, h, c, dv] + ([slippage_bps] if slippage_bps else [])).encode()).hexdigest()[:10] for m, h, c in configs if m != "persistence"}
+    configs = [("persistence", tg, h, c) for tg in targets for h in horizons for c in costs] + \
+              [(m, target_of(m), h, c) for m in picked for h in horizons for c in costs]
+    key = lambda m, tg, h, c: json.dumps([m, h, c, dv] + ([slippage_bps] if slippage_bps else []) + ([tg] if tg != AGENT else []))
+    new_ids = {hashlib.sha256(key(m, tg, h, c).encode()).hexdigest()[:10] for m, tg, h, c in configs if m != "persistence"}
     prior = {r[0] for r in conn.execute("SELECT id FROM experiments WHERE config NOT LIKE '%\"persistence\"%'")}
     alpha = 0.05 / max(len(prior | new_ids), 1)
     res = {}
-    for m, h, c in configs:
-        res[(m, h, c)] = bt.walk_forward(conn, AGENT, times, h, MODELS[m], cost_bps=c, feature_fn=FEATURES[m][0] if m in FEATURES else None, slippage_bps=slippage_bps)
+    for m, tg, h, c in configs:
+        res[(m, tg, h, c)] = bt.walk_forward(conn, tg, times[tg], h, MODELS[m], cost_bps=c, feature_fn=FEATURES[m][0] if m in FEATURES else None,
+                                             slippage_bps=slippage_bps)
     out = []
-    for (m, h, c), r in res.items():
+    for (m, tg, h, c), r in res.items():
         tr, va, te = bt.split_chronological(r)
         met = bt.metrics(te) if te else {}
-        base = bt.metrics(bt.split_chronological(res[("persistence", h, c)])[2]) if res[("persistence", h, c)] else {}
+        b = res[("persistence", tg, h, c)]
+        base = bt.metrics(bt.split_chronological(b)[2]) if b else {}
         hits = [x["dir_hit"] for x in te if x["dir_hit"] is not None]
         p = binom_p(sum(hits), len(hits))
         net = sum(x["ret"] for x in te)
         promoted = bool(m != "persistence" and met and base and met["rmse"] < base["rmse"] and p < alpha and net > 0)
         reason = "baseline" if m == "persistence" else ("promoted" if promoted else
                  f"rejected: rmse {'<' if met and base and met['rmse'] < base['rmse'] else '>='} baseline, dir_p={p:.3f} (alpha {alpha:.4f}), net_ret={net:.4f}")
-        eid = hashlib.sha256(json.dumps([m, h, c, dv] + ([slippage_bps] if slippage_bps else [])).encode()).hexdigest()[:10]
+        eid = hashlib.sha256(key(m, tg, h, c).encode()).hexdigest()[:10]
         span = lambda s: f"{s[0]['target']}..{s[-1]['target']}" if s else "n/a"
         met = {**met, "dir_hit": (sum(hits) / len(hits)) if hits else None, "dir_p": p, "net_return": net}
         conn.execute("INSERT OR REPLACE INTO experiments VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": AGENT, "slippage_bps": slippage_bps, "features": FEATURES[m][1] if m in FEATURES else []}),
+                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": tg, "slippage_bps": slippage_bps, "features": FEATURES[m][1] if m in FEATURES else []}),
                       dv, span(tr), span(va), span(te), json.dumps(met), json.dumps(base), int(promoted), reason))
         out.append((eid, m, h, c, span(tr), span(va), span(te), met, base, promoted, reason, dv))
     conn.commit()

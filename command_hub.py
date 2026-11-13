@@ -198,6 +198,88 @@ async def ingest_now():
         return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:], "knowledge": kb}
 
 
+class EdgePayload(BaseModel):
+    key: str
+    url: str
+    status: int
+    content_type: str = ""
+    retrieved_timestamp: str
+    headers: dict = {}
+    colo: str = ""
+    body_b64: str
+
+
+def _edge_sources(year: int) -> dict:
+    """Whitelist of sources a Worker may fetch at the edge: key -> (exact URL, how to load it). The hub only ever parses a
+    payload with the collector that owns that exact URL, so a forged request cannot choose a parser or a destination."""
+    sys.path.insert(0, _HERE)
+    from collectors import cpc_degree_days, eia_petroleum_spot, eia_prices, eia_storage, rggi_auctions
+    return {
+        "cpc_heating": (cpc_degree_days.BASE.format(year=year, kind="Heating"), lambda c, f: cpc_degree_days.collect(c, "Heating", year, f)),
+        "cpc_cooling": (cpc_degree_days.BASE.format(year=year, kind="Cooling"), lambda c, f: cpc_degree_days.collect(c, "Cooling", year, f)),
+        "eia_storage": (eia_storage.URL, lambda c, f: eia_storage.collect(c, f)),
+        "eia_hh_spot": (eia_prices.URL.format(name="RNGWHHDd"), lambda c, f: eia_prices.collect(c, f, only=["RNGWHHDd"])),
+        "eia_wti": (eia_petroleum_spot.URL.format(name="RWTCd"), lambda c, f: eia_petroleum_spot.collect(c, f, only=["RWTCd"])),
+        "eia_propane": (eia_petroleum_spot.URL.format(name="EER_EPLLPA_PF4_Y44MB_DPGd"),
+                        lambda c, f: eia_petroleum_spot.collect(c, f, only=["EER_EPLLPA_PF4_Y44MB_DPGd"])),
+        "rggi": (rggi_auctions.URL, lambda c, f: rggi_auctions.collect(c, f)),
+    }
+
+
+_EDGE_LOCK = asyncio.Lock()
+
+
+@app.post("/ingest/edge")
+async def ingest_edge(p: EdgePayload):
+    """Receive a payload a Cloudflare Worker fetched at the edge (Section 3.1/3.2). Reachable only through Access.
+    The fetch metadata (status, headers, edge retrieval time, colo, size, hash) is recorded in edge_fetches whether or
+    not parsing succeeds; the bytes are archived and parsed by the owning collector, exactly as a local fetch would be."""
+    import base64
+    import ingest as _ingest
+    try:
+        body = base64.b64decode(p.body_b64, validate=True)
+    except Exception:
+        raise HTTPException(status_code=422, detail="body_b64 is not valid base64")
+    if len(body) > 8_000_000:
+        raise HTTPException(status_code=413, detail="payload too large")
+    try:
+        retrieved = _ingest.utc_iso(p.retrieved_timestamp)
+    except Exception:
+        raise HTTPException(status_code=422, detail="retrieved_timestamp must be an ISO-8601 UTC timestamp")
+    year = int(retrieved[:4])
+    sources = _edge_sources(year)
+    if p.key not in sources or p.url != sources[p.key][0]:
+        raise HTTPException(status_code=422, detail="unknown edge source or URL does not match the whitelist")
+    url, loader = sources[p.key]
+    digest = hashlib.sha256(body).hexdigest()
+    headers = {k.lower(): str(v)[:300] for k, v in list(p.headers.items())[:40]}
+
+    def run():
+        conn = sqlite3.connect(DB_PATH, timeout=30)
+        try:
+            conn.execute("CREATE TABLE IF NOT EXISTS edge_fetches(id INTEGER PRIMARY KEY AUTOINCREMENT, key TEXT, url TEXT, http_status INTEGER, "
+                         "content_type TEXT, headers TEXT, retrieved_timestamp TEXT, received_timestamp TEXT, colo TEXT, byte_length INTEGER, "
+                         "sha256 TEXT, result TEXT, ok INTEGER)")
+            received = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            if p.status != 200:
+                result, ok = {"error": f"edge fetch returned HTTP {p.status}"}, 0
+            else:
+                fetcher = lambda u: (p.status, body, p.content_type) if u == url else (404, b"", "")
+                try:
+                    result, ok = loader(conn, fetcher), 1
+                except Exception as e:  # noqa: BLE001  (layout change, gatekeeper rejection...): recorded, not raised
+                    result, ok = {"error": f"{type(e).__name__}: {e}"[:300]}, 0
+            conn.execute("INSERT INTO edge_fetches(key,url,http_status,content_type,headers,retrieved_timestamp,received_timestamp,colo,byte_length,sha256,result,ok) "
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (p.key, url, p.status, p.content_type, json.dumps(headers, sort_keys=True), retrieved, received,
+                                                             p.colo[:16], len(body), digest, json.dumps(result, default=str)[:2000], ok))
+            conn.commit()
+            return {"ok": bool(ok), "key": p.key, "sha256": digest, "bytes": len(body), "result": result}
+        finally:
+            conn.close()
+    async with _EDGE_LOCK:
+        return await asyncio.to_thread(run)
+
+
 _KB_LOCK = asyncio.Lock()
 
 

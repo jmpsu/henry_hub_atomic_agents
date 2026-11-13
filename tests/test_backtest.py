@@ -118,3 +118,44 @@ class RiskMetrics(unittest.TestCase):
         self.assertAlmostEqual(m["max_drawdown"], 0.05); self.assertIsNotNone(m["sharpe_per_decision"])
         self.assertEqual(m["by_regime"]["heating_season"]["n"], 2); self.assertEqual(m["by_regime"]["non_heating_season"]["n"], 2)
         self.assertEqual(bt.regime("2026-11-30T00:00:00Z"), "heating_season"); self.assertEqual(bt.regime("2026-04-01T00:00:00Z"), "non_heating_season")
+
+
+class CrossDomainModels(unittest.TestCase):
+    def test_known_at_respects_availability(self):
+        import backtest as bt
+        k = bt.KnownAt([("2026-01-01", 10.0, "2026-02-15T00:00:00Z"), ("2026-02-01", 11.0, "2026-03-15T00:00:00Z")])
+        self.assertIsNone(k.at("2026-02-14T23:59:59Z"))
+        self.assertEqual(k.at("2026-02-15T00:00:00Z"), ("2026-01-01", 10.0))
+        self.assertEqual(k.at("2026-03-20T00:00:00Z"), ("2026-02-01", 11.0))
+        late = bt.KnownAt([("2026-02-01", 11.0, "2026-03-01T00:00:00Z"), ("2026-01-01", 10.5, "2026-03-05T00:00:00Z")])   # older month revised later
+        self.assertEqual(late.at("2026-03-06T00:00:00Z"), ("2026-02-01", 11.0))                                       # still the newest target
+
+    def test_propane_wti_revert_learns_planted_reversion(self):
+        import backtest as bt
+        from datetime import date as D
+        days = [(D(2024, 1, 1) + timedelta(days=i)).isoformat() for i in range(500)]
+        wti = bt.KnownAt([(d, 80.0, d + "T21:00:00Z") for d in days])
+        fair = 0.5 * 80 / 42 * 100                                   # propane at 50% of WTI
+        p, hist = fair, []
+        for i, d in enumerate(days):
+            shock = ((i * 37) % 11 - 5) * 0.8
+            p = p + 0.3 * (fair - p) + shock                         # pulls 30% of the gap back each day
+            hist.append((d + "T00:00:00Z", p))
+        pred = bt.propane_wti_revert(hist, {"wti": wti, "horizon_days": 1})
+        expected = hist[-1][1] + 0.3 * (fair - hist[-1][1])
+        last = hist[-1][1]
+        self.assertEqual((pred > last), (expected > last))                       # moves toward fair value
+        self.assertLess(abs(pred - expected), 0.6 * abs(expected - last) + 1.2)   # and recovers most of the planted pull
+        self.assertEqual(bt.propane_wti_revert(hist[:5], {"wti": wti, "horizon_days": 1}), hist[4][1])   # too little history: no signal
+
+    def test_production_feature_is_pit(self):
+        import backtest as bt, init_db, ingest, sqlite3
+        d = _scratch.mkdtemp(); db = os.path.join(d, "t.db"); init_db.migrate(db); c = sqlite3.connect(db)
+        for m in range(1, 9):
+            for a in bt.PROD_BASINS:
+                ingest.record_observation(c, agent_id=a, target_timestamp=f"2025-{m:02d}-01T00:00:00Z", available_timestamp=f"2025-{m + 1:02d}-15T17:00:00Z",
+                                          value=10.0 + m, source_id="t")
+        c.commit()
+        f = bt.production_features(c, "2025-07-01T00:00:00Z", 5)
+        self.assertEqual(f["prod_chg3"].at("2025-07-01T00:00:00Z"), ("2025-05-01", 18.0))   # May (pub Jun 15) minus Feb, x6 basins = 3*6
+        self.assertIsNone(f["prod_chg3"].at("2025-05-14T00:00:00Z"))                         # nothing with 3 prior months yet published

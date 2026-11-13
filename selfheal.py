@@ -74,13 +74,56 @@ def diagnose(agent_id: str, html: str, selector: str, expected_range=None) -> di
 REPAIR_SCHEMA = {"type": "object", "properties": {"selector": {"type": "string"}}, "required": ["selector"]}
 
 
+class _Tags(HTMLParser):
+    """Collect the tag/id/class selectors present in a document (used to ground the model's second attempt)."""
+
+    def __init__(self):
+        super().__init__()
+        self.found = []
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if a.get("id"):
+            self.found.append(f"{tag}#{a['id']}")
+        for c in (a.get("class") or "").split():
+            self.found.append(f"{tag}.{c}")
+
+
+def candidate_selectors(html: str) -> list:
+    p = _Tags()
+    p.feed(html)
+    return list(dict.fromkeys(p.found))
+
+
+def _usable(selector: str, html: str, failed: str) -> bool:
+    if not selector or selector == failed:
+        return False
+    try:
+        parse_value(html, selector)
+        return True
+    except (LookupError, ValueError):
+        return False
+
+
 def propose_repair(diag: dict, html: str, llm) -> dict:
-    """llm(prompt, schema) -> dict. The prompt ends with /no_think; callers use num_predict 180."""
+    """llm(prompt, schema) -> dict. The prompt ends with /no_think; callers use num_predict 180.
+    A proposal that repeats the failed selector or extracts nothing from the page is rejected, and the model gets one
+    more attempt with the selectors actually present in the page listed. The result is still only a PROPOSAL:
+    validate_proposal() against preserved fixtures decides whether it is accepted."""
     prompt = (f"A scraper selector '{diag['selector']}' failed ({diag['error']}) for {diag['agent_id']}. "
               f"Return one CSS-like selector (tag, #id, .class or tag.class) that isolates the numeric value in this HTML:\n"
               f"{html[:1200]}\n/no_think")
     out = llm(prompt, REPAIR_SCHEMA)
-    return {"selector": str(out.get("selector", "")).strip()}
+    sel = str(out.get("selector", "")).strip()
+    attempts = [sel]
+    if not _usable(sel, html, diag["selector"]):
+        cands = [c for c in candidate_selectors(html) if c != diag["selector"]][:40]
+        retry = (f"The selector '{sel}' does not work: it is the failed one or it extracts no number. Choose ONE of these selectors that exist "
+                 f"in the page, the one whose element contains the numeric value: {', '.join(cands)}.\nHTML:\n{html[:1200]}\n/no_think")
+        out = llm(retry, REPAIR_SCHEMA)
+        sel = str(out.get("selector", "")).strip()
+        attempts.append(sel)
+    return {"selector": sel, "attempts": attempts}
 
 
 def ollama_llm(prompt: str, schema: dict, url="http://127.0.0.1:11434/api/generate", model="qwen3:4b", timeout=60) -> dict:

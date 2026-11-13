@@ -80,6 +80,131 @@ def hdd_anomaly(history, features):
     return last + (my - b * mx) + b * x_now
 
 
+# ----------------------------------------------------------------------------- cross-domain features (PIT at every origin)
+def pit_rows(conn, agent_id, as_of, since="1990-01-01T00:00:00Z"):
+    """[(target_date, value, available_timestamp)] for one agent, latest vintage per target known at as_of, sorted by target."""
+    as_of = ingest.utc_iso(as_of)
+    rows = conn.execute(
+        "SELECT p.target_timestamp,p.value,p.available_timestamp FROM pit_market_data p WHERE p.agent_id=? AND p.available_timestamp<=? "
+        "AND p.target_timestamp>=? AND COALESCE(p.provenance,'measured')='measured' AND p.available_timestamp=(SELECT MAX(q.available_timestamp) "
+        "FROM pit_market_data q WHERE q.agent_id=p.agent_id AND q.target_timestamp=p.target_timestamp AND q.available_timestamp<=?) "
+        "ORDER BY p.target_timestamp", (agent_id, as_of, since, as_of)).fetchall()
+    assert all(r[2] <= as_of for r in rows), "LOOK-AHEAD: feature row published after decision time"
+    return [(r[0][:10], r[1], r[2]) for r in rows]
+
+
+class KnownAt:
+    """value_at(ts): the latest-target value whose available_timestamp <= ts. Used to build each TRAINING origin's feature
+    as it was known on that origin day, so fitting never uses data published later than the origin."""
+
+    def __init__(self, rows):
+        import bisect
+        self._b = bisect
+        ev = sorted((r[2], r[0], r[1]) for r in rows)        # by availability
+        self.av, best, self.val = [], None, []
+        for a, t, v in ev:
+            if best is None or t >= best[0]:
+                best = (t, v)
+            self.av.append(a)
+            self.val.append(best)
+
+    def at(self, ts):
+        i = self._b.bisect_right(self.av, ts) - 1
+        return self.val[i] if i >= 0 else None
+
+
+def _close(d):
+    return d + "T21:00:00Z"
+
+
+def crude_features(conn, t, horizon_days, lookback_days=900):
+    since = _iso(_dt(ingest.utc_iso(t)) - timedelta(days=lookback_days))
+    return {"horizon_days": horizon_days, "wti": KnownAt(pit_rows(conn, "Agent_Crude_WTI_Spot", t, since))}
+
+
+PROD_BASINS = ("Agent_Prod_Appalachia", "Agent_Prod_Permian", "Agent_Prod_Haynesville", "Agent_Prod_EagleFord", "Agent_Prod_Bakken", "Agent_Prod_DJBasin")
+
+
+def production_features(conn, t, horizon_days, lookback_days=1500):
+    since = _iso(_dt(ingest.utc_iso(t)) - timedelta(days=lookback_days))
+    by = {}
+    for a in PROD_BASINS:
+        for d, v, av in pit_rows(conn, a, t, since):
+            e = by.setdefault(d, [0.0, 0, ""])
+            e[0] += v; e[1] += 1; e[2] = max(e[2], av)
+    months = sorted((d, v, av) for d, (v, n, av) in by.items() if n == len(PROD_BASINS))
+    # 3-month change in total shale output, stamped with the availability of the newer month
+    chg = [(months[i][0], months[i][1] - months[i - 3][1], max(months[i][2], months[i - 3][2])) for i in range(3, len(months))]
+    return {"horizon_days": horizon_days, "prod_chg3": KnownAt(chg)}
+
+
+def _ols_forecast(history, h, x_at, min_obs=60):
+    """Fit (price at origin+h) - (price at origin) = a + b*x(origin) on the visible history, return last + a + b*x(now)."""
+    if not history:
+        return None
+    last = history[-1][1]
+    px = {d[:10]: v for d, v in history}
+    xs, ys = [], []
+    for d, v in px.items():
+        fut = px.get((_dt(d + "T00:00:00Z") + timedelta(days=h)).strftime("%Y-%m-%d"))
+        x = x_at(d, v)
+        if fut is not None and x is not None:
+            xs.append(x); ys.append(fut - v)
+    x_now = x_at(history[-1][0][:10], last)
+    if len(xs) < min_obs or x_now is None:
+        return last
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    den = sum((x - mx) ** 2 for x in xs)
+    if den <= 0:
+        return last
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den
+    return last + (my - b * mx) + b * x_now
+
+
+def propane_wti_revert(history, features):
+    """Propane (cents/gal) vs WTI ($/bbl): regress the h-day propane change on the gap between today's price and the price
+    implied by the trailing-60-session average propane/WTI ratio. Every ratio uses WTI as known on that origin day."""
+    if not features:
+        return history[-1][1] if history else None
+    wti, h = features["wti"], int(features["horizon_days"])
+    vals = [v for _, v in history]
+    dates = [d[:10] for d, _ in history]
+    ratios = []
+    for d, v in zip(dates, vals):
+        w = wti.at(_close(d))
+        ratios.append(v / 100 * 42 / w[1] if w and w[1] > 0 else None)
+    idx = {d: i for i, d in enumerate(dates)}
+
+    def x_at(d, v):
+        i = idx[d]
+        win = [r for r in ratios[max(0, i - 60):i] if r is not None]
+        w = wti.at(_close(d))
+        if len(win) < 30 or not w:
+            return None
+        return (sum(win) / len(win)) * w[1] / 42 * 100 - v            # fair price minus actual (cents/gal)
+    return _ols_forecast(history, h, x_at)
+
+
+def propane_wti_momentum(history, features):
+    """Regress the h-day propane change on the 5-day WTI return known at the origin."""
+    if not features:
+        return history[-1][1] if history else None
+    wti, h = features["wti"], int(features["horizon_days"])
+
+    def x_at(d, v):
+        now, then = wti.at(_close(d)), wti.at(_close((_dt(d + "T00:00:00Z") - timedelta(days=7)).strftime("%Y-%m-%d")))
+        return (now[1] / then[1] - 1) if now and then and then[1] > 0 else None
+    return _ols_forecast(history, h, x_at)
+
+
+def hh_production_momentum(history, features):
+    """Regress the h-day Henry Hub change on the 3-month change in shale gas output as published by the origin day."""
+    if not features:
+        return history[-1][1] if history else None
+    pc, h = features["prod_chg3"], int(features["horizon_days"])
+    return _ols_forecast(history, h, lambda d, v: (pc.at(_close(d)) or (None, None))[1], min_obs=120)
+
+
 def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_bps=0.0, eval_lag_days=1, feature_fn=None, slippage_bps=0.0):
     """For each decision time t: build history from the PIT snapshot at t, predict the value for target
     time t+horizon, and score it against the value known at (target+eval_lag), i.e. after the target is published."""

@@ -16,5 +16,6 @@ binding = "BACKTEST_JOBS"
 [[queues.consumers]]
 queue = "quant-backtest-jobs"
 max_batch_size = 1
-max_retries = 3
+max_concurrency = 1   # the hub runs one experiment at a time; serial delivery avoids 409 retry storms
+max_retries = 10
 dead_letter_queue = "quant-backtest-dlq"

@@ -56,3 +56,23 @@ class VoidTags(unittest.TestCase):
     def test_void_tag_inside_match_does_not_swallow_it(self):
         import selfheal
         self.assertEqual(selfheal.extract('<table><tr><td class="v">3.41<br>USD</td><td class="v">2.9<img src="x"></td></tr></table>', "td.v"), ["3.41USD", "2.9"])
+
+
+class RepairRetry(unittest.TestCase):
+    def test_repeated_or_useless_proposal_triggers_grounded_retry(self):
+        import selfheal
+        html = '<div><span class="px">$3.42</span><span class="lbl">HH</span></div>'
+        diag = selfheal.diagnose("Agent_X", html, "span.old", (1, 20))
+        answers = iter([{"selector": "span.old"}, {"selector": "span.px"}])
+        prompts = []
+        def fake(prompt, schema):
+            prompts.append(prompt); return next(answers)
+        p = selfheal.propose_repair(diag, html, fake)
+        self.assertEqual(p, {"selector": "span.px", "attempts": ["span.old", "span.px"]})
+        self.assertIn("span.px", prompts[1]); self.assertTrue(prompts[1].rstrip().endswith("/no_think"))
+    def test_good_first_answer_is_not_retried(self):
+        import selfheal
+        html = '<span class="px">$3.42</span>'
+        calls = []
+        p = selfheal.propose_repair(selfheal.diagnose("A", html, "b.x"), html, lambda pr, sc: calls.append(1) or {"selector": "span.px"})
+        self.assertEqual((p["selector"], len(calls)), ("span.px", 1))

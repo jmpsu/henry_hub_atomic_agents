@@ -148,6 +148,15 @@ def build_objects(conn, weeks: int = 12, months: int = 12) -> list:
     for t, v, av, src, h in _latest(conn, "Agent_Power_CO2_AllowancePrice", limit=6):
         out.append(_obj("carbon", "rggi_auction", t[:10], f"RGGI auction {t[:10]}: cleared ${v:.2f}/short ton",
                         f"The RGGI quarterly CO2 allowance auction held on {t[:10]} cleared at ${v:.2f} per short ton.", ["Agent_Power_CO2_AllowancePrice"], av, src, h))
+    # ---- source documents (forecast discussions, pipeline notices...): the source's own text, newest first
+    try:
+        for did, dom, src, url, title, body, pub, av, h in conn.execute(
+                "SELECT id,domain,source_id,source_url,title,body,published_timestamp,available_timestamp,raw_payload_hash FROM documents "
+                "ORDER BY available_timestamp DESC LIMIT ?", (weeks * 7,)):
+            text = body if len(body) <= 4000 else body[:4000] + " [...]"
+            out.append(_obj(dom, f"document_{src}", did, title, text, [], av, src, h, provenance="source_document", published=pub))
+    except sqlite3.OperationalError:
+        pass
     # ---- backtest experiments (results, not observations)
     try:
         for eid, created, cfg, tp, met, reason in conn.execute("SELECT id,created,config,test_period,metrics,reason FROM experiments WHERE config NOT LIKE '%\"persistence\"%'"):
@@ -238,6 +247,11 @@ def rebuild_edges(conn) -> dict:
     # same period: weekly storage <-> weekly weather (same week ending); monthly price <-> monthly production
     idx = {(r[2], r[3]): r[0] for r in rows}
     for (key, period), nid in idx.items():
+        if key.startswith("document_noaa_cpc_610"):           # a forecast discussion and the weekly weather summary of its issue week
+            wk = next((p for k, p in idx if k == "cpc_weekly_hdd" and 0 <= (datetime.strptime(p, "%Y-%m-%d") - datetime.strptime(period[7:17], "%Y-%m-%d")).days < 7), None)
+            if wk:
+                conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (idx[("cpc_weekly_hdd", wk)], nid, "same_period", None))
+                counts["same_period"] += 1
         if key == "eia_weekly_storage" and ("cpc_weekly_hdd", period) in idx:
             conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (idx[("cpc_weekly_hdd", period)], nid, "same_period", None))
             counts["same_period"] += 1
