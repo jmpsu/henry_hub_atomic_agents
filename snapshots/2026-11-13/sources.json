@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-13T19:38:33Z",
+ "as_of": "2026-11-13T19:55:57Z",
  "note": "Payload bytes are archived under raw/<sha256> on the host and are not committed.",
  "payloads": [
   {
@@ -1378,6 +1378,96 @@
    "retrieved_timestamp": "2026-11-13T14:34:32Z",
    "source_id": "eia_dnav_pet",
    "source_url": "https://www.eia.gov/dnav/pet/hist_xls/EER_EPLLPA_PF4_Y44MB_DPGd.xls"
+  },
+  {
+   "byte_length": 1468,
+   "content_type": "text/plain",
+   "http_status": 200,
+   "raw_payload_hash": "55837455775d22eb712b760ac88d2bafdf2b0f0a4afdcdb7751ebcb0b7ee80a6",
+   "retrieved_timestamp": "2026-11-13T19:44:01Z",
+   "source_id": "eia_wngsr",
+   "source_url": "https://ir.eia.gov/ngs/wngsr.csv"
+  },
+  {
+   "byte_length": 29344,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "258f7085f669cc3653d747ddbcaf29fc5d953c14200d2639de6b72669003c086",
+   "retrieved_timestamp": "2026-11-13T19:50:23Z",
+   "source_id": "noaa_cpc_610_discussion",
+   "source_url": "https://www.cpc.ncep.noaa.gov/products/predictions/610day/fxus06.html"
+  },
+  {
+   "byte_length": 653457,
+   "content_type": "application/json",
+   "http_status": 200,
+   "raw_payload_hash": "25444517b60b9dd54b3ce4bcde9c440647c1024d5253ca64be2aeb6127d2309c",
+   "retrieved_timestamp": "2026-11-13T19:51:27Z",
+   "source_id": "eia_coal_markets",
+   "source_url": "https://www.eia.gov/coal/markets/coal_markets_archive_json.php"
+  },
+  {
+   "byte_length": 437577,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "292627bb5b9a85da0116045c26a7f3b327c6e58fe8eeb69259a3f501bfde2dc1",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_sng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=SNG"
+  },
+  {
+   "byte_length": 430630,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "42b57b694f080dc7f602b00be8511faeb60d0a8194f204a877c780d684093052",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_epng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EPNG"
+  },
+  {
+   "byte_length": 433991,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "6889c15185efce7596ddd38bfdb03752a95b222c2b714f763137751935ad36b5",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_ngpl",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=NGPL"
+  },
+  {
+   "byte_length": 284743,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "9faef676a6db4b2cbcff0c80745eb879404a1bb3325f298da3ecc1a6eab99574",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_kmlp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=KMLP"
+  },
+  {
+   "byte_length": 444923,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "b39b91479847f829309382daeeeaeb3620489a1ef6c1d51884054e555b42916c",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_tgp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=TGP"
+  },
+  {
+   "byte_length": 371808,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "bc564e6521752e81a9aa60f2f3067ce9de96fd2816d767703c3f4c25da8230a1",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_cig",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=CIG"
+  },
+  {
+   "byte_length": 303038,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "e1e4944ac8a436316ff478b3bed268e832b025d965823a2e50a2695b18854891",
+   "retrieved_timestamp": "2026-11-13T19:53:38Z",
+   "source_id": "kinder_morgan_notices_eec",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EEC"
   }
  ],
  "schema": "pit-snapshot/1"

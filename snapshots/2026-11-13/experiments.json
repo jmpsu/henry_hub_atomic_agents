@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-13T19:38:33Z",
+ "as_of": "2026-11-13T19:55:57Z",
  "experiments": [
   {
    "baseline_metrics": {
@@ -1101,6 +1101,572 @@
    "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
    "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
    "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 5,
+    "model": "propane_wti_revert",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:50:15Z",
+   "id": "27b95e4009",
+   "metrics": {
+    "bias": -0.8688214947584263,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.8333333333333334,
+      "max_drawdown": 0.01137735849056598,
+      "mean_return_after_costs": 0.09081997996513298,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.159176274425198
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.6261308520310676,
+      "mean_return_after_costs": -0.005633576402502832,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.687029916743558
+     }
+    },
+    "dir_hit": 0.5277777777777778,
+    "dir_p": 0.7236736098317631,
+    "directional_hit_rate": 0.5277777777777778,
+    "mae": 4.2523841387609025,
+    "max_drawdown": 0.6261308520310676,
+    "mean_return_after_costs": 0.002404219961466819,
+    "n": 72,
+    "net_return": 0.17310383722561096,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.879446289591786,
+    "sharpe_per_decision": 0.03816638353847197
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.724 (alpha 0.0029), net_ret=0.1731",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 10,
+    "model": "propane_wti_revert",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:51:02Z",
+   "id": "2ae67347dd",
+   "metrics": {
+    "bias": -2.585637220142653,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.07933333333333335,
+      "mean_return_after_costs": 0.0312759702559425,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 10.37450742646422
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.53125,
+      "max_drawdown": 1.2229709361729244,
+      "mean_return_after_costs": 0.004498403933483323,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.768650789819662
+     }
+    },
+    "dir_hit": 0.5294117647058824,
+    "dir_p": 0.7160047955043312,
+    "directional_hit_rate": 0.5294117647058824,
+    "mae": 6.062507809147301,
+    "max_drawdown": 1.2959834984309546,
+    "mean_return_after_costs": 0.006073554893627981,
+    "n": 68,
+    "net_return": 0.4130017327667027,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.945629082740699,
+    "sharpe_per_decision": 0.06952612379817251
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.716 (alpha 0.0028), net_ret=0.4130",
+   "test_period": "2026-05-14T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-11T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:51:02Z",
+   "id": "f151f45a02",
+   "metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "net_return": 0.0,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-14T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-11T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 5,
+    "model": "propane_wti_momentum",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:52:05Z",
+   "id": "354c6b8c81",
+   "metrics": {
+    "bias": -0.3991023822837858,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.3333333333333333,
+      "max_drawdown": 0.3006371140529239,
+      "mean_return_after_costs": -0.015076601912157433,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 14.094545258337785
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5454545454545454,
+      "max_drawdown": 0.3918083469418523,
+      "mean_return_after_costs": 0.010612336860221925,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.370980026341064
+     }
+    },
+    "dir_hit": 0.5277777777777778,
+    "dir_p": 0.7236736098317631,
+    "directional_hit_rate": 0.5277777777777778,
+    "mae": 4.195719228476505,
+    "max_drawdown": 0.3918083469418523,
+    "mean_return_after_costs": 0.008471591962523646,
+    "n": 72,
+    "net_return": 0.6099546213017025,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.836782335162142,
+    "sharpe_per_decision": 0.13584729156680683
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.724 (alpha 0.0026), net_ret=0.6100",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 5,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:52:05Z",
+   "id": "dff4f96b30",
+   "metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "net_return": 0.0,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Prod_Appalachia",
+     "Agent_Prod_Permian",
+     "Agent_Prod_Haynesville",
+     "Agent_Prod_EagleFord",
+     "Agent_Prod_Bakken",
+     "Agent_Prod_DJBasin"
+    ],
+    "horizon_days": 10,
+    "model": "hh_production_momentum",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:55:18Z",
+   "id": "9a65e97edf",
+   "metrics": {
+    "bias": -0.09041017934111771,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.19521487603305793,
+      "mean_return_after_costs": -0.022406803000697896,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.3001039636073003
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.375,
+      "max_drawdown": 0.9000391766678509,
+      "mean_return_after_costs": 6.085966591794093e-05,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.25755130526969516
+     }
+    },
+    "dir_hit": 0.38235294117647056,
+    "dir_p": 0.06890880788626996,
+    "directional_hit_rate": 0.38235294117647056,
+    "mae": 0.21601137073068533,
+    "max_drawdown": 0.9000391766678509,
+    "mean_return_after_costs": -0.0012607675497653436,
+    "n": 68,
+    "net_return": -0.08573219338404336,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.2602470756473312,
+    "sharpe_per_decision": -0.016030982443937605
+   },
+   "pit_data_version": "bb14e2db97fc",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.069 (alpha 0.0025), net_ret=-0.0857",
+   "test_period": "2026-05-18T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:55:18Z",
+   "id": "ee837469a5",
+   "metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "net_return": 0.0,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "bb14e2db97fc",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-18T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-15T00:00:00Z"
   }
  ],
  "promoted": [],

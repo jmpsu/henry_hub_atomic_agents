@@ -1,5 +1,21 @@
 {
  "agents": {
+  "Agent_Coal_CAPP_SpotPrice": {
+   "first_target": "2011-01-07T00:00:00Z",
+   "last_available": "2026-11-10T17:00:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 825,
+   "rows_sha256": "318ae688a7c3ac00e9d8aeefa8898f0cc24f797f00238772efd02681dd721e43",
+   "targets": 825
+  },
+  "Agent_Coal_PRB_SpotPrice": {
+   "first_target": "2011-01-07T00:00:00Z",
+   "last_available": "2026-11-10T17:00:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 825,
+   "rows_sha256": "caa4366aff3aeec8bc7af64a825c343cd6185a351782390491f1f3b6e3b8eabb",
+   "targets": 825
+  },
   "Agent_Crude_WTI_Spot": {
    "first_target": "1986-01-02T00:00:00Z",
    "last_available": "2026-11-11T21:00:00Z",
@@ -282,10 +298,10 @@
   },
   "Agent_Power_CO2_AllowancePrice": {
    "first_target": "2008-09-25T00:00:00Z",
-   "last_available": "2026-11-13T14:31:27Z",
+   "last_available": "2026-11-13T19:44:24Z",
    "last_target": "2026-09-09T00:00:00Z",
-   "rows": 91,
-   "rows_sha256": "f43aaad6f6d4fd50f51f053cfa6823a4bd42ad21aa60142fe4f6bf0a0da3ba3f",
+   "rows": 97,
+   "rows_sha256": "70fad41cfe1986808f23d03ece9b13a94f4d21da1f97f39c302e9beee57b4fee",
    "targets": 73
   },
   "Agent_Prod_Appalachia": {
@@ -338,51 +354,51 @@
   },
   "Agent_Storage_East": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-10-30T00:00:00Z",
-   "rows": 1,
-   "rows_sha256": "c2730205cfd64db2e221e0edda1be16fddf5a3a7529d973bd80b2382e49b610b",
-   "targets": 1
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "858b124b16f5ae8a51da34c25ad0f79e4eacd2eefe655269638cf8e5da8b28e6",
+   "targets": 2
   },
   "Agent_Storage_Midwest": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-10-30T00:00:00Z",
-   "rows": 1,
-   "rows_sha256": "a104d062b7e32013edb94a322ed76c2b91052473ec29182722c4875cd4c3fc4a",
-   "targets": 1
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "6472c2ef832bba2c1c013fd541b004a3f486171ede3809dc6c7eeeeac9b810b5",
+   "targets": 2
   },
   "Agent_Storage_Mountain": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-10-30T00:00:00Z",
-   "rows": 1,
-   "rows_sha256": "250331c7c3c7a052b5b9abbea89d45b0ce98dfb22a8340bfd951230e98dd1ef9",
-   "targets": 1
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "b7df4ae39eff280cf9a31274749897434f2dc2fd60f9cb50d3e810ac852b9711",
+   "targets": 2
   },
   "Agent_Storage_Pacific": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-10-30T00:00:00Z",
-   "rows": 1,
-   "rows_sha256": "56a36f63f350a59f2bd7f4f95c52857bc56aff14e60c6e3bd1fe31e0a7c776b9",
-   "targets": 1
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "1e99748c7e55ef903219dc524a56378139a0d3d0ccf5d885faba4bfb7776fccf",
+   "targets": 2
   },
   "Agent_Storage_SouthCentral_NonSalt": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-10-30T00:00:00Z",
-   "rows": 1,
-   "rows_sha256": "d239bb16f823f1e20af1766178d7b83cebe139939b8ad245e11e685f6352712e",
-   "targets": 1
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "be79261a532dbb22c426470f57def67261bff041bac47d1d124459059e2a252a",
+   "targets": 2
   },
   "Agent_Storage_SouthCentral_Salt": {
    "first_target": "2026-10-30T00:00:00Z",
-   "last_available": "2026-11-05T15:30:00Z",
-   "last_target": "2026-11-05T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "2e3f18e4b523a46793e0b664cb03e71c95675f1f0d3bf438f1ed9d553f28dc2b",
-   "targets": 2
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "51c7855a4669d9c485674e57402cda0fb11e7c3e3a7754f4810328b21e497f10",
+   "targets": 3
   },
   "Agent_Weather_30YrNormal_HDD": {
    "first_target": "1991-01-01T00:00:00Z",
@@ -409,12 +425,14 @@
    "targets": 16751
   }
  },
- "agents_with_rows": 51,
- "as_of": "2026-11-13T19:38:33Z",
- "database_rows_sha256": "b67a5c323907d631371947543303a4b1bf16dacaad76ce6f74f2db29dfac8ff5",
- "pit_rows": 103654,
+ "agents_with_rows": 53,
+ "as_of": "2026-11-13T19:55:57Z",
+ "database_rows_sha256": "99120c8ab04f95b17be86a3dd7da3abaf17c44a836ced08919d26bdf106df510",
+ "pit_rows": 105316,
  "roster_agents": 81,
  "roster_agents_with_real_data": [
+  "Agent_Coal_CAPP_SpotPrice",
+  "Agent_Coal_PRB_SpotPrice",
   "Agent_Demand_Industrial",
   "Agent_Demand_ResComm",
   "Agent_ECMWF_00z_HDD_Day1",
@@ -463,8 +481,6 @@
   "Agent_Weather_Actual_HDD"
  ],
  "roster_agents_without_real_data": [
-  "Agent_Coal_CAPP_SpotPrice",
-  "Agent_Coal_PRB_SpotPrice",
   "Agent_Coal_Rail_TransportRate",
   "Agent_Demand_PowerBurn",
   "Agent_ECMWF_00z_HDD_Day10",

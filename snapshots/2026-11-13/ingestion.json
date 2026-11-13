@@ -1,5 +1,29 @@
 {
  "agents": {
+  "Agent_Coal_CAPP_SpotPrice": {
+   "extraction_versions": {
+    "eia_coal_spot/1": 825
+   },
+   "max_vintages_per_target": 1,
+   "provenance": {
+    "measured": 825
+   },
+   "quality_status": {
+    "validated_availability_assumed_tuesday": 825
+   }
+  },
+  "Agent_Coal_PRB_SpotPrice": {
+   "extraction_versions": {
+    "eia_coal_spot/1": 825
+   },
+   "max_vintages_per_target": 1,
+   "provenance": {
+    "measured": 825
+   },
+   "quality_status": {
+    "validated_availability_assumed_tuesday": 825
+   }
+  },
   "Agent_Crude_WTI_Spot": {
    "extraction_versions": {
     "eia_petroleum_spot/1": 9543
@@ -422,14 +446,14 @@
   },
   "Agent_Power_CO2_AllowancePrice": {
    "extraction_versions": {
-    "rggi_auctions/1": 91
+    "rggi_auctions/1": 97
    },
-   "max_vintages_per_target": 4,
+   "max_vintages_per_target": 5,
    "provenance": {
-    "measured": 91
+    "measured": 97
    },
    "quality_status": {
-    "revision_vintage": 18,
+    "revision_vintage": 24,
     "validated_availability_assumed_d+1": 73
    }
   },
@@ -507,77 +531,77 @@
   },
   "Agent_Storage_East": {
    "extraction_versions": {
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1
+    "measured": 2
    },
    "quality_status": {
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Storage_Midwest": {
    "extraction_versions": {
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1
+    "measured": 2
    },
    "quality_status": {
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Storage_Mountain": {
    "extraction_versions": {
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1
+    "measured": 2
    },
    "quality_status": {
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Storage_Pacific": {
    "extraction_versions": {
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1
+    "measured": 2
    },
    "quality_status": {
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Storage_SouthCentral_NonSalt": {
    "extraction_versions": {
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1
+    "measured": 2
    },
    "quality_status": {
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Storage_SouthCentral_Salt": {
    "extraction_versions": {
     "": 1,
-    "eia_storage/1": 1
+    "eia_storage/1": 2
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 1,
+    "measured": 2,
     "unverified_seed": 1
    },
    "quality_status": {
     "unverified_seed_origin_unknown": 1,
-    "validated": 1
+    "validated": 2
    }
   },
   "Agent_Weather_30YrNormal_HDD": {
@@ -624,6 +648,6 @@
    }
   }
  },
- "as_of": "2026-11-13T19:38:33Z",
+ "as_of": "2026-11-13T19:55:57Z",
  "schema": "pit-snapshot/1"
 }

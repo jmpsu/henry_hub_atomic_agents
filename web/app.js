@@ -202,9 +202,13 @@
     add("Shale gas, six basins", dv.shale_production_total_bcfd.value == null ? "pending" : num(dv.shale_production_total_bcfd.value, 1) + " Bcf/d");
     add("Working gas in storage", dv.storage_total_bcf.value == null ? "pending" : `${num(dv.storage_total_bcf.value, 0)} Bcf · ${dv.storage_total_bcf.date}`);
     add("HDD vs 30-yr normal", dv.hdd_anomaly.value == null ? "pending" : `${signed(dv.hdd_anomaly.value, 1)} · ${dv.hdd_anomaly.date}`);
-    add("Live flow feeds", `${s.geo.flow_agents_collected} of ${s.geo.flow_agents_total}`);
+    add("Live flow meters", `${s.geo.flow_agents_collected} of ${s.geo.flow_agents_total}`);
+    const nt = s.notices || {};
+    add("Critical notices, 7 days", `${nt.last_7_days || 0} · ${Object.entries(nt.by_pipeline_7d || {}).map(([k, v]) => k + " " + v).join(", ") || "—"}`);
+    add("Force majeure, 30 days", String((nt.force_majeure_30d || []).length));
     box.append(kv);
     for (const a of s.alerts) box.append(el("div", { class: "alert " + a.level }, [el("span", { class: "lv", text: a.level }), el("span", { text: a.text })]));
+    for (const n of (nt.recent || []).slice(0, 5)) box.append(el("div", { class: "alert notice" }, [el("span", { class: "lv", text: n.pipeline }), el("span", { text: `${n.posted.slice(5, 16).replace("T", " ")}Z  ${n.title}` })]));
   }
 
   /* ---------- relative-value curves ---------- */

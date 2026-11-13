@@ -559,8 +559,28 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. No pipeline-flow collector exists yet.",
                "flow_agents_collected": len(flows_ok), "flow_agents_total": len(flow_agents)}
 
+        # ---- pipeline critical notices (source documents, PIT: posted at or before the cutoff)
+        try:
+            nrows = conn.execute("SELECT id, source_id, title, body, available_timestamp FROM documents WHERE domain='pipeline_notice' "
+                                 "AND available_timestamp<=? ORDER BY available_timestamp DESC LIMIT 400", (cutoff,)).fetchall()
+        except sqlite3.OperationalError:
+            nrows = []
+        week = [r for r in nrows if (_age_days(r[4], cutoff) or 0) <= 7]
+        fm = [r for r in nrows if "FORCE MAJEURE." in r[3] and (_age_days(r[4], cutoff) or 0) <= 30]
+        per = {}
+        for r in week:
+            k = r[1].replace("kinder_morgan_notices_", "").upper()
+            per[k] = per.get(k, 0) + 1
+        notices = {"status": "measured" if nrows else PENDING, "source": "Kinder Morgan informational postings (7 interstate pipelines)",
+                   "last_7_days": len(week), "by_pipeline_7d": per,
+                   "force_majeure_30d": [{"id": r[0], "title": r[2], "posted": r[4]} for r in fm[:10]],
+                   "recent": [{"id": r[0], "pipeline": r[1].replace("kinder_morgan_notices_", "").upper(), "title": r[2], "posted": r[4]} for r in nrows[:12]],
+                   "note": "Pipeline notices are the operators' own postings (source documents), shown as published."}
+
         # ---- alerts (all derived from the data above)
         alerts = []
+        for r in fm[:3]:
+            alerts.append({"level": "watch", "kind": "pipeline", "text": f"Force majeure ({r[4][:10]}): {r[2]}"})
         t = state["technicals"]
         if t.get("status") == "ok":
             s_ = t["summary"]
@@ -576,7 +596,8 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                     alerts.append({"level": "info", "kind": "technical", "text": f"{meta['label']}: {c['type'].replace('_', ' ')} on {c['date']}."})
         if derived["hdd_anomaly"]["value"] is not None and abs(derived["hdd_anomaly"]["value"]) >= 5:
             alerts.append({"level": "info", "kind": "weather", "text": f"CONUS HDD {derived['hdd_anomaly']['value']:+.1f} vs 30-yr normal on {derived['hdd_anomaly']['date']}."})
-        alerts.append({"level": "gap", "kind": "coverage", "text": f"Pipeline and LNG flow collectors: {len(flows_ok)} of {len(flow_agents)}. No live flows, critical notices or force-majeure feed yet."})
+        alerts.append({"level": "gap", "kind": "coverage", "text": f"Pipeline and LNG flow volumes: {len(flows_ok)} of {len(flow_agents)} meters collected. "
+                       f"Critical notices: {notices['last_7_days']} in the last 7 days from {len(per)} pipelines."})
         def max_age(agent):  # expected cadence: daily series 10 days, monthly 75, quarterly auctions 130, static normals never
             if agent == "Agent_Weather_30YrNormal_HDD":
                 return None
@@ -595,7 +616,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         out = {"schema": SCHEMA_VERSION, "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "as_of": cutoff,
                "active_product": product, "default_product": active_product(), "product": {"id": product, **meta},
                "timeframe": {"id": timeframe, **tf}, "products": products, "timeframes": [{"id": k, **v} for k, v in TIMEFRAMES.items()],
-               "price": price, **state, "curves": curves, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "alerts": alerts,
+               "price": price, **state, "curves": curves, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
                "knowledge": knowledge or {"status": "unavailable"},
                "platform": {"roster_agents": len(roster), "roster_agents_collected": len(collected), "agents_with_data": len(latest), **stats,
                             "provenance_legend": {"measured": "published by the source and stored unchanged", "extracted_estimate": "derived here from measured rows",

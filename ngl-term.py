@@ -322,8 +322,15 @@ def flows_panel(s: dict) -> Panel:
                    Text("pending" if i["value"] is None else fmt(i["value"], 0, i.get("unit", "")), style=MUTE if i["value"] is None else FG))
     for a in [x for x in s["sources"] if x["agent_id"].startswith("Agent_Flow_")]:
         tb.add_row(Text(short(a["agent_id"]).replace("Flow ", ""), style=MUTE), Text("pending" if a["status"] != "collected" else "collected", style=MUTE))
-    note = Text(f"live flow feeds {g['flow_agents_collected']}/{g['flow_agents_total']} · critical notices / force majeure: no feed yet", style=GOLD)
-    return panel(Group(note, tb), "Regional flows & pipeline alerts")
+    nt = s.get("notices", {})
+    note = Text(f"flow meters {g['flow_agents_collected']}/{g['flow_agents_total']} · critical notices 7d: {nt.get('last_7_days', 0)} "
+                f"({', '.join(f'{k} {v}' for k, v in sorted(nt.get('by_pipeline_7d', {}).items()))}) · force majeure 30d: {len(nt.get('force_majeure_30d', []))}", style=GOLD)
+    recent = Table.grid(padding=(0, 1))
+    recent.add_column(style=DIM, no_wrap=True, min_width=16)
+    recent.add_column(no_wrap=True, overflow="ellipsis")
+    for n in nt.get("recent", [])[:5]:
+        recent.add_row(f"{n['posted'][5:16].replace('T', ' ')} {n['pipeline']}", n["title"])
+    return panel(Group(note, recent, tb), "Regional flows & pipeline alerts")
 
 
 def sources_panel(s: dict, limit: int) -> Panel:

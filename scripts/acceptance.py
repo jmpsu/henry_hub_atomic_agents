@@ -245,12 +245,24 @@ def _():
     return st == 200 and json.loads(b)["results"] == [] and st2 == 200 and json.loads(b2)["results"], f"old cutoff -> 0 results; now -> {len(json.loads(b2)['results'])}"
 
 
-@check("cross_domain_sources", "unstructured sources (pipeline notices, FERC, NOAA discussions, LNG notices, NGL fractionation) are ingested",
-       blocked_by="no collector for EBB notices / FERC / NOAA text products / NGL fractionation yet")
+@check("unstructured_sources", "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed")
+def _():
+    with ro() as c:
+        try:
+            docs = dict(c.execute("SELECT domain, COUNT(*) FROM documents GROUP BY 1").fetchall())
+            kb = dict(c.execute("SELECT domain, COUNT(*) FROM kb_nodes WHERE domain IN ('pipeline_notice','noaa_discussion') GROUP BY 1").fetchall())
+        except sqlite3.OperationalError as e:
+            return False, str(e)
+    ok = docs.get("pipeline_notice", 0) > 0 and docs.get("noaa_discussion", 0) > 0 and kb.get("pipeline_notice", 0) > 0 and kb.get("noaa_discussion", 0) > 0
+    return ok, f"documents {docs}; indexed in knowledge library {kb}"
+
+
+@check("cross_domain_sources", "FERC filings, LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products are ingested",
+       blocked_by="FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions")
 def _():
     with ro() as c:
         doms = {r[0] for r in c.execute("SELECT DISTINCT domain FROM kb_nodes")}
-    need = {"pipeline_notice", "ferc", "noaa_discussion", "lng_notice", "ngl_fractionation"}
+    need = {"ferc", "lng_notice", "ngl_fractionation", "petchem_outage"}
     return need <= doms, f"have {sorted(doms)}; missing {sorted(need - doms)}"
 
 
@@ -462,6 +474,15 @@ def _():
     return rc == 0, out.strip()[:120]
 
 
+@check("architecture_doc", "an architecture/dependency audit and implementation plan covering all five architectures is versioned")
+def _():
+    p = ROOT / "docs" / "ARCHITECTURE.md"
+    t = p.read_text() if p.exists() else ""
+    secs = [f"Architecture {i}" for i in range(1, 6)]
+    rc, _ = sh("git ls-files --error-unmatch docs/ARCHITECTURE.md")
+    return all(x in t for x in secs) and rc == 0, f"sections present={[x for x in secs if x in t]}; tracked={rc == 0}"
+
+
 # ----------------------------------------------------------------------------- mapping
 RULES = [  # (section prefix or None, regex on text/context, checks) - first matching rule set is unioned per requirement
     ("1", r".", ["roster_all_collected", "experiments_recorded", "promotion_gate", "knowledge_library", "worker_gateway_e2e"]),
@@ -488,12 +509,15 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("4.4", r".", ["selfheal_unit", "selfheal_pr_live"]),
     ("4.5", r".", ["webhook_recovery"]),
     ("4", r"81|monitor", ["roster_all_collected"]),
-    ("5.1", r"pipeline|ferc|force majeure|maintenance|lng terminal|ngl|ethane|propane|butane|gasoline|cracker|refinery|coal|basis|publications|fractionation|mont belvieu",
-     ["cross_domain_sources"]),
+    ("5.1", r"pipeline critical|force majeure|maintenance and capacity", ["unstructured_sources"]),
+    ("5.1", r"noaa weather forecasts", ["unstructured_sources"]),
+    ("5.1", r"coal", ["knowledge_library"]),
+    ("5.1", r"ferc|lng terminal|ngl production|mont belvieu|ethane, propane|cracker|refinery|basis|publications|lng feedgas", ["cross_domain_sources"]),
     ("5.1", r"eia|noaa|gfs|ecmwf|power burn|storage|production", ["knowledge_library"]),
     ("5.1", r"preserve|source|timestamp|revision", ["knowledge_library"]),
     ("5.2", r".", ["ollama_models", "knowledge_library", "knowledge_search_pit"]),
-    ("5.3", r".", ["knowledge_library", "cross_domain_sources", "provenance_labels"]),
+    ("5.3", r".", ["knowledge_library", "unstructured_sources", "provenance_labels"]),
+    ("5.3", r"permian pipeline|lng feedgas|ethane|cracker|propane export|power burn|ngl purity|associated gas|mont belvieu|basis", ["cross_domain_sources"]),
     ("5.4", r".", ["hypothesis_memo"]),
     ("5.5", r".", ["hypothesis_memo", "research_log_live"]),
     ("6.1", r".", ["queue_dispatch", "multi_feature_experiments"]),
@@ -520,7 +544,8 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("10", r"vector|analogs|hypotheses", ["knowledge_library", "cross_domain_sources", "hypothesis_memo"]),
     ("10", r"backtest|rank|leaderboard", ["backtest_unit", "leaderboard_versioned", "queue_dispatch"]),
     ("10", r"remote|scenario|research|alerts|continuously", ["worker_gateway_e2e", "alert_delivery", "collector_schedule"]),
-    ("11", r".", ["full_test_suite", "worker_gateway_e2e", "roster_all_collected"]),
+    ("11", r".", ["full_test_suite", "worker_gateway_e2e", "architecture_doc"]),
+    ("11", r"81|agents|connectors|data sources", ["roster_all_collected"]),
     ("3.2", r"required components", ["access_protects_hub", "worker_gateway_e2e"]),
     ("3.3", r"canonical observation fields|production data contract", ["schema_16_columns"]),
     ("4", r"permanent data gaps", ["collector_freshness", "selfheal_unit", "roster_all_collected"]),
