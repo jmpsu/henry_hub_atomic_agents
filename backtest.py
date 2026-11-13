@@ -32,7 +32,55 @@ def ar1(history, features):
     return v[-1] + (num / den) * d[-1]
 
 
-def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_bps=0.0, eval_lag_days=1):
+def pit_series(conn, agent_id, as_of, since, measured_only=True):
+    """{YYYY-MM-DD: value} for one agent as known at as_of (latest vintage with available_timestamp <= as_of), target >= since."""
+    as_of = ingest.utc_iso(as_of)
+    q = ("SELECT p.target_timestamp,p.value,p.available_timestamp FROM pit_market_data p WHERE p.agent_id=? AND p.available_timestamp<=? "
+         "AND p.target_timestamp>=? AND p.available_timestamp=(SELECT MAX(q.available_timestamp) FROM pit_market_data q "
+         "WHERE q.agent_id=p.agent_id AND q.target_timestamp=p.target_timestamp AND q.available_timestamp<=?)")
+    if measured_only:
+        q += " AND COALESCE(p.provenance,'measured')='measured'"
+    rows = conn.execute(q, (agent_id, as_of, since, as_of)).fetchall()
+    assert all(r[2] <= as_of for r in rows), "LOOK-AHEAD: feature row published after decision time"
+    return {r[0][:10]: r[1] for r in rows}
+
+
+def weather_features(conn, t, horizon_days, lookback_days=420):
+    """Cross-domain feature set visible at decision time t: CONUS HDD anomaly = observed HDD - 30-year normal HDD.
+    The normal is a derived estimate (provenance extracted_estimate), so it is read with measured_only=False."""
+    since = _iso(_dt(ingest.utc_iso(t)) - timedelta(days=lookback_days))
+    hdd = pit_series(conn, "Agent_Weather_Actual_HDD", t, since)
+    norm = pit_series(conn, "Agent_Weather_30YrNormal_HDD", t, since, measured_only=False)
+    return {"horizon_days": horizon_days, "hdd_anomaly": {d: hdd[d] - norm[d] for d in hdd if d in norm}}
+
+
+def hdd_anomaly(history, features):
+    """Price change over the horizon regressed (OLS, fitted only on data visible at decision time) on the latest HDD anomaly
+    known before each origin day. Falls back to the last price (no signal) when there is too little aligned history."""
+    if not history:
+        return None
+    last = history[-1][1]
+    anom = (features or {}).get("hdd_anomaly") or {}
+    h = int((features or {}).get("horizon_days", 1))
+    px = {d[:10]: v for d, v in history}
+    day = lambda s, n: (_dt(s + "T00:00:00Z") + timedelta(days=n)).strftime("%Y-%m-%d")
+    xs, ys = [], []
+    for d, v in px.items():
+        x, fut = anom.get(day(d, -1)), px.get(day(d, h))
+        if x is not None and fut is not None:
+            xs.append(x); ys.append(fut - v)
+    x_now = anom.get(day(history[-1][0][:10], -1))
+    if len(xs) < 40 or x_now is None:
+        return last
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    den = sum((x - mx) ** 2 for x in xs)
+    if den <= 0:
+        return last
+    b = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / den
+    return last + (my - b * mx) + b * x_now
+
+
+def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_bps=0.0, eval_lag_days=1, feature_fn=None):
     """For each decision time t: build history from the PIT snapshot at t, predict the value for target
     time t+horizon, and score it against the value known at (target+eval_lag), i.e. after the target is published."""
     out = []
@@ -42,7 +90,7 @@ def walk_forward(conn, target_agent, decision_times, horizon_days, model, cost_b
         history = sorted((r[1], r[3]) for r in snap)
         if len(history) < 2:
             continue
-        pred = model(history, None)
+        pred = model(history, feature_fn(conn, t, horizon_days) if feature_fn else None)
         # forecast target lies on the series' own timeline: last known target + horizon
         target_ts = _iso(_dt(history[-1][0]) + timedelta(days=horizon_days))
         eval_at = _iso(_dt(target_ts) + timedelta(days=eval_lag_days))

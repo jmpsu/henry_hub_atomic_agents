@@ -15,7 +15,8 @@ def mean_revert_20(history, features=None):
     return sum(v) / len(v) if len(v) >= 5 else None
 
 
-MODELS = {"persistence": bt.persistence, "ar1": bt.ar1, "mean20": mean_revert_20}
+MODELS = {"persistence": bt.persistence, "ar1": bt.ar1, "mean20": mean_revert_20, "hdd_anomaly": bt.hdd_anomaly}
+FEATURES = {"hdd_anomaly": (bt.weather_features, ["Agent_Weather_Actual_HDD", "Agent_Weather_30YrNormal_HDD"])}  # model -> (builder, agents)
 
 
 def binom_p(k, n):  # two-sided exact-ish via normal approx w/ continuity; fine for n>=30
@@ -49,7 +50,7 @@ def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None):
     alpha = 0.05 / max(len(prior | new_ids), 1)
     res = {}
     for m, h, c in configs:
-        res[(m, h, c)] = bt.walk_forward(conn, AGENT, times, h, MODELS[m], cost_bps=c)
+        res[(m, h, c)] = bt.walk_forward(conn, AGENT, times, h, MODELS[m], cost_bps=c, feature_fn=FEATURES[m][0] if m in FEATURES else None)
     out = []
     for (m, h, c), r in res.items():
         tr, va, te = bt.split_chronological(r)
@@ -65,7 +66,7 @@ def run(db, n_decisions=500, horizons=(1, 5), costs=(0, 10), models=None):
         span = lambda s: f"{s[0]['target']}..{s[-1]['target']}" if s else "n/a"
         met = {**met, "dir_hit": (sum(hits) / len(hits)) if hits else None, "dir_p": p, "net_return": net}
         conn.execute("INSERT OR REPLACE INTO experiments VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": AGENT}),
+                     (eid, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), json.dumps({"model": m, "horizon_days": h, "cost_bps": c, "agent": AGENT, "features": FEATURES[m][1] if m in FEATURES else []}),
                       dv, span(tr), span(va), span(te), json.dumps(met), json.dumps(base), int(promoted), reason))
         out.append((eid, m, h, c, span(tr), span(va), span(te), met, base, promoted, reason, dv))
     conn.commit()
@@ -86,7 +87,7 @@ def write_leaderboard(conn):
             "SELECT id,created,config,data_version,train_period,val_period,test_period,metrics,baseline_metrics,promoted,reason "
             "FROM experiments ORDER BY created DESC, id"):
         c, met, base = json.loads(cfg), json.loads(met or "{}"), json.loads(base or "{}")
-        lines.append(f"| {eid} | {created} | {c.get('model')} | {c.get('horizon_days')} | {c.get('cost_bps')} | {tr} | {va} | {te} | {met.get('n','n/a')} | "
+        lines.append(f"| {eid} | {created} | {c.get('model')}{' [' + ', '.join(c['features']) + ']' if c.get('features') else ''} | {c.get('horizon_days')} | {c.get('cost_bps')} | {tr} | {va} | {te} | {met.get('n','n/a')} | "
                      f"{f(met.get('rmse'))} | {f(base.get('rmse'))} | {f(met.get('dir_hit'))} | {f(met.get('dir_p'))} | {f(met.get('net_return'))} | {dv} | {reason} |")
     lines += ["", "No model is promoted unless the Result column says `promoted`."]
     (HERE / "LEADERBOARD.md").write_text("\n".join(lines) + "\n")

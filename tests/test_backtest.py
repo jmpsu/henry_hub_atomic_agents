@@ -77,3 +77,33 @@ class BacktestTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class WeatherModel(unittest.TestCase):
+    def _db(self):
+        import os, sqlite3, tempfile
+        from datetime import datetime, timedelta, timezone
+        import init_db, ingest
+        f = os.path.join(tempfile.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        d0, p = datetime(2025, 1, 1, tzinfo=timezone.utc), 3.0
+        iso = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")
+        for i in range(200):
+            d = d0 + timedelta(days=i)
+            anom = ((i * 7) % 11) - 5.0                      # deterministic anomaly known next day
+            ingest.record_observation(c, agent_id="Agent_Weather_Actual_HDD", target_timestamp=iso(d), available_timestamp=iso(d + timedelta(days=1, hours=12)), value=20 + anom, source_id="t")
+            ingest.record_observation(c, agent_id="Agent_Weather_30YrNormal_HDD", target_timestamp=iso(d), available_timestamp="2021-05-04T00:00:00Z", value=20.0, source_id="t", provenance="extracted_estimate")
+            if i >= 2:
+                p = round(p + 0.01 * ((((i - 2) * 7) % 11) - 5.0), 6)   # day i's change is driven by the anomaly of day i-2, public by day i-1 12:00Z
+            ingest.record_observation(c, agent_id="Agent_HH_Spot_EIA", target_timestamp=iso(d), available_timestamp=iso(d + timedelta(hours=21)), value=p, source_id="t")
+        c.commit(); return c
+    def test_features_respect_cutoff_and_model_beats_persistence(self):
+        import backtest as bt
+        c = self._db()
+        f = bt.weather_features(c, "2025-03-01T21:00:00Z", 1)
+        self.assertIn("2025-02-28", f["hdd_anomaly"]); self.assertNotIn("2025-03-01", f["hdd_anomaly"])   # Mar 1 HDD not public until Mar 2 12:00Z
+        times = [r[0] for r in c.execute("select distinct available_timestamp from pit_market_data where agent_id='Agent_HH_Spot_EIA' order by 1")][80:190]
+        w = bt.metrics(bt.walk_forward(c, "Agent_HH_Spot_EIA", times, 1, bt.hdd_anomaly, feature_fn=bt.weather_features))
+        self.assertGreater(w["n"], 50); self.assertLess(w["rmse"], 0.5 * w["persistence_rmse"])
+    def test_no_features_means_no_signal(self):
+        import backtest as bt
+        self.assertEqual(bt.hdd_anomaly([("2025-01-01T00:00:00Z", 3.0), ("2025-01-02T00:00:00Z", 3.1)], None), 3.1)
