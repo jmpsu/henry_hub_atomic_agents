@@ -1,4 +1,4 @@
-"""One-off backfill: NOAA CPC CONUS population-weighted observed HDD/CDD 1981..(current year-1), plus the derived
+"""One-off backfill: NOAA CPC CONUS population-weighted observed HDD/CDD 1981..today, plus the derived
 Agent_Weather_30YrNormal_HDD (mean HDD per calendar day over 1991-2020, the NOAA normals period).
 PIT assumptions (documented): an observed day D is treated as available D+1 12:00Z (CPC posts the next morning; historic
 revision timing is unknowable); the 1991-2020 normal is available from 2021-05-04 (NOAA normals release) for every target date."""
@@ -37,13 +37,15 @@ def backfill(conn, fetcher=cpc.fetch, now=None, first_year=1981) -> dict:
     stats, hdd_all = {}, {}
     for kind, agent in cpc.AGENTS.items():
         new = 0
-        for year in range(first_year, now.year):
+        for year in range(first_year, now.year + 1):   # current year too, under the same D+1 rule (days not yet 'public' are skipped)
             url = cpc.BASE.format(year=year, kind=kind)
             status, body, ctype = fetcher(url)
             if status != 200:
                 continue
             h = ingest.archive_payload(conn, body, "noaa_cpc_degree_days_history", url, status, retrieved, ctype)
             for day, v in cpc.parse(body.decode()).items():
+                if avail_for(day) > retrieved:
+                    continue
                 if kind == "Heating":
                     hdd_all[day] = v
                 new += int(ingest.record_observation(
