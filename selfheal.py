@@ -118,11 +118,19 @@ def propose_repair(diag: dict, html: str, llm) -> dict:
     attempts = [sel]
     if not _usable(sel, html, diag["selector"]):
         cands = [c for c in candidate_selectors(html) if c != diag["selector"]][:40]
-        retry = (f"The selector '{sel}' does not work: it is the failed one or it extracts no number. Choose ONE of these selectors that exist "
-                 f"in the page, the one whose element contains the numeric value: {', '.join(cands)}.\nHTML:\n{html[:1200]}\n/no_think")
-        out = llm(retry, REPAIR_SCHEMA)
-        sel = str(out.get("selector", "")).strip()
-        attempts.append(sel)
+        if cands:
+            # constrained second attempt: the schema only admits selectors that exist in the page
+            schema = {"type": "object", "properties": {"selector": {"type": "string", "enum": cands}}, "required": ["selector"]}
+            retry = (f"The selector '{sel}' does not work: it is the failed one or it extracts no number. Pick the selector whose element "
+                     f"contains the numeric value. HTML:\n{html[:1200]}\n/no_think")
+            out = llm(retry, schema)
+            sel = str(out.get("selector", "")).strip()
+            attempts.append(sel)
+        if not _usable(sel, html, diag["selector"]):
+            numeric = [c for c in cands if _usable(c, html, diag["selector"])]
+            if len(numeric) == 1:                      # deterministic fallback, only when unambiguous
+                sel = numeric[0]
+                attempts.append("deterministic:" + sel)
     return {"selector": sel, "attempts": attempts}
 
 

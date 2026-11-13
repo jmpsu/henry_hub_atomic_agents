@@ -69,10 +69,23 @@ class RepairRetry(unittest.TestCase):
             prompts.append(prompt); return next(answers)
         p = selfheal.propose_repair(diag, html, fake)
         self.assertEqual(p, {"selector": "span.px", "attempts": ["span.old", "span.px"]})
-        self.assertIn("span.px", prompts[1]); self.assertTrue(prompts[1].rstrip().endswith("/no_think"))
+        self.assertTrue(prompts[1].rstrip().endswith("/no_think"))
     def test_good_first_answer_is_not_retried(self):
         import selfheal
         html = '<span class="px">$3.42</span>'
         calls = []
         p = selfheal.propose_repair(selfheal.diagnose("A", html, "b.x"), html, lambda pr, sc: calls.append(1) or {"selector": "span.px"})
         self.assertEqual((p["selector"], len(calls)), ("span.px", 1))
+
+
+class RepairFallback(unittest.TestCase):
+    def test_constrained_schema_and_deterministic_fallback(self):
+        import selfheal
+        html = '<div><span class="px">$3.42</span><span class="lbl">HH</span></div>'
+        diag = selfheal.diagnose("Agent_X", html, "span.old", (1, 20))
+        schemas = []
+        def stubborn(prompt, schema):
+            schemas.append(schema); return {"selector": "span.lbl" if len(schemas) > 1 else "span.old"}
+        p = selfheal.propose_repair(diag, html, stubborn)
+        self.assertEqual(set(schemas[1]["properties"]["selector"]["enum"]), {"div", "span.px", "span.lbl"} - {"div"} | set(selfheal.candidate_selectors(html)))
+        self.assertEqual(p["selector"], "span.px"); self.assertEqual(p["attempts"][-1], "deterministic:span.px")

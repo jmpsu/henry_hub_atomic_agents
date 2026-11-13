@@ -205,7 +205,8 @@ def _():
     code = ("import selfheal as s;h='<div><span class=\"px\">$3.42</span></div>';d=s.diagnose('Agent_X',h,'span.old',(1,20));"
             "p=s.propose_repair(d,h,s.ollama_llm);v=s.validate_proposal(p['selector'],[{'html':h,'expected':3.42}]);print(p,v);assert v['passed']")
     rc, out = sh([PY, "-c", code], timeout=180)
-    return rc == 0, out.strip().splitlines()[-1][:160] if out.strip() else ""
+    lines = out.strip().splitlines()
+    return rc == 0, (lines[-1][:200] if rc == 0 else " / ".join(l[:120] for l in lines[-4:])) if lines else ""
 
 
 @check("selfheal_pr_live", "a validated repair opens a real GitHub pull request", blocked_by="owner approval to open PRs automatically")
@@ -366,7 +367,7 @@ def _():
 
 @check("ollama_only_local", "no production code calls an external AI API; inference is local Ollama")
 def _():
-    rc, out = sh(["git", "grep", "-nIiE", r"anthropic|openai\.com|api\.openai|generativelanguage|cohere\.ai", "--", "*.py", "*.js", "*.toml", "*.sh"])
+    rc, out = sh(["git", "grep", "-nIiE", r"anthropic|openai\.com|api\.openai|generativelanguage|cohere\.ai", "--", "*.py", "*.js", "*.toml", "*.sh", ":!scripts/acceptance.py"])
     return rc != 0, out.strip()[:200] or "none"
 
 
