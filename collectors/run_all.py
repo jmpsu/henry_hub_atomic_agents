@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from collectors import cpc_degree_days, eia_prices, ecmwf_hdd, eia_ng_monthly, rggi_auctions, eia_storage, gfs_hdd  # noqa: E402
+from collectors import cpc_degree_days, eia_prices, ecmwf_hdd, eia_ng_monthly, rggi_auctions, steo_production, eia_storage, gfs_hdd  # noqa: E402
 
 
 def main() -> int:
@@ -19,6 +19,7 @@ def main() -> int:
             ("eia_prices", lambda: eia_prices.collect(conn)),
             ("eia_ng_monthly", lambda: eia_ng_monthly.collect(conn)),
             ("rggi_auctions", lambda: rggi_auctions.collect(conn)),
+            ("steo_production", lambda: steo_production.collect(conn)),
             ("gfs_hdd", lambda: gfs_hdd.collect(conn)),
             ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn))]
     now = datetime.now(timezone.utc)

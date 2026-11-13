@@ -1,6 +1,5 @@
 // Edge gateway: mobile/API -> Cloudflare Access -> tunnel -> command_hub.py (127.0.0.1:8090)
 // Worker secrets: MOBILE_COMMAND_SECRET, CF_ACCESS_CLIENT_ID, CF_ACCESS_CLIENT_SECRET
-// Var: ORIGIN_URL (tunnel hostname routed to local port 8090)
 function safeEqual(a, b) {
   const enc = new TextEncoder();
   const x = enc.encode(a);
@@ -10,44 +9,45 @@ function safeEqual(a, b) {
   return diff === 0;
 }
 
+function accessHeaders(env) {
+  return {
+    "Content-Type": "application/json",
+    "CF-Access-Client-Id": env.CF_ACCESS_CLIENT_ID,
+    "CF-Access-Client-Secret": env.CF_ACCESS_CLIENT_SECRET,
+  };
+}
+
 export default {
-  // Scheduled collection: Cron Trigger -> Access-protected tunnel -> hub /ingest (no gist, no LLM).
   async scheduled(event, env, ctx) {
     const resp = await fetch(env.INGEST_URL || "https://quant.joeysvault.app/ingest", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "CF-Access-Client-Id": env.CF_ACCESS_CLIENT_ID,
-        "CF-Access-Client-Secret": env.CF_ACCESS_CLIENT_SECRET,
-      },
+      headers: accessHeaders(env),
       body: "{}",
     });
     console.log(`ingest ${event.cron}: HTTP ${resp.status}`);
   },
-  // Queue consumer: each backtest job is forwarded to the hub (local compute) through the Access tunnel.
-  // 200/422 -> ack (done, or permanently invalid); anything else -> retry, then the dead-letter queue.
+
   async queue(batch, env) {
-    const base = (env.ORIGIN_URL || "https://quant.joeysvault.app/execute").replace(/\/execute$/, "");
+    const target = (env.ORIGIN_URL || "https://quant.joeysvault.app/execute").replace(/\/execute$/, "/experiments/run");
     for (const msg of batch.messages) {
       try {
-        const resp = await fetch(`${base}/experiments/run`, {
+        const resp = await fetch(target, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "CF-Access-Client-Id": env.CF_ACCESS_CLIENT_ID,
-            "CF-Access-Client-Secret": env.CF_ACCESS_CLIENT_SECRET,
-          },
+          headers: accessHeaders(env),
           body: JSON.stringify(msg.body),
         });
-        console.log(`backtest job ${msg.id}: HTTP ${resp.status}`);
-        if (resp.status === 200 || resp.status === 422) msg.ack();
-        else msg.retry({ delaySeconds: 60 });
-      } catch (e) {
-        console.log(`backtest job ${msg.id}: ${e}`);
-        msg.retry({ delaySeconds: 60 });
+        if (resp.ok || resp.status === 422) {
+          msg.ack();
+        } else {
+          msg.retry({ delaySeconds: resp.status === 409 ? 15 : 30 });
+        }
+      } catch (err) {
+        console.error("queue dispatch error:", err);
+        msg.retry({ delaySeconds: 30 });
       }
     }
   },
+
   async fetch(request, env) {
     if (request.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
@@ -62,25 +62,23 @@ export default {
     const body = await request.text();
     if (body.length > 4096) return new Response("Payload Too Large", { status: 413 });
 
-    if (new URL(request.url).pathname === "/enqueue") {
-      let job;
-      try { job = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
-      const jobs = Array.isArray(job) ? job : [job];
+    const url = new URL(request.url);
+    if (url.pathname === "/backtest" || url.pathname === "/enqueue") {
+      const queue = env.BACKTEST_QUEUE || env.BACKTEST_JOBS;   // wrangler.toml binds BACKTEST_JOBS
+      if (!queue) return new Response("Queue not bound", { status: 500 });
+      let payload;
+      try { payload = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
+      const jobs = Array.isArray(payload) ? payload : [payload];
       if (!jobs.length || jobs.length > 50 || jobs.some((j) => !j || typeof j.model !== "string")) {
         return new Response("Expected 1-50 jobs with a model", { status: 422 });
       }
-      await env.BACKTEST_JOBS.sendBatch(jobs.map((j) => ({ body: j })));
-      return new Response(JSON.stringify({ enqueued: jobs.length }), { status: 202, headers: { "Content-Type": "application/json" } });
+      await queue.sendBatch(jobs.map((j) => ({ body: j })));
+      return Response.json({ queued: jobs.length }, { status: 202 });
     }
 
-    // Bearer header is dropped: only Content-Type and the Access service-token pair go upstream.
     const upstream = await fetch(env.ORIGIN_URL || "https://quant.joeysvault.app/execute", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "CF-Access-Client-Id": env.CF_ACCESS_CLIENT_ID,
-        "CF-Access-Client-Secret": env.CF_ACCESS_CLIENT_SECRET,
-      },
+      headers: accessHeaders(env),
       body,
     });
     return new Response(upstream.body, {

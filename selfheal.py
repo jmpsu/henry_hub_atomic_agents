@@ -83,6 +83,22 @@ def propose_repair(diag: dict, html: str, llm) -> dict:
     return {"selector": str(out.get("selector", "")).strip()}
 
 
+def ollama_llm(prompt: str, schema: dict, url="http://127.0.0.1:11434/api/generate", model="qwen3:4b", timeout=60) -> dict:
+    """Default llm() for propose_repair. qwen3 returns an EMPTY response unless thinking is disabled, so "think": False is
+    required alongside the /no_think suffix; num_predict stays at 180 and the JSON schema is enforced by Ollama."""
+    import urllib.request
+    if not prompt.rstrip().endswith("/no_think"):
+        prompt = prompt.rstrip() + " /no_think"
+    payload = json.dumps({"model": model, "prompt": prompt, "format": schema, "stream": False, "think": False,
+                          "options": {"temperature": 0, "num_ctx": 2048, "num_predict": 180}}).encode()
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        text = json.loads(resp.read().decode()).get("response", "")
+    if not text.strip():
+        raise RuntimeError("Ollama returned an empty response (is thinking disabled?)")
+    return json.loads(text)
+
+
 def validate_proposal(candidate_selector: str, fixtures: list) -> dict:
     """fixtures: [{"html":..., "expected": float}, ...] preserved from past successful runs. All must match."""
     results = []
