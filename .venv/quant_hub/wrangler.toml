@@ -1,0 +1,9 @@
+name = "quant-gateway"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+ORIGIN_URL = "https://quant.joeysvault.app/execute"
+
+[triggers]
+crons = ["30 13 * * *", "45 15 * * 4"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z)
