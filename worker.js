@@ -64,7 +64,7 @@ export default {
 
     const url = new URL(request.url);
     if (url.pathname === "/backtest" || url.pathname === "/enqueue") {
-      const queue = env.BACKTEST_QUEUE || env.BACKTEST_JOBS;   // wrangler.toml binds BACKTEST_JOBS
+      const queue = env.BACKTEST_JOBS;   // bound in wrangler.toml
       if (!queue) return new Response("Queue not bound", { status: 500 });
       let payload;
       try { payload = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
