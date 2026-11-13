@@ -113,7 +113,9 @@ async def generate_pit_analysis(user_query: str, sql_ctx: str, vec_ctx: str, as_
         f"You are a quantitative natural gas trading engine operating strictly Point-in-Time as of {as_of}.\n"
         f"User Command: {user_query}\n"
         + (f"Computed scenario balance delta (supply minus demand, positive=looser): {est['value']} Bcf/d. "
-           "Your thesis MUST be consistent with this sign.\n" if est else "") + "\n"
+           "Your thesis MUST be consistent with this sign: "
+           + ("positive means the balance LOOSENS (bearish for price).\n" if est["value"] > 0 else
+              "negative means the balance TIGHTENS (bullish for price).\n" if est["value"] < 0 else "zero means no stated shift.\n") if est else "") + "\n"
         f"Structured PIT SQL Snapshots:\n{sql_ctx}\n\n"
         f"Retrieved Cross-Node Vector Knowledge:\n{vec_ctx}\n\n"
         "Return ONLY valid JSON with:\n"
@@ -254,6 +256,13 @@ async def handle_remote_command(req: CommandRequest):
         analysis = await generate_pit_analysis(req.query, sql_ctx, vec_ctx, as_of, est)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"model output failed: {e}")
+    consistency = scenario.thesis_consistency(analysis.get("alpha_thesis", ""), est["value"])
+    if consistency == "contradicts_computed_delta":
+        # Untrusted model prose that contradicts the deterministic number is withheld (and never stored in the vector KB).
+        analysis["alpha_thesis_rejected"] = analysis.get("alpha_thesis", "")
+        d = est["value"]
+        analysis["alpha_thesis"] = (f"Computed balance shift is {d:+.2f} Bcf/d ({'looser' if d > 0 else 'tighter'}), a stated scenario assumption. "
+                                    "The model thesis contradicted this sign and was withheld.")
     reason = scenario.validate_sql(analysis.get("sql_query", ""), as_of)
     if reason:
         sql_source, sql_rejected = "deterministic_fallback", reason
@@ -278,6 +287,7 @@ async def handle_remote_command(req: CommandRequest):
         "sql_source": sql_source,
         "sql_rejection_reason": sql_rejected,
         "scenario_basis": est["basis"],
+        "thesis_consistency": consistency,
         "provenance_labels": {"db_rows": "mixed; see provenance column / data_quality",
                               "scenario_delta_bcf": "synthetic_scenario",
                               "alpha_thesis": "model_hypothesis"},

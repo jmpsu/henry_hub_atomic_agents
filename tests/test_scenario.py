@@ -50,3 +50,11 @@ class Sandbox(unittest.TestCase):
             self.assertIsNotNone(s.validate_sql(bad, A), bad)
     def test_unnormalised_as_of_refused(self):
         with self.assertRaises(ValueError): s.run_sandboxed(self.db, "SELECT 1 FROM pit_market_data", "2026-01-05' --")
+
+class Thesis(unittest.TestCase):
+    def test_sign_check(self):
+        self.assertEqual(s.thesis_consistency("Sabine Pass feedgas drop tightens supply. Short-term prices likely to rise.", 1.5), "contradicts_computed_delta")
+        self.assertEqual(s.thesis_consistency("Lower feedgas loosens the balance. Prices likely to fall.", 1.5), "consistent")
+        self.assertEqual(s.thesis_consistency("Supply loss tightens the balance. Prompt-month should firm.", -2.0), "consistent")
+        self.assertEqual(s.thesis_consistency("Storage is in focus.", 1.5), "not_checked")
+        self.assertEqual(s.thesis_consistency("tightens", 0.0), "not_checked")

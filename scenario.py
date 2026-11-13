@@ -28,6 +28,21 @@ def estimate_delta(query: str) -> dict:
                      "mapped to balance = supply - demand; scenario assumption, no price elasticity applied"}
 
 
+_TIGHT = re.compile(r"\b(tighten\w*|tighter|deficit|shortage|undersuppl\w*|bullish|firm\w*|(prices?|basis)\s+(likely\s+to\s+)?(rise|rises|rising|increase\w*|spike\w*|higher))\b", re.I)
+_LOOSE = re.compile(r"\b(loosen\w*|looser|surplus|oversuppl\w*|glut|bearish|soften\w*|weaken\w*|(prices?|basis)\s+(likely\s+to\s+)?(fall|falls|falling|decline\w*|drop\w*|lower))\b", re.I)
+
+
+def thesis_consistency(thesis: str, delta: float) -> str:
+    """Deterministic sign check of the model's prose against the computed balance delta (positive = looser).
+    Returns 'consistent', 'contradicts_computed_delta', or 'not_checked' (zero delta or no directional wording)."""
+    if not delta:
+        return "not_checked"
+    tight, loose = bool(_TIGHT.search(thesis or "")), bool(_LOOSE.search(thesis or ""))
+    if tight == loose:
+        return "not_checked"
+    return "consistent" if (loose if delta > 0 else tight) else "contradicts_computed_delta"
+
+
 _BAD = re.compile(r"(;|--|/\*|\b(pragma|attach|insert|update|delete|drop|alter|create|replace|vacuum|load_extension|with|main|temp|sqlite_\w*)\b)", re.I)
 _TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 _FUNCS = {"count", "sum", "avg", "min", "max", "round", "abs", "substr", "lower", "upper", "coalesce", "like", "date", "strftime", "total", "length"}
