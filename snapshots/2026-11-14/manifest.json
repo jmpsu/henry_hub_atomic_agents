@@ -1,0 +1,519 @@
+{
+ "agents": {
+  "Agent_Coal_CAPP_SpotPrice": {
+   "first_target": "2011-01-07T00:00:00Z",
+   "last_available": "2026-11-10T17:00:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 825,
+   "rows_sha256": "318ae688a7c3ac00e9d8aeefa8898f0cc24f797f00238772efd02681dd721e43",
+   "targets": 825
+  },
+  "Agent_Coal_PRB_SpotPrice": {
+   "first_target": "2011-01-07T00:00:00Z",
+   "last_available": "2026-11-10T17:00:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 825,
+   "rows_sha256": "caa4366aff3aeec8bc7af64a825c343cd6185a351782390491f1f3b6e3b8eabb",
+   "targets": 825
+  },
+  "Agent_Crude_WTI_Spot": {
+   "first_target": "1986-01-02T00:00:00Z",
+   "last_available": "2026-11-11T21:00:00Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 9543,
+   "rows_sha256": "a82fb6de7e58a25eaea88a8234ff601069e5ec2f5883508448498b36c0406e9e",
+   "targets": 9543
+  },
+  "Agent_Demand_Industrial": {
+   "first_target": "2001-01-01T00:00:00Z",
+   "last_available": "2026-10-31T16:00:00Z",
+   "last_target": "2026-08-01T00:00:00Z",
+   "rows": 308,
+   "rows_sha256": "59125b41f40ca64a3da7a242faebf1de3d301be44ba3e13257f5046185eda703",
+   "targets": 308
+  },
+  "Agent_Demand_ResComm": {
+   "first_target": "2001-01-01T00:00:00Z",
+   "last_available": "2026-10-31T16:00:00Z",
+   "last_target": "2026-08-01T00:00:00Z",
+   "rows": 308,
+   "rows_sha256": "655e5126ce059d84a61c8a3c218b44fccd1d5dee788a5a144d1998cad8913953",
+   "targets": 308
+  },
+  "Agent_ECMWF_00z_HDD_Day1": {
+   "first_target": "2026-11-12T00:00:00Z",
+   "last_available": "2026-11-13T07:34:05Z",
+   "last_target": "2026-11-13T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "2acf223d2ab382a9068f0cd7d0ef6d331ffdc2662f85337ce332d1502aa870e7",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day2": {
+   "first_target": "2026-11-13T00:00:00Z",
+   "last_available": "2026-11-13T07:34:08Z",
+   "last_target": "2026-11-14T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "b93ccf8f2ce1f0e909fd5ae8d612f3deff003733714eb85f3bb82986ae85421b",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day3": {
+   "first_target": "2026-11-14T00:00:00Z",
+   "last_available": "2026-11-13T07:34:10Z",
+   "last_target": "2026-11-15T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "e18ca6ca22b9a8b83a4e04ce0f6b0c3002e1dadebf931bd9db7eb29e3d0e9182",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day4": {
+   "first_target": "2026-11-15T00:00:00Z",
+   "last_available": "2026-11-13T07:34:14Z",
+   "last_target": "2026-11-16T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "bfa401587dd43c15b08e73c81474fb296837b56eddf6fc06a4208c0129179370",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day5": {
+   "first_target": "2026-11-16T00:00:00Z",
+   "last_available": "2026-11-13T07:34:16Z",
+   "last_target": "2026-11-17T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "e9997eb6216af65254e9748e15e51908fc4f769cf584e8b058aaf43ddf00b70d",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day6": {
+   "first_target": "2026-11-17T00:00:00Z",
+   "last_available": "2026-11-13T07:34:18Z",
+   "last_target": "2026-11-18T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "f557149b3cf55248a852d22907ebba11ee956524a6e9f52c05aa557f19f34c28",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day7": {
+   "first_target": "2026-11-18T00:00:00Z",
+   "last_available": "2026-11-13T07:34:19Z",
+   "last_target": "2026-11-19T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "86c52fbd22d989df750ba506100d7177319f9ad45bee026d3f0f3e633efe00d4",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day8": {
+   "first_target": "2026-11-19T00:00:00Z",
+   "last_available": "2026-11-13T07:34:20Z",
+   "last_target": "2026-11-20T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "a9036af34eca2075a05ed38e64bedfd66ee61044c31cbac285521b9def2fec0d",
+   "targets": 2
+  },
+  "Agent_ECMWF_00z_HDD_Day9": {
+   "first_target": "2026-11-20T00:00:00Z",
+   "last_available": "2026-11-13T07:34:22Z",
+   "last_target": "2026-11-21T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "2113006cb6f14ae1df3e683c33be18eb82691ef98def2b4ee483dc5806182100",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day1": {
+   "first_target": "2026-11-12T00:00:00Z",
+   "last_available": "2026-11-13T03:50:00Z",
+   "last_target": "2026-11-13T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "26d6fb97ef21e268810d8f93c75aab5ea493dfbb90059171939370c28a8cbc90",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day10": {
+   "first_target": "2026-11-21T00:00:00Z",
+   "last_available": "2026-11-13T04:46:10Z",
+   "last_target": "2026-11-22T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "d38118d6b0f984eb22fea0ddf8ca45a31f7d6191e6ee4589e6c11ee687eb9127",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day11": {
+   "first_target": "2026-11-22T00:00:00Z",
+   "last_available": "2026-11-13T04:41:55Z",
+   "last_target": "2026-11-23T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "c81ab5cf5225e2218cc8c03b824b3e479fa47ec6dada30793ca579efa9984091",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day12": {
+   "first_target": "2026-11-23T00:00:00Z",
+   "last_available": "2026-11-13T04:48:21Z",
+   "last_target": "2026-11-24T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "506a1deddb35449b60fd07d9cb8b16cf02c911de274cb00fad3a4193b2ec4a4d",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day13": {
+   "first_target": "2026-11-24T00:00:00Z",
+   "last_available": "2026-11-13T04:55:50Z",
+   "last_target": "2026-11-25T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "b2130ae0ef3d6ab79e31b3ef28d34d6baef26185f1ff1859cd3b8fbcf9cf84b3",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day14": {
+   "first_target": "2026-11-25T00:00:00Z",
+   "last_available": "2026-11-13T05:01:31Z",
+   "last_target": "2026-11-26T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "be9970c625642e2e1ca21ac82c8ffc7459ac5a33a110bdb81b1d0d90730f8626",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day15": {
+   "first_target": "2026-11-26T00:00:00Z",
+   "last_available": "2026-11-13T05:17:11Z",
+   "last_target": "2026-11-27T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "b40097cc1539223a870aeec8c75dc19da6dc9863191eaf10ef0183b0f297409b",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day2": {
+   "first_target": "2026-11-13T00:00:00Z",
+   "last_available": "2026-11-13T03:45:55Z",
+   "last_target": "2026-11-14T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "35aadc46d0f537b101b15d50c10dca9fe2ea3d7dab0626ffb349486103f43556",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day3": {
+   "first_target": "2026-11-14T00:00:00Z",
+   "last_available": "2026-11-13T04:04:36Z",
+   "last_target": "2026-11-15T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "d98bf735c008e7d9d5be5ce11b8e48ba1cf422fc2db0a81cbb6804fd746375d4",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day4": {
+   "first_target": "2026-11-15T00:00:00Z",
+   "last_available": "2026-11-13T04:13:29Z",
+   "last_target": "2026-11-16T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "255f6d80531a788530d34d0b571013c23d89d8f5e14d2dc3712ef0dda733fe37",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day5": {
+   "first_target": "2026-11-16T00:00:00Z",
+   "last_available": "2026-11-13T04:14:10Z",
+   "last_target": "2026-11-17T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "fc3b8e8b6d1f3ee8d02b78fa7087367825949b3932915db3125867a5bfb0c033",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day6": {
+   "first_target": "2026-11-17T00:00:00Z",
+   "last_available": "2026-11-13T04:21:50Z",
+   "last_target": "2026-11-18T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "3886a7c59762d7d7d14470abd54e5df5c0c2f03775b78fd2bbb6f2aa3a034d85",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day7": {
+   "first_target": "2026-11-18T00:00:00Z",
+   "last_available": "2026-11-13T04:31:15Z",
+   "last_target": "2026-11-19T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "8a35fc5eb23d4b3cc5c4f0a41b096319d9218529fecd534c82f37441bd041c12",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day8": {
+   "first_target": "2026-11-19T00:00:00Z",
+   "last_available": "2026-11-13T04:22:56Z",
+   "last_target": "2026-11-20T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "22217e324c88f4c99744d7405bf2f020ddef449d80aa2cbd28637b49a73ae9f6",
+   "targets": 2
+  },
+  "Agent_GFS_00z_HDD_Day9": {
+   "first_target": "2026-11-20T00:00:00Z",
+   "last_available": "2026-11-13T04:29:19Z",
+   "last_target": "2026-11-21T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "9f2b4112332cf1b8179fff4a8da38fdb5797ea2b53100cbf9df8326e322511ec",
+   "targets": 2
+  },
+  "Agent_HH_Cash_Midpoint": {
+   "first_target": "2026-11-11T00:00:00Z",
+   "last_available": "2026-11-11T13:00:00Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 1,
+   "rows_sha256": "b922026d374b6f2d748a85cb55bed9ecde54231c2e88845d3db826ee35eaa4b0",
+   "targets": 1
+  },
+  "Agent_HH_M1": {
+   "first_target": "1994-01-13T00:00:00Z",
+   "last_available": "2024-04-05T21:00:00Z",
+   "last_target": "2024-04-05T00:00:00Z",
+   "rows": 7496,
+   "rows_sha256": "9cfdb81950e5c7acb6bdace69ba037d9f477c03b4eeee14484c6bc01cdb2b304",
+   "targets": 7496
+  },
+  "Agent_HH_M2": {
+   "first_target": "1994-01-12T00:00:00Z",
+   "last_available": "2024-04-05T21:00:00Z",
+   "last_target": "2024-04-05T00:00:00Z",
+   "rows": 7500,
+   "rows_sha256": "b9444b6665e7e1b9e39e2c282d13c36483038697ab8348ff15f76fd6085351f9",
+   "targets": 7500
+  },
+  "Agent_HH_M3": {
+   "first_target": "1994-01-19T00:00:00Z",
+   "last_available": "2024-04-05T21:00:00Z",
+   "last_target": "2024-04-05T00:00:00Z",
+   "rows": 7452,
+   "rows_sha256": "2430de5c44b10f476c0fdffea1d135afb3b93e41de31a3ae7a3fba50a7fa3f3a",
+   "targets": 7452
+  },
+  "Agent_HH_M4": {
+   "first_target": "1993-12-20T00:00:00Z",
+   "last_available": "2024-04-05T21:00:00Z",
+   "last_target": "2024-04-05T00:00:00Z",
+   "rows": 7453,
+   "rows_sha256": "36f379b6cb36728c66abb47d69a153798ec5b63632fbe50b73afba5a25c43c0c",
+   "targets": 7453
+  },
+  "Agent_HH_Spot_EIA": {
+   "first_target": "1997-01-07T00:00:00Z",
+   "last_available": "2026-11-11T21:00:00Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 5728,
+   "rows_sha256": "2d211fb94bb13c468b053fc92c5b94a82cdb2a24830cb6cb83033b08108c86b9",
+   "targets": 5728
+  },
+  "Agent_LNG_SabinePass_Flow": {
+   "first_target": "2026-11-11T00:00:00Z",
+   "last_available": "2026-11-11T14:15:00Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 1,
+   "rows_sha256": "227a8e1903b07727b22ca5b271387fd0016736fc152f65df83e19e8705ab9822",
+   "targets": 1
+  },
+  "Agent_NGL_MontBelvieu_Propane": {
+   "first_target": "1992-07-09T00:00:00Z",
+   "last_available": "2026-11-11T21:00:00Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 8152,
+   "rows_sha256": "730eec05c165f07381ab19af28663e77c3d22071a44c2200236c840e26b83675",
+   "targets": 8152
+  },
+  "Agent_Power_CO2_AllowancePrice": {
+   "first_target": "2008-09-25T00:00:00Z",
+   "last_available": "2026-09-10T16:00:00Z",
+   "last_target": "2026-09-09T00:00:00Z",
+   "rows": 73,
+   "rows_sha256": "b24b46b90e5c780c65d93ee082eaa8636f81ac3ef021d527cd1d1944b3fbca43",
+   "targets": 73
+  },
+  "Agent_Prod_Appalachia": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "dacd04b31f9cb3f9913fb28f08eae5c4e7538ea1ed04fdada6c04707bca78eba",
+   "targets": 321
+  },
+  "Agent_Prod_Bakken": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "3c6ba7b932f72bab8c50d7e07e841aa5de9c566c31ae80c94cda216e4a19862b",
+   "targets": 321
+  },
+  "Agent_Prod_DJBasin": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "44c15f7ba4a7a237045f4d5cf8edb3189f7671331e94c8a6f649d73b99a870d9",
+   "targets": 321
+  },
+  "Agent_Prod_EagleFord": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "252beead95e9b90ebffdc3fab1441f07ccbaa9e88da0ee9636d1de705adf9a49",
+   "targets": 321
+  },
+  "Agent_Prod_Haynesville": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "7fe95748b5c8e74670a8e517e3c9f6e47a86752564264dffdfae60a3c371aef6",
+   "targets": 321
+  },
+  "Agent_Prod_Permian": {
+   "first_target": "2000-01-01T00:00:00Z",
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "3d10eb0794308cb72dd6ce5f46cc1eab27b59acc90d02ee86277db6b26b3a9b3",
+   "targets": 321
+  },
+  "Agent_Storage_East": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "858b124b16f5ae8a51da34c25ad0f79e4eacd2eefe655269638cf8e5da8b28e6",
+   "targets": 2
+  },
+  "Agent_Storage_Midwest": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "6472c2ef832bba2c1c013fd541b004a3f486171ede3809dc6c7eeeeac9b810b5",
+   "targets": 2
+  },
+  "Agent_Storage_Mountain": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "b7df4ae39eff280cf9a31274749897434f2dc2fd60f9cb50d3e810ac852b9711",
+   "targets": 2
+  },
+  "Agent_Storage_Pacific": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "1e99748c7e55ef903219dc524a56378139a0d3d0ccf5d885faba4bfb7776fccf",
+   "targets": 2
+  },
+  "Agent_Storage_SouthCentral_NonSalt": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 2,
+   "rows_sha256": "be79261a532dbb22c426470f57def67261bff041bac47d1d124459059e2a252a",
+   "targets": 2
+  },
+  "Agent_Storage_SouthCentral_Salt": {
+   "first_target": "2026-10-30T00:00:00Z",
+   "last_available": "2026-11-13T15:30:00Z",
+   "last_target": "2026-11-06T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "51c7855a4669d9c485674e57402cda0fb11e7c3e3a7754f4810328b21e497f10",
+   "targets": 3
+  },
+  "Agent_Weather_30YrNormal_HDD": {
+   "first_target": "1991-01-01T00:00:00Z",
+   "last_available": "2021-05-04T00:00:00Z",
+   "last_target": "2027-12-31T00:00:00Z",
+   "rows": 13505,
+   "rows_sha256": "54e5b055c02b14ecbe095428c7919f8d74c00828efc0ecd156f34499b48a072e",
+   "targets": 13505
+  },
+  "Agent_Weather_Actual_CDD": {
+   "first_target": "1981-01-01T00:00:00Z",
+   "last_available": "2026-11-13T13:19:12Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 17067,
+   "rows_sha256": "bdcf56875e955e2d1cb702eb6a4591e2f254476ef17c8f17dac067f367ce8046",
+   "targets": 16751
+  },
+  "Agent_Weather_Actual_HDD": {
+   "first_target": "1981-01-01T00:00:00Z",
+   "last_available": "2026-11-13T13:19:06Z",
+   "last_target": "2026-11-11T00:00:00Z",
+   "rows": 17068,
+   "rows_sha256": "91e207ddea504b51033b8bded08486d30188feeb75882caf33fa7b156bb47a16",
+   "targets": 16751
+  }
+ },
+ "agents_with_rows": 53,
+ "as_of": "2026-11-14T00:38:46Z",
+ "database_rows_sha256": "73b12c6320d26142746b78b0dc3943050461bbf8698893713febc69d600a5f41",
+ "pit_rows": 105292,
+ "roster_agents": 81,
+ "roster_agents_with_real_data": [
+  "Agent_Coal_CAPP_SpotPrice",
+  "Agent_Coal_PRB_SpotPrice",
+  "Agent_Demand_Industrial",
+  "Agent_Demand_ResComm",
+  "Agent_ECMWF_00z_HDD_Day1",
+  "Agent_ECMWF_00z_HDD_Day2",
+  "Agent_ECMWF_00z_HDD_Day3",
+  "Agent_ECMWF_00z_HDD_Day4",
+  "Agent_ECMWF_00z_HDD_Day5",
+  "Agent_ECMWF_00z_HDD_Day6",
+  "Agent_ECMWF_00z_HDD_Day7",
+  "Agent_ECMWF_00z_HDD_Day8",
+  "Agent_ECMWF_00z_HDD_Day9",
+  "Agent_GFS_00z_HDD_Day1",
+  "Agent_GFS_00z_HDD_Day10",
+  "Agent_GFS_00z_HDD_Day11",
+  "Agent_GFS_00z_HDD_Day12",
+  "Agent_GFS_00z_HDD_Day13",
+  "Agent_GFS_00z_HDD_Day14",
+  "Agent_GFS_00z_HDD_Day15",
+  "Agent_GFS_00z_HDD_Day2",
+  "Agent_GFS_00z_HDD_Day3",
+  "Agent_GFS_00z_HDD_Day4",
+  "Agent_GFS_00z_HDD_Day5",
+  "Agent_GFS_00z_HDD_Day6",
+  "Agent_GFS_00z_HDD_Day7",
+  "Agent_GFS_00z_HDD_Day8",
+  "Agent_GFS_00z_HDD_Day9",
+  "Agent_HH_M1",
+  "Agent_HH_M2",
+  "Agent_HH_M3",
+  "Agent_HH_M4",
+  "Agent_Power_CO2_AllowancePrice",
+  "Agent_Prod_Appalachia",
+  "Agent_Prod_Bakken",
+  "Agent_Prod_DJBasin",
+  "Agent_Prod_EagleFord",
+  "Agent_Prod_Haynesville",
+  "Agent_Prod_Permian",
+  "Agent_Storage_East",
+  "Agent_Storage_Midwest",
+  "Agent_Storage_Mountain",
+  "Agent_Storage_Pacific",
+  "Agent_Storage_SouthCentral_NonSalt",
+  "Agent_Storage_SouthCentral_Salt",
+  "Agent_Weather_30YrNormal_HDD",
+  "Agent_Weather_Actual_CDD",
+  "Agent_Weather_Actual_HDD"
+ ],
+ "roster_agents_without_real_data": [
+  "Agent_Coal_Rail_TransportRate",
+  "Agent_Demand_PowerBurn",
+  "Agent_ECMWF_00z_HDD_Day10",
+  "Agent_ECMWF_00z_HDD_Day11",
+  "Agent_ECMWF_00z_HDD_Day12",
+  "Agent_ECMWF_00z_HDD_Day13",
+  "Agent_ECMWF_00z_HDD_Day14",
+  "Agent_ECMWF_00z_HDD_Day15",
+  "Agent_Flow_Emerson",
+  "Agent_Flow_Kingsgate",
+  "Agent_Flow_NET_Mexico",
+  "Agent_Flow_ValleyCrossing",
+  "Agent_Flow_Waddington",
+  "Agent_HH_Cash_High",
+  "Agent_HH_Cash_Low",
+  "Agent_HH_Cash_Midpoint",
+  "Agent_HH_Cash_Volume",
+  "Agent_HH_M10",
+  "Agent_HH_M11",
+  "Agent_HH_M12",
+  "Agent_HH_M5",
+  "Agent_HH_M6",
+  "Agent_HH_M7",
+  "Agent_HH_M8",
+  "Agent_HH_M9",
+  "Agent_LNG_CalcasieuPass_Flow",
+  "Agent_LNG_Cameron_Flow",
+  "Agent_LNG_CorpusChristi_Flow",
+  "Agent_LNG_CovePoint_Flow",
+  "Agent_LNG_ElbaIsland_Flow",
+  "Agent_LNG_Freeport_Flow",
+  "Agent_LNG_Plaquemines_Flow",
+  "Agent_LNG_SabinePass_Flow"
+ ],
+ "schema": "pit-snapshot/1"
+}

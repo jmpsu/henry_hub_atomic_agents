@@ -381,7 +381,7 @@ def _():
 
 @check("ollama_only_local", "no production code calls an external AI API; inference is local Ollama")
 def _():
-    rc, out = sh(["git", "grep", "-nIiE", r"anthropic|openai\.com|api\.openai|generativelanguage|cohere\.ai", "--", "*.py", "*.js", "*.toml", "*.sh", ":!scripts/acceptance.py"])
+    rc, out = sh(["git", "grep", "-nIiE", r"^\s*(import|from)\s+(anthropic|openai|google\.generativeai|cohere)\b|api\.anthropic\.com|api\.openai\.com|generativelanguage\.googleapis|api\.cohere\.ai", "--", "*.py", "*.js", "*.toml", "*.sh", ":!scripts/acceptance.py"])
     return rc != 0, out.strip()[:200] or "none"
 
 

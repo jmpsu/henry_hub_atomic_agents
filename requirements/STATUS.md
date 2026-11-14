@@ -1,70 +1,70 @@
-# Requirement status (2026-11-13T19:57:50Z)
+# Requirement status (2026-11-14T00:38:42Z)
 
 Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic requirements
 
 | Status | Count |
 |---|---|
-| passed | 307 |
+| passed | 327 |
 | failed | 0 |
-| blocked | 115 |
+| blocked | 95 |
 | unverified | 0 |
 
 ## Checks
 
 | Check | Status | Evidence | Blocked by |
 |---|---|---|---|
-| `access_protects_hub` | passed | /execute 403, /ingest 403 |  |
-| `alert_delivery` | blocked | alerts are computed and shown in state.json/UI; no outbound notification channel configured | choose a delivery channel (issue, email, push) |
-| `architecture_doc` | passed | sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
-| `audit_gists` | passed | 5 recent hub gists |  |
-| `backtest_unit` | passed | 11 passed in 0.41s |  |
-| `branch_protection` | blocked | {"message":"Upgrade to GitHub Pro or make this repository public to enable this feature.","documentation_url":"https://d | owner decision (GitHub settings) |
-| `branch_pushed` | passed | ## quant-hub-build...origin/quant-hub-build |  |
-| `collector_freshness` | passed | all daily series fresh (<=5 days) |  |
-| `collector_schedule` | passed | timer enabled; worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbe |  |
+| `access_protects_hub` | passed (carried over) | /execute 403, /ingest 403 |  |
+| `alert_delivery` | passed (carried over) | incident issues [(3, 'CLOSED')]; event streams ['[backtests] backtests event st', '[selfheal] selfheal event stre'] |  |
+| `architecture_doc` | passed (carried over) | sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
+| `audit_gists` | passed (carried over) | 5 recent hub gists |  |
+| `backtest_unit` | passed (carried over) | 11 passed in 0.44s |  |
+| `branch_protection` | blocked (carried over) | {"message":"Upgrade to GitHub Pro or make this repository public to enable this feature.","documentation_url":"https://d | owner decision (GitHub settings) |
+| `branch_pushed` | passed (carried over) | ## quant-hub-build...origin/quant-hub-build |  |
+| `collector_freshness` | passed (carried over) | all daily series fresh (<=5 days) |  |
+| `collector_schedule` | passed (carried over) | timer enabled; worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbe |  |
 | `collectors_run` | passed (carried over) | OK   cpc_heating {'agent': 'Agent_Weather_Actual_HDD', 'obse / OK   cpc_cooling {'agent': 'Agent_Weather_Actual_CDD', 'obse / OK   eia_storage [{'agent': 'Agent_Storage_East', 'obs |  |
-| `cross_domain_sources` | blocked | have ['alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation | FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions |
-| `db_integrity` | passed | ok |  |
-| `edge_collection` | passed | edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage'] |  |
-| `edge_ingest_unit` | passed | 3 passed in 0.63s |  |
-| `env_locked` | passed | mode 0o600; ignored True; tracked secret files: none |  |
-| `execute_sandbox_tests` | passed | 11 passed in 0.18s |  |
-| `experiment_endpoint` | passed | HTTP 200 |  |
-| `experiments_recorded` | passed | 34 experiments, 0 incomplete |  |
-| `full_test_suite` | passed | 115 passed in 3.43s |  |
-| `gatekeeper` | passed | 3 passed in 0.09s |  |
-| `hub_health` | passed | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":194} |  |
-| `hypothesis_memo` | passed | 5 passed in 0.01s |  |
-| `indicators` | passed | 9 passed in 0.07s |  |
-| `knowledge_library` | passed | 194 nodes, 9 domains, edges {'builds_on': 64, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata |  |
-| `knowledge_search_pit` | passed | old cutoff -> 0 results; now -> 8 |  |
-| `leaderboard_versioned` | passed | tracked=True; 34/34 experiments listed |  |
-| `main_site_link` | blocked | HTTP 200, link present=False | deploy after the public routes serve |
-| `markets_local` | passed | state 200 ngl-state/1, /execute 404, / 200 |  |
-| `multi_feature_experiments` | passed | feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum'] | needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented |
-| `ngl_term` | passed | exit 0, 794 braille cells |  |
-| `no_tmp_or_claude_paths` | passed | none |  |
-| `observations_reference_payloads` | passed | 91807/91807 measured rows reference an archived payload |  |
-| `ollama_models` | passed | ['nomic-embed-text:latest', 'qwen3:4b'] |  |
+| `cross_domain_sources` | blocked (carried over) | have ['alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation | FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions |
+| `db_integrity` | passed (carried over) | ok |  |
+| `edge_collection` | passed (carried over) | edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage'] |  |
+| `edge_ingest_unit` | passed (carried over) | 3 passed in 0.73s |  |
+| `env_locked` | passed (carried over) | mode 0o600; ignored True; tracked secret files: none |  |
+| `execute_sandbox_tests` | passed (carried over) | 11 passed in 0.18s |  |
+| `experiment_endpoint` | passed (carried over) | HTTP 200 |  |
+| `experiments_recorded` | passed (carried over) | 36 experiments, 0 incomplete |  |
+| `full_test_suite` | passed (carried over) | 122 passed in 3.62s |  |
+| `gatekeeper` | passed (carried over) | 3 passed in 0.10s |  |
+| `hub_health` | passed (carried over) | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":194} |  |
+| `hypothesis_memo` | passed (carried over) | 5 passed in 0.01s |  |
+| `indicators` | passed (carried over) | 9 passed in 0.07s |  |
+| `knowledge_library` | passed (carried over) | 194 nodes, 9 domains, edges {'builds_on': 64, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata |  |
+| `knowledge_search_pit` | passed (carried over) | old cutoff -> 0 results; now -> 8 |  |
+| `leaderboard_versioned` | passed (carried over) | tracked=True; 36/36 experiments listed |  |
+| `main_site_link` | blocked (carried over) | HTTP 200, link present=False | deploy after the public routes serve |
+| `markets_local` | passed (carried over) | state 200 ngl-state/1, /execute 404, / 200 |  |
+| `multi_feature_experiments` | passed (carried over) | feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum'] | needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented |
+| `ngl_term` | passed (carried over) | exit 0, 794 braille cells |  |
+| `no_tmp_or_claude_paths` | passed (carried over) | none |  |
+| `observations_reference_payloads` | passed (carried over) | 91783/91783 measured rows reference an archived payload |  |
+| `ollama_models` | passed (carried over) | ['nomic-embed-text:latest', 'qwen3:4b'] |  |
 | `ollama_only_local` | passed | none |  |
-| `pit_tests` | passed | 22 passed in 0.87s |  |
-| `promotion_gate` | passed | promotion conditions present in experiments.py |  |
-| `provenance_labels` | passed | 0 unlabelled rows |  |
-| `public_markets` | blocked | markets.joeysvault.app 404, ngl.joeysvault.app 404 | sudo: deploy/add_markets_ingress.sh must be run by the owner |
-| `queue_dispatch` | passed | │ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1         |  |
-| `raw_payloads_verified` | passed | 163/163 verified |  |
-| `research_log_live` | blocked | no alpha-hypothesis issues | no hypothesis has passed promotion; publishing a rejected one would be misleading |
-| `roster_81` | passed | 81 unique |  |
-| `roster_all_collected` | blocked | 48/81 with real data; missing 33: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emers | paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal |
-| `schema_16_columns` | passed | missing=[] |  |
-| `selfheal_live_ollama` | passed | {'selector': 'span.px', 'attempts': ['span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]} |  |
-| `selfheal_pr_live` | blocked | open_pull_request runs dry-run only | owner approval to open PRs automatically |
-| `selfheal_unit` | passed | 12 passed in 0.02s |  |
-| `snapshots_versioned` | passed | tracked snapshot days ['2026-11-13']; scheduled=True |  |
-| `state_schema_contract` | passed | 13 passed in 0.25s |  |
-| `unstructured_sources` | passed | documents {'noaa_discussion': 1, 'pipeline_notice': 375}; indexed in knowledge library {'noaa_discussion': 1, 'pipeline_notice': 83} |  |
-| `web_ui_browser` | passed | 18 map nodes, panels=True, console errors=0 |  |
-| `webhook_recovery` | blocked | no webhook handler in worker.js | a GitHub webhook secret (new credential) |
+| `pit_tests` | passed (carried over) | 22 passed in 0.99s |  |
+| `promotion_gate` | passed (carried over) | promotion conditions present in experiments.py |  |
+| `provenance_labels` | passed (carried over) | 0 unlabelled rows |  |
+| `public_markets` | blocked (carried over) | markets.joeysvault.app 404, ngl.joeysvault.app 404 | sudo: deploy/add_markets_ingress.sh must be run by the owner |
+| `queue_dispatch` | passed (carried over) | │ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1         |  |
+| `raw_payloads_verified` | passed (carried over) | 163/163 verified |  |
+| `research_log_live` | blocked (carried over) | no alpha-hypothesis issues | no hypothesis has passed promotion; publishing a rejected one would be misleading |
+| `roster_81` | passed (carried over) | 81 unique |  |
+| `roster_all_collected` | blocked (carried over) | 48/81 with real data; missing 33: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emers | paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal |
+| `schema_16_columns` | passed (carried over) | missing=[] |  |
+| `selfheal_live_ollama` | passed (carried over) | {'selector': 'span.px', 'attempts': ['span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]} |  |
+| `selfheal_pr_live` | passed (carried over) | self-heal PRs: [(2, 'OPEN')] |  |
+| `selfheal_unit` | passed (carried over) | 12 passed in 0.02s |  |
+| `snapshots_versioned` | passed (carried over) | tracked snapshot days ['2026-11-13']; scheduled=True |  |
+| `state_schema_contract` | passed (carried over) | 13 passed in 0.30s |  |
+| `unstructured_sources` | passed (carried over) | documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 1, 'pipeline_notice': 83} |  |
+| `web_ui_browser` | passed (carried over) | 18 map nodes, panels=True, console errors=0 |  |
+| `webhook_recovery` | passed (carried over) | GitHub deliveries accepted after signature check: 2 of 2; reruns verified+ok=1, forged refused=1 |  |
 | `worker_gateway_e2e` | passed (carried over) | PASS no bearer (401) / PASS bad bearer (401) / PASS origin without Access token (403) / PASS authenticated /execute (200) / PASS payload shape |  |
 
 ## Requirements not passed
@@ -98,19 +98,6 @@ Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic r
 | R3.5-fa8bfa50 | 137 | blocked | Enforce repository permissions and branch protections; do not assume ordinary Git history is intrinsically imm | snapshots_versioned, branch_pushed, branch_protection |
 | R4-e0489c13 | 145 | blocked | These changes must not silently create permanent data gaps. | collector_freshness, selfheal_unit, roster_all_collected |
 | R4.1-ced2a6ba | 149 | blocked | The Python orchestration system must monitor all 81 atomic agents. | selfheal_unit, gatekeeper, collector_freshness, roster_all_collected |
-| R4.4-f57940b2 | 192 | blocked | The repair pipeline must: | selfheal_unit, selfheal_pr_live |
-| R4.4-333bdf25 | 193 | blocked | Create an isolated working branch. | selfheal_unit, selfheal_pr_live |
-| R4.4-f69ec027 | 194 | blocked | Apply the proposed patch. | selfheal_unit, selfheal_pr_live |
-| R4.4-02d45091 | 195 | blocked | Run unit tests against preserved source fixtures. | selfheal_unit, selfheal_pr_live |
-| R4.4-5aedbcff | 196 | blocked | Run schema validation. | selfheal_unit, selfheal_pr_live |
-| R4.4-2781b5c3 | 197 | blocked | Compare extracted values against known expected results. | selfheal_unit, selfheal_pr_live |
-| R4.4-f06a7416 | 198 | blocked | Check timestamp and PIT handling. | selfheal_unit, selfheal_pr_live |
-| R4.4-44c2a840 | 199 | blocked | Generate a repair report. | selfheal_unit, selfheal_pr_live |
-| R4.4-a113ed48 | 200 | blocked | Open a GitHub pull request using gh pr create. | selfheal_unit, selfheal_pr_live |
-| R4.4-d78818ad | 206 | blocked | Production deployment must require successful tests and an authorized merge. | selfheal_unit, selfheal_pr_live |
-| R4.4-afc642da | 206 | blocked | Do not allow an LLM to approve and deploy its own unverified code changes. | selfheal_unit, selfheal_pr_live |
-| R4.5-34636c2d | 212 | blocked | The Worker must authenticate the event and enqueue a deployment or execution request. | webhook_recovery |
-| R4.5-81c63eb3 | 214 | blocked | The local orchestrator must retrieve the approved change, verify its identity, and rerun the affected collecto | webhook_recovery |
 | R5-ee5ec77f | 222 | blocked | The system must discover relationships between seemingly unrelated market developments that can affect NGL and | knowledge_library, cross_domain_sources |
 | R5.1-e87f9b97 | 231 | blocked | FERC filings and regulatory announcements. | cross_domain_sources |
 | R5.1-b701c525 | 236 | blocked | LNG terminal operational notices. | cross_domain_sources |
@@ -132,7 +119,6 @@ Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic r
 | R5.3-afcfe344 | 285 | blocked | Associated gas production changing as crude oil economics shift. | knowledge_library, unstructured_sources, provenance_labels, cross_domain_sources |
 | R5.3-01b98b4c | 286 | blocked | Mont Belvieu NGL price movements interacting with Henry Hub forward curves. | knowledge_library, unstructured_sources, provenance_labels, cross_domain_sources |
 | R5.5-c478768c | 318 | blocked | Each memo must reference the underlying source observations, vector nodes, model version, analytical assumptio | hypothesis_memo, research_log_live |
-| R7.5-205221b1 | 525 | blocked | The alerting system must notify the user of material market events, failed collectors, data-quality incidents, | alert_delivery |
 | R8-97616259 | 529 | blocked | The five architectures must operate as a connected pipeline. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
 | R8-8df61f90 | 533 | blocked | Cloudflare Workers retrieve source material through scheduled edge collectors. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
 | R8-976918fe | 534 | blocked | Secure ingress delivers source payloads to the local extraction infrastructure. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
@@ -150,12 +136,6 @@ Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic r
 | R8-20b70032 | 546 | blocked | The remote Quant Hub exposes authenticated analytical capabilities. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
 | R8-520b6109 | 547 | blocked | The alerting system reports validated discoveries, operational failures, and material market developments. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
 | R8-9adaa64a | 549 | blocked | A successful system must connect all five architectures. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R9-8d62a603 | 586 | blocked | Preserve Cloudflare Access authentication. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-319a765e | 587 | blocked | Keep service credentials outside source control. | raw_payloads_verified, schema_16_columns, gatekeeper, access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-e22e92b1 | 588 | blocked | Restrict local database execution to read-only operations where appropriate. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-6ec4b921 | 589 | blocked | Authenticate remote jobs and webhooks. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-7dfd4af1 | 590 | blocked | Require authorization before merging and deploying repaired code. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-a93f59cd | 591 | blocked | Preserve execution and incident audit records. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
 | R10-cf8a2b74 | 595 | blocked | The completed platform must be able to: | roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-d712f6b5 | 597 | blocked | Collect and maintain data from 81 or more specialized market-data agents. | roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-ba057802 | 598 | blocked | Retrieve historical market observations with exact point-in-time availability. | pit_tests, raw_payloads_verified, roster_all_collected, worker_gateway_e2e, backtest_unit |
