@@ -43,18 +43,21 @@ text (pipeline notices, forecast discussions) with the source's publication time
 
 | Item | State |
 |---|---|
-| Collectors (local) | `collectors/`: CPC degree days + history/normals, EIA storage, EIA HH spot + futures 1-4 (to 2024-04), EIA WTI + Mont Belvieu propane, EIA NG monthly demand, EIA STEO basin production, GFS and ECMWF HDD (days 1-15 / 1-9), RGGI CO2, EIA weekly coal (CAPP, PRB), Kinder Morgan critical notices (7 pipelines), NOAA CPC 6-10/8-14 discussions |
+| Collectors (local) | `collectors/`: CPC degree days + history/normals, EIA storage, EIA HH spot + futures 1-4 (to 2024-04), EIA WTI + Mont Belvieu propane, EIA NG monthly demand, EIA-930 US48 gas-fired generation (power burn), EIA STEO basin production, GFS and ECMWF HDD (days 1-15 / 1-9), RGGI CO2, EIA weekly coal spot (CAPP, PRB), EIA coal rail transportation rate, Kinder Morgan critical notices (7 pipelines), NOAA CPC 6-10/8-14 discussions |
 | Edge collection | Worker fetches 7 whitelisted sources from Cloudflare's network; hub `/ingest/edge` checks key+URL against its own whitelist, records status/headers/hash/time in `edge_fetches`, archives and parses with the owning collector |
 | Validation | `ingestion/validation/gatekeeper.py` range/unit gate; every collector checks layout and raises on change; PIT availability rules are documented per collector |
-| Coverage | 48 of 81 roster agents have real data. Missing: NGI cash (4), CME M5-M12 (8), border/Mexico flows (5), LNG feedgas (8), power burn, ECMWF day 10-15 (6), coal rail rate, plus 3 legacy-seed-only agents. These need paid feeds, logins, an EIA API key, or (ECMWF 10-15) a heavy ensemble download |
+| Coverage | 50 of 81 roster agents have real data. Missing: NGI cash (4) and CME M5-M12 (8) - paid feeds; border/Mexico flows (5) and LNG feedgas (8) - pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) - not in the deterministic open feed. |
 | Schedules | Worker crons + user timer; source fetched once per run, one retry on 5xx |
 
 ## Architecture 2 — self-healing scrapers (Section 4)
 
-`selfheal.py`: structured diagnosis, LLM (qwen3:4b via `ollama_llm`) selector proposal with one grounded retry, fixture
-validation, `open_pull_request` that refuses unless validation and tests pass and never merges. Live repair verified.
-Not built: automatic PR opening (runs as dry run — owner approval needed) and the GitHub merge webhook → Worker → rerun
-path (needs a new webhook secret).
+`selfheal.py`: structured diagnosis, LLM (qwen3:4b via `ollama_llm`) selector proposal with a constrained, grounded retry
+and a deterministic fallback, fixture validation. `selfheal_pipeline.py`: selector agents registered in
+`ingestion/selectors.json` (selector lists; a repair is prepended so old layouts keep working) -> diagnose -> propose ->
+validate on preserved fixtures and the failing page's value range -> isolated worktree branch `selfheal/<collector>/...` ->
+full test suite -> push -> `gh pr create` (never merges; verified with PR #2). Recovery: GitHub webhook (HMAC verified by
+the Worker) -> hub `/selfheal/rerun` -> fetch, verify the merge commit is on the base branch, rerun the collector from a
+detached worktree of exactly that commit, record `selfheal_runs`, report on the `[selfheal]` issue stream.
 
 ## Architecture 3 — vector knowledge engine (Section 5)
 
@@ -83,8 +86,8 @@ Hub `/execute`: `as_of` normalised to UTC, PIT SQL context filtered by query-imp
 with strict JSON schema, `/no_think`, `num_predict` 180; model SQL runs in a sandbox (temp view with the cutoff, SQLite
 authorizer, row cap, step limit) with deterministic fallback; scenario delta computed deterministically; a thesis that
 contradicts the delta's sign is withheld; private audit gist piped to `gh` on stdin; new vector node linked to its
-parents. Response carries all ten fields of 7.4 plus provenance labels. Not built: outbound alert delivery channel
-(alerts are computed and shown in `state.json`, the web UI and the terminal).
+parents. Response carries all ten fields of 7.4 plus provenance labels. Owner alerts: `notify.py` opens one GitHub issue per incident (collector failure), closes it on recovery, and posts
+routine events (backtests, validated hypotheses, self-heal reruns) to rolling issue streams.
 
 ## Section 12 — visual platform
 

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-14T00:38:42Z",
+ "generated_at": "2026-11-14T00:45:42Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
  "requirements": 422,
  "totals": {
@@ -14,72 +14,63 @@
    "evidence": "/execute 403, /ingest 403",
    "desc": "quant.joeysvault.app refuses requests without an Access service token",
    "blocked_by": null,
-   "seconds": 4.4,
-   "carried_over": true
+   "seconds": 4.7
   },
   "alert_delivery": {
    "status": "passed",
    "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[backtests] backtests event st', '[selfheal] selfheal event stre']",
    "desc": "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues",
    "blocked_by": null,
-   "seconds": 1.5,
-   "carried_over": true
+   "seconds": 1.4
   },
   "architecture_doc": {
    "status": "passed",
    "evidence": "sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True",
    "desc": "an architecture/dependency audit and implementation plan covering all five architectures is versioned",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "audit_gists": {
    "status": "passed",
    "evidence": "5 recent hub gists",
    "desc": "audit gists are created for /execute calls (gh authenticated, recent gist present)",
    "blocked_by": null,
-   "seconds": 0.6,
-   "carried_over": true
+   "seconds": 1.0
   },
   "backtest_unit": {
    "status": "passed",
-   "evidence": "11 passed in 0.44s",
+   "evidence": "11 passed in 0.43s",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
-   "seconds": 0.6,
-   "carried_over": true
+   "seconds": 0.6
   },
   "branch_protection": {
    "status": "blocked",
    "evidence": "{\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://d",
    "desc": "main is protected on GitHub",
    "blocked_by": "owner decision (GitHub settings)",
-   "seconds": 0.3,
-   "carried_over": true
+   "seconds": 0.3
   },
   "branch_pushed": {
    "status": "passed",
    "evidence": "## quant-hub-build...origin/quant-hub-build",
    "desc": "local HEAD is pushed to origin",
    "blocked_by": null,
-   "seconds": 0.5,
-   "carried_over": true
+   "seconds": 0.5
   },
   "collector_freshness": {
    "status": "passed",
    "evidence": "all daily series fresh (<=5 days)",
    "desc": "daily collectors produced data within their cadence",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "collector_schedule": {
    "status": "passed",
    "evidence": "timer enabled; worker crons ['crons = [\"30 13 * * *\", \"45 15 * * THU\"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbers Sunday as 1']",
    "desc": "local systemd timer and Worker cron triggers are installed",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "collectors_run": {
    "status": "passed",
@@ -94,184 +85,161 @@
    "evidence": "have ['alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
    "desc": "FERC filings, LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products are ingested",
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "db_integrity": {
    "status": "passed",
    "evidence": "ok",
    "desc": "SQLite integrity_check returns ok",
    "blocked_by": null,
-   "seconds": 0.1,
-   "carried_over": true
+   "seconds": 0.1
   },
   "edge_collection": {
    "status": "passed",
    "evidence": "edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage']",
    "desc": "Cloudflare Workers fetch source data at the edge and forward payload + fetch metadata through Access",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "edge_ingest_unit": {
    "status": "passed",
-   "evidence": "3 passed in 0.73s",
+   "evidence": "3 passed in 0.64s",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 1.1,
-   "carried_over": true
+   "seconds": 0.9
   },
   "env_locked": {
    "status": "passed",
    "evidence": "mode 0o600; ignored True; tracked secret files: none",
    "desc": ".env is mode 600 and git-ignored; no secrets tracked",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "execute_sandbox_tests": {
    "status": "passed",
    "evidence": "11 passed in 0.18s",
    "desc": "/execute SQL sandbox, as_of normalisation, scenario arithmetic, thesis sign check",
    "blocked_by": null,
-   "seconds": 0.4,
-   "carried_over": true
+   "seconds": 0.4
   },
   "experiment_endpoint": {
    "status": "passed",
    "evidence": "HTTP 200",
    "desc": "hub /experiments lists recorded experiments",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "experiments_recorded": {
    "status": "passed",
    "evidence": "36 experiments, 0 incomplete",
    "desc": "every experiment (including rejected) is recorded with periods, data version and baseline",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "full_test_suite": {
    "status": "passed",
-   "evidence": "122 passed in 3.62s",
+   "evidence": "131 passed in 3.83s",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 4.0,
-   "carried_over": true
+   "seconds": 4.2
   },
   "gatekeeper": {
    "status": "passed",
-   "evidence": "3 passed in 0.10s",
+   "evidence": "3 passed in 0.09s",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
-   "seconds": 0.3,
-   "carried_over": true
+   "seconds": 0.3
   },
   "hub_health": {
    "status": "passed",
-   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":194}",
+   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":195}",
    "desc": "privileged hub answers locally on 127.0.0.1:8090",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "hypothesis_memo": {
    "status": "passed",
    "evidence": "5 passed in 0.01s",
    "desc": "alpha hypotheses carry every required field and are rejected without out-of-sample, cost-inclusive backtests",
    "blocked_by": null,
-   "seconds": 0.2,
-   "carried_over": true
+   "seconds": 0.2
   },
   "indicators": {
    "status": "passed",
    "evidence": "9 passed in 0.07s",
    "desc": "triangles, Bollinger squeeze, 50/200 crossovers, RSI/MACD divergence, Fibonacci, frac spread, WTI ratio",
    "blocked_by": null,
-   "seconds": 0.3,
-   "carried_over": true
+   "seconds": 0.2
   },
   "knowledge_library": {
    "status": "passed",
    "evidence": "194 nodes, 9 domains, edges {'builds_on': 64, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "knowledge_search_pit": {
    "status": "passed",
    "evidence": "old cutoff -> 0 results; now -> 8",
    "desc": "semantic search returns nothing that was unavailable at the cutoff",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "leaderboard_versioned": {
    "status": "passed",
    "evidence": "tracked=True; 36/36 experiments listed",
    "desc": "LEADERBOARD.md exists, matches the experiments table and is tracked in git",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "main_site_link": {
    "status": "blocked",
    "evidence": "HTTP 200, link present=False",
    "desc": "https://joeysvault.app links to markets.joeysvault.app",
    "blocked_by": "deploy after the public routes serve",
-   "seconds": 2.2,
-   "carried_over": true
+   "seconds": 2.2
   },
   "markets_local": {
    "status": "passed",
    "evidence": "state 200 ngl-state/1, /execute 404, / 200",
    "desc": "read-only markets hub serves state.json, UI and refuses privileged routes",
    "blocked_by": null,
-   "seconds": 0.2,
-   "carried_over": true
+   "seconds": 0.2
   },
   "multi_feature_experiments": {
    "status": "passed",
    "evidence": "feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum']",
    "desc": "experiments vary weather model, storage, production, LNG, NGL and vector features",
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "ngl_term": {
    "status": "passed",
    "evidence": "exit 0, 794 braille cells",
    "desc": "ngl-term.py renders the same state.json with a Braille map",
    "blocked_by": null,
-   "seconds": 0.3,
-   "carried_over": true
+   "seconds": 0.3
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
    "evidence": "none",
    "desc": "production code uses no /tmp, tempfile or .claude paths",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "observations_reference_payloads": {
    "status": "passed",
-   "evidence": "91783/91783 measured rows reference an archived payload",
+   "evidence": "92844/92844 measured rows reference an archived payload",
    "desc": "measured rows from collectors cite an archived raw payload",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "ollama_models": {
    "status": "passed",
    "evidence": "['nomic-embed-text:latest', 'qwen3:4b']",
    "desc": "local Ollama serves qwen3:4b and nomic-embed-text",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "ollama_only_local": {
    "status": "passed",
@@ -282,147 +250,129 @@
   },
   "pit_tests": {
    "status": "passed",
-   "evidence": "22 passed in 0.99s",
+   "evidence": "23 passed in 0.98s",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 1.2,
-   "carried_over": true
+   "seconds": 1.2
   },
   "promotion_gate": {
    "status": "passed",
    "evidence": "promotion conditions present in experiments.py",
    "desc": "a model is promoted only with lower OOS RMSE, Bonferroni-significant direction and positive net return",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "provenance_labels": {
    "status": "passed",
    "evidence": "0 unlabelled rows",
    "desc": "every row is labelled measured / extracted_estimate / synthetic_scenario / model_hypothesis / unverified_seed",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "public_markets": {
    "status": "blocked",
    "evidence": "markets.joeysvault.app 404, ngl.joeysvault.app 404",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 4.4,
-   "carried_over": true
+   "seconds": 4.3
   },
   "queue_dispatch": {
    "status": "passed",
    "evidence": "│ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1        ",
    "desc": "Cloudflare Queue producer/consumer bound on the Worker",
    "blocked_by": null,
-   "seconds": 1.3,
-   "carried_over": true
+   "seconds": 1.3
   },
   "raw_payloads_verified": {
    "status": "passed",
-   "evidence": "163/163 verified",
+   "evidence": "179/179 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 0.3,
-   "carried_over": true
+   "seconds": 0.8
   },
   "research_log_live": {
    "status": "blocked",
    "evidence": "no alpha-hypothesis issues",
    "desc": "alpha memos are published with gh issue create",
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
-   "seconds": 0.4,
-   "carried_over": true
+   "seconds": 0.5
   },
   "roster_81": {
    "status": "passed",
    "evidence": "81 unique",
    "desc": "the roster defines 81 unique atomic agents",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "roster_all_collected": {
    "status": "blocked",
-   "evidence": "48/81 with real data; missing 33: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, Demand_PowerBurn, ECMWF_00z_HDD_Day10, ECMWF_00z_HDD_Day11, ECMWF_00z_HDD_Day12, ECMWF_00z_HDD_Day13, ECMWF_00z_HDD_Day14, ECMWF_00z_HDD_Day15, Coal_Rail_TransportRate",
+   "evidence": "50/81 with real data; missing 31: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, ECMWF_00z_HDD_Day10, ECMWF_00z_HDD_Day11, ECMWF_00z_HDD_Day12, ECMWF_00z_HDD_Day13, ECMWF_00z_HDD_Day14, ECMWF_00z_HDD_Day15",
    "desc": "every roster agent has real (non-seed) data",
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
-   "seconds": 1.8,
-   "carried_over": true
+   "seconds": 1.7
   },
   "schema_16_columns": {
    "status": "passed",
    "evidence": "missing=[]",
    "desc": "pit_market_data carries the 4 canonical + 12 production columns",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "selfheal_live_ollama": {
    "status": "passed",
-   "evidence": "{'selector': 'span.px', 'attempts': ['span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
+   "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 2.7,
-   "carried_over": true
+   "seconds": 8.9
   },
   "selfheal_pr_live": {
    "status": "passed",
    "evidence": "self-heal PRs: [(2, 'OPEN')]",
    "desc": "a validated, test-passing repair opens a real GitHub pull request (never merged automatically)",
    "blocked_by": null,
-   "seconds": 0.5,
-   "carried_over": true
+   "seconds": 0.6
   },
   "selfheal_unit": {
    "status": "passed",
    "evidence": "12 passed in 0.02s",
    "desc": "failure diagnosis, LLM selector repair proposal, fixture validation, PR gating",
    "blocked_by": null,
-   "seconds": 0.2,
-   "carried_over": true
+   "seconds": 0.2
   },
   "snapshots_versioned": {
    "status": "passed",
-   "evidence": "tracked snapshot days ['2026-11-13']; scheduled=True",
+   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14']; scheduled=True",
    "desc": "deterministic snapshot manifests are exported daily and tracked in git",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "state_schema_contract": {
    "status": "passed",
-   "evidence": "13 passed in 0.30s",
+   "evidence": "13 passed in 0.27s",
    "desc": "state.json carries every section the UI and terminal render, with explicit provenance",
    "blocked_by": null,
-   "seconds": 0.5,
-   "carried_over": true
+   "seconds": 0.5
   },
   "unstructured_sources": {
    "status": "passed",
    "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 1, 'pipeline_notice': 83}",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
-   "seconds": 0.0,
-   "carried_over": true
+   "seconds": 0.0
   },
   "web_ui_browser": {
    "status": "passed",
    "evidence": "18 map nodes, panels=True, console errors=0",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 2.0,
-   "carried_over": true
+   "seconds": 1.4
   },
   "webhook_recovery": {
    "status": "passed",
    "evidence": "GitHub deliveries accepted after signature check: 2 of 2; reruns verified+ok=1, forged refused=1",
    "desc": "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector",
    "blocked_by": null,
-   "seconds": 0.6,
-   "carried_over": true
+   "seconds": 0.6
   },
   "worker_gateway_e2e": {
    "status": "passed",
