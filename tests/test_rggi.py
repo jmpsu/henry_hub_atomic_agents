@@ -26,3 +26,13 @@ class Correction(unittest.TestCase):
         self.assertEqual(r[0]["observations_new"], 1)
         rows = c.execute("select available_timestamp,value,quality_status from pit_market_data where target_timestamp like '2026-09-09%' order by 1").fetchall()
         self.assertEqual(rows, [("2026-09-10T16:00:00Z", 37.65, "validated_availability_assumed_d+1"), ("2026-11-13T12:00:00Z", 38.0, "revision_vintage")])
+
+
+class FutureRows(unittest.TestCase):
+    def test_future_vintage_rows_excluded_so_reruns_add_nothing(self):
+        page = HTML.replace("</table>", "<tr><td>Auction 72 (Future)</td><td>2026-06-03</td><td>1</td><td>0</td><td>1</td><td>$34.00</td><td>--</td></tr></table>")
+        self.assertEqual([x for x in g.parse(page) if x[1] == "2026-06-03"], [("Auction 72", "2026-06-03", 35.0)])
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        for _ in range(3):
+            g.collect(c, fetcher=lambda u: (200, page.encode(), "text/html"))
+        self.assertEqual(c.execute("select count(*) from pit_market_data where target_timestamp like '2026-06-03%'").fetchone()[0], 1)

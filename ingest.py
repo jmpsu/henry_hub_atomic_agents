@@ -21,8 +21,9 @@ def archive_payload(conn, payload: bytes, source_id: str, source_url: str, http_
                     retrieved: str, content_type: str = "") -> str:
     """Store the original bytes under raw/<sha256> (never overwritten) and index them."""
     h = hashlib.sha256(payload).hexdigest()
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    path = RAW_DIR / h
+    raw_dir = Path(os.environ.get("RAW_DIR", RAW_DIR))      # read per call so tests and worktrees can redirect it
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    path = raw_dir / h
     if not path.exists():
         path.write_bytes(payload)
     conn.execute(

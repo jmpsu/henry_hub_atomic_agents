@@ -9,6 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from runtime_paths import RUNTIME_DIR  # noqa: E402
 
 ROOT = RUNTIME_DIR / "test_scratch"
+import os  # noqa: E402
+os.environ.setdefault("RAW_DIR", str(ROOT / "raw"))   # test payloads never land in the project's real raw/ archive
 
 
 def mkdtemp() -> str:

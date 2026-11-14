@@ -1,7 +1,9 @@
 """RGGI quarterly CO2 allowance auction clearing prices (HTML table, keyless):
 https://www.rggi.org/auctions/auction-results/prices-volumes  -> Agent_Power_CO2_AllowancePrice (USD/short ton).
 Quarterly clearing price only (the roster's 'secondary price' is NOT covered). PIT assumption (documented, conservative):
-results public the day AFTER the auction at 16:00Z. Target = auction date."""
+results public the day AFTER the auction at 16:00Z. Target = auction date.
+Rows labelled "(Future)" (2009-2011 auctions of future-control-period allowances, same date as the main auction) are a
+different product and are excluded."""
 import html
 import os
 import re
@@ -34,6 +36,8 @@ def parse(text: str) -> list:
     for r in rows[1:]:
         m = re.fullmatch(r"\$([\d.,]+)", r[5]) if len(r) >= 7 else None
         if not m or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", r[1]):
+            continue
+        if "(future)" in r[0].lower():      # future-vintage allowances sold at the same auction: a different product, not the clearing price
             continue
         out.append((r[0], r[1], float(m.group(1).replace(",", ""))))
     if not out:
