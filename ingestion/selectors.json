@@ -1,9 +1,15 @@
 {
  "Agent_SelfHeal_Demo": {
   "collector": "selfheal_demo",
+  "fixtures": "tests/fixtures/selfheal/Agent_SelfHeal_Demo",
   "note": "Demonstration agent that exercises the self-heal pipeline end to end on preserved fixtures; it is not market data.",
-  "selectors": ["span.hh-price"],
-  "range": [0.5, 20.0],
-  "fixtures": "tests/fixtures/selfheal/Agent_SelfHeal_Demo"
+  "range": [
+   0.5,
+   20.0
+  ],
+  "selectors": [
+   "span.px-now",
+   "span.hh-price"
+  ]
  }
 }
