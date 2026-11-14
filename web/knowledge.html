@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Knowledge Library</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="kl">
+<header class="top">
+  <a class="home" href="/">&larr; market dashboard</a>
+  <div class="title">VECTOR KNOWLEDGE LIBRARY</div>
+  <div class="asof" id="asof">loading</div>
+</header>
+
+<nav class="controls kl-controls" aria-label="Knowledge filters">
+  <div class="kl-time">
+    <label for="kl-slider">Point in time</label>
+    <input id="kl-slider" type="range" min="0" max="730" step="1" value="0" aria-describedby="kl-time-note">
+    <input id="kl-date" type="datetime-local" aria-label="Cutoff (UTC)">
+    <button type="button" id="kl-now" class="btn">now</button>
+    <span id="kl-time-note" class="dim">only objects available at the cutoff are shown or searched</span>
+  </div>
+  <form id="kl-form" class="kl-search"><input id="kl-q" type="search" maxlength="200" placeholder="semantic search, e.g. compressor outage on Tennessee Gas" aria-label="Semantic search"><button type="submit">Search</button></form>
+</nav>
+
+<main class="kl-main">
+  <section class="panel kl-graph-panel" aria-labelledby="kl-h">
+    <h2 id="kl-h">Knowledge graph<span class="tags" id="kl-tags"></span></h2>
+    <div class="kl-filters">
+      <div><span class="dim">domains</span> <span id="kl-domains" class="kl-chips"></span></div>
+      <div><span class="dim">edges</span> <span id="kl-edges" class="kl-chips"></span></div>
+      <div><label class="dim" for="kl-limit">objects</label> <select id="kl-limit"><option>150</option><option selected>300</option><option>600</option></select>
+        <button type="button" id="kl-fit" class="btn">fit</button></div>
+    </div>
+    <svg id="kl-svg" role="img" aria-label="Interactive knowledge graph: drag to pan, scroll to zoom, select a node to inspect it"></svg>
+    <div class="kl-legend" id="kl-legend"></div>
+  </section>
+
+  <aside class="panel kl-side" aria-labelledby="kl-ins-h">
+    <h2 id="kl-ins-h">Inspector</h2>
+    <div id="kl-detail" class="kl-detail">Select a node, or search. Similarity is a retrieval aid, never evidence of causation.</div>
+  </aside>
+
+  <section class="panel kl-activity" aria-labelledby="kl-act-h">
+    <h2 id="kl-act-h">Agent activity<span class="tags" id="kl-act-tags"></span></h2>
+    <div class="kl-act-grid">
+      <div><div class="chart-cap">Recent agent runs</div><div class="table-wrap"><table id="kl-runs"><thead><tr><th>Agent</th><th>Finished</th><th>OK</th><th>Summary</th></tr></thead><tbody></tbody></table></div></div>
+      <div><div class="chart-cap">Message bus (agent → agent)</div><div class="table-wrap"><table id="kl-msgs"><thead><tr><th>#</th><th>From</th><th>Topic</th><th>Consumed by</th></tr></thead><tbody></tbody></table></div></div>
+      <div><div class="chart-cap">Local model calls (Ollama)</div><div class="table-wrap"><table id="kl-llm"><thead><tr><th>Agent</th><th>Task</th><th>Model</th><th>Calls</th><th>OK</th><th>Fallback</th><th>Avg ms</th></tr></thead><tbody></tbody></table></div></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="kl-foot"></span>
+  <span>Read-only. Every object carries its source, availability time and provenance; model output is labelled as a hypothesis.</span>
+</footer>
+
+<script src="/static/vendor/d3.min.js"></script>
+<script src="/static/knowledge.js"></script>
+</body>
+</html>

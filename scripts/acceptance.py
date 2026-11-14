@@ -520,10 +520,172 @@ BLOCK_CATEGORY = {
 }
 
 
+
+# ----------------------------------------------------------------------------- CLAUDE.md directive: Ollama layer, agents, graphical library
+AGENT_NAMES = ("diagnostics", "data_quality", "repair", "notice_analyst", "anomaly", "synthesis")
+
+
+@check("agent_unit", "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off")
+def _():
+    return pytest_ok("tests/test_agents.py")
+
+
+@check("ollama_live_integration", "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run")
+def _():
+    return pytest_ok("tests/test_ollama_live.py")
+
+
+@check("agents_live_run", "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b")
+def _():
+    since = (datetime.now(timezone.utc) - __import__("datetime").timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with ro() as c:
+        runs = {a: c.execute("SELECT ok FROM agent_runs WHERE agent=? AND finished>=? ORDER BY id DESC LIMIT 1", (a, since)).fetchone() for a in AGENT_NAMES}
+        calls = dict(c.execute("SELECT agent, SUM(ok) FROM llm_calls WHERE at>=? AND model LIKE 'qwen3%' GROUP BY agent", (since,)).fetchall())
+        emb = c.execute("SELECT SUM(ok) FROM llm_calls WHERE at>=? AND model LIKE 'nomic-embed-text%'", (since,)).fetchone()[0] or 0
+    ok_runs = [a for a, r in runs.items() if r and r[0]]
+    used = {a: calls.get(a, 0) for a in ("notice_analyst", "data_quality", "synthesis")}
+    return len(ok_runs) == len(AGENT_NAMES) and all(v > 0 for v in used.values()) and emb > 0, \
+        f"ok runs {ok_runs}; qwen3 ok calls {used}; embedding ok calls {emb}"
+
+
+@check("agents_share_knowledge", "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store")
+def _():
+    with ro() as c:
+        cross = c.execute("SELECT COUNT(*) FROM agent_message_reads r JOIN agent_messages m ON m.id=r.message_id WHERE r.consumer<>m.sender").fetchone()[0]
+        topics = dict(c.execute("SELECT m.topic, COUNT(DISTINCT r.consumer) FROM agent_messages m JOIN agent_message_reads r ON r.message_id=m.id GROUP BY 1").fetchall())
+        findings = c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain='agent_finding'").fetchone()[0]
+        linked = c.execute("SELECT COUNT(DISTINCT e.dst) FROM kb_edges e JOIN kb_nodes s ON s.id=e.src WHERE e.type='evidence_for' AND s.domain<>'agent_finding'").fetchone()[0]
+        built_on = c.execute("SELECT COUNT(*) FROM kb_edges e JOIN kb_nodes s ON s.id=e.src JOIN kb_nodes d ON d.id=e.dst WHERE e.type='evidence_for' "
+                             "AND s.domain='agent_finding' AND d.domain='agent_finding'").fetchone()[0]
+    ch = sqlite3.connect(f"file:{ROOT / 'chroma_pit_kb' / 'chroma.sqlite3'}?mode=ro", uri=True)
+    try:
+        mirrored = ch.execute("SELECT COUNT(DISTINCT embedding_id) FROM embeddings WHERE embedding_id LIKE 'kb_finding_%'").fetchone()[0]
+    finally:
+        ch.close()
+    ok = cross > 0 and findings > 0 and linked > 0 and built_on > 0 and mirrored >= findings * 0.9
+    return ok, (f"{cross} cross-agent message reads {topics}; {findings} findings, {linked} linked to source/data evidence, "
+                f"{built_on} finding->finding links (later runs build on earlier findings); {mirrored} mirrored in Chroma")
+
+
+@check("hypothesis_evaluated_live", "an agent hypothesis was evaluated by the PIT walk-forward backtester and a complete 5.4 memo was persisted")
+def _():
+    with ro() as c:
+        st = dict(c.execute("SELECT status, COUNT(*) FROM finding_status GROUP BY 1").fetchall())
+        memos = c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain='agent_finding' AND series_key LIKE '%\\_memo' ESCAPE '\\'").fetchone()[0]
+        ev = c.execute("SELECT COUNT(*) FROM kb_edges WHERE type='evaluated_by'").fetchone()[0]
+    return st.get("evaluated", 0) > 0 and memos > 0 and ev > 0, f"finding verdicts {st}; evaluated_by edges {ev}; memos {memos}"
+
+
+@check("knowledge_explorer", "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering", network=True)
+def _():
+    st, page = http("http://127.0.0.1:8095/knowledge")
+    st2, b = http("http://127.0.0.1:8095/api/knowledge-graph?limit=600")
+    g = json.loads(b) if st2 == 200 else {}
+    fid = next((n["id"] for n in g.get("nodes", []) if n["domain"] == "agent_finding" and n.get("status")), None)
+    st3, nb = http(f"http://127.0.0.1:8095/api/knowledge-node/{fid}") if fid else (0, b"{}")
+    node = json.loads(nb).get("node", {}) if st3 == 200 else {}
+    st4, old = http("http://127.0.0.1:8095/api/knowledge-graph?as_of=2020-01-01T00:00:00Z")
+    links = {l["type"] for l in g.get("links", [])}
+    ok = (st == 200 and b"knowledge.js" in page and "evidence_for" in links and node.get("edges") and node.get("status")
+          and st4 == 200 and json.loads(old)["total_nodes"] < g.get("total_nodes", 0))
+    rc, tail = pytest_ok("tests/test_knowledge_explorer.py")
+    return ok and rc, f"/knowledge {st}; graph {g.get('total_nodes')} nodes, edge types {sorted(links)}; inspector {st3} edges={len(node.get('edges', []))}; tests {tail}"
+
+
+@check("knowledge_explorer_browser", "the /knowledge page renders the interactive graph in headless Chrome with no console errors", network=True)
+def _():
+    chrome = shutil.which("google-chrome")
+    if not chrome:
+        return False, "google-chrome not installed"
+    prof = ROOT / "runtime" / "chrome-acceptance-kl"
+    shutil.rmtree(prof, ignore_errors=True)
+    p = subprocess.run([chrome, "--headless=new", "--no-sandbox", f"--user-data-dir={prof}", "--window-size=1600,1400", "--virtual-time-budget=15000",
+                        "--enable-logging=stderr", "--v=0", "--dump-dom", "http://127.0.0.1:8095/knowledge"], capture_output=True, text=True, timeout=120)
+    shutil.rmtree(prof, ignore_errors=True)
+    dom, log = p.stdout, p.stderr
+    errs = [l for l in log.splitlines() if "CONSOLE" in l and "GPU stall" not in l]
+    nodes, edges = dom.count('class="kl-node'), dom.count('class="kl-edge')
+    findings = dom.count("kl-node finding")
+    return nodes > 50 and edges > 20 and findings > 0 and not errs, f"{nodes} nodes, {edges} edges, {findings} agent findings drawn, console errors={len(errs)}"
+
+
+@check("agents_scheduled", "agents run after every scheduled collection (timer ExecStopPost and the hub's /ingest trigger)")
+def _():
+    rc, unit = sh("systemctl --user cat hh-collect-cpc.service")
+    hub = (ROOT / "command_hub.py").read_text()
+    wired = "scripts/run_agents.py" in unit and "_agents_after_ingest()" in hub
+    rc2, en = sh("systemctl --user is-enabled hh-collect-cpc.timer")
+    return wired and rc2 == 0, f"timer {en.strip()}; ExecStopPost run_agents.py={'scripts/run_agents.py' in unit}; /ingest trigger={'_agents_after_ingest()' in hub}"
+
+
+
+
+# ----------------------------------------------------------------------------- CLAUDE.md directive traceability
+# (requirement, CLAUDE.md line, implementation, checks). Status = passed only when every mapped check passed.
+DIRECTIVE = [
+    ("Ollama: agent reasoning and task assistance", 21, "agents/workers.py SynthesisAgent, RepairAgent; agents/llm.py",
+     ["agent_unit", "ollama_live_integration", "agents_live_run"]),
+    ("Ollama: structured extraction, classification, normalization, validation", 22,
+     "agents/workers.py NoticeAnalystAgent (schema + source-label/severity/location checks), DiagnosticsAgent",
+     ["agent_unit", "ollama_live_integration", "agents_live_run"]),
+    ("Ollama: anomaly detection and data-quality investigation", 23, "agents/workers.py AnomalyAgent, DataQualityAgent",
+     ["agent_unit", "agents_live_run"]),
+    ("Ollama: agent-to-agent knowledge exchange and synthesis", 24, "agents/memory.py publish/consume + findings; SynthesisAgent",
+     ["agent_unit", "agents_share_knowledge", "agents_live_run"]),
+    ("Ollama: research synthesis grounded in retrieved source data", 25,
+     "SynthesisAgent: PIT observations + semantic retrieval, numbers_grounded, evidence/observation citation checks",
+     ["agent_unit", "agents_live_run", "hypothesis_evaluated_live"]),
+    ("Ollama: embedding generation and semantic retrieval", 26, "agents/llm.py embed; agents/memory.py search; kb_ingest.search",
+     ["ollama_live_integration", "knowledge_search_pit", "agents_share_knowledge"]),
+    ("Ollama: error diagnosis and bounded self-healing assistance", 27,
+     "DiagnosticsAgent -> incident -> RepairAgent (dry-run selfheal_pipeline.repair / code suggestion, never applied)",
+     ["agent_unit", "selfheal_unit", "selfheal_live_ollama"]),
+    ("Model calls: explicit configuration, timeouts, error handling, logging, deterministic fallback", 29,
+     "agents/llm.py CONFIG/status/_post/json(fallback, validate)/llm_calls", ["agent_unit", "ollama_live_integration"]),
+    ("Not operational merely because the daemon responds", 29, "agents/llm.py status() requires the configured models; live tests",
+     ["ollama_live_integration", "agents_live_run"]),
+    ("Library: ingestion of documents, source material, agent findings, validated intelligence", 35,
+     "kb_ingest.build_objects/ingest; agents/memory.add_finding", ["knowledge_library", "agents_share_knowledge"]),
+    ("Library: text extraction, chunking, metadata, source attribution, provenance", 36, "kb_ingest.chunk_text + part_of edges; kb_nodes metadata",
+     ["kb_chunking", "knowledge_library", "provenance_labels"]),
+    ("Library: vector embeddings and persistent vector indexing", 37, "kb_nodes.embedding + Chroma henry_hub_alpha_graph",
+     ["knowledge_library", "agents_share_knowledge", "hub_health"]),
+    ("Library: semantic search and retrieval by agents and research workflows", 38,
+     "agents/memory.search; /execute retrieve_vector_nodes; /api/knowledge-search", ["knowledge_search_pit", "agents_live_run", "worker_gateway_e2e"]),
+    ("Library: relationships between documents, concepts, series, agents, findings, features", 39,
+     "kb_edges types previous_in_series, same_period, builds_on, semantic_neighbor, part_of, evidence_for, evaluated_by",
+     ["knowledge_library", "agents_share_knowledge", "hypothesis_evaluated_live"]),
+    ("Library: graphical interface for exploring, searching, inspecting, navigating", 40,
+     "web/knowledge.html + web/knowledge.js at /knowledge; /api/knowledge-graph, /api/knowledge-node, /api/agents/activity",
+     ["knowledge_explorer", "knowledge_explorer_browser", "web_ui_browser"]),
+    ("Library: persistent across runs, updates, deduplication, traceable sources", 41,
+     "doc_hash idempotent ingest; finding content-hash ids; raw_payloads", ["knowledge_library", "agent_unit", "raw_payloads_verified"]),
+    ("Library: Ollama for embedding and synthesis", 42, "nomic-embed-text embeddings; qwen3:4b synthesis", ["ollama_live_integration", "agents_live_run"]),
+    ("Agents use shared intelligence and knowledge infrastructure (verified execution)", 47, "agents/ via /agents/run and the daily timer",
+     ["agents_live_run", "agents_share_knowledge", "agents_scheduled"]),
+    ("Point-in-time correctness, no look-ahead in features, retrieval, inputs, training, backtesting", 50,
+     "markets_engine.load_series, kb_ingest.search, memory.search assertions, observations(), evaluate(created<=as_of), backtest.py",
+     ["pit_tests", "knowledge_search_pit", "agent_unit", "backtest_unit"]),
+    ("End-to-end: acquisition -> ... -> agent collaboration -> Ollama synthesis -> backtesting -> persistent knowledge", 53,
+     "collectors -> pit_market_data -> kb_ingest -> agents -> experiments -> kb findings/memos",
+     ["collectors_run", "knowledge_library", "agents_live_run", "hypothesis_evaluated_live", "experiments_recorded"]),
+    ("Acceptance 6: point-in-time and no-look-ahead tests pass", 76, "tests/test_backtest.py, test_ingest.py, test_agents.py, ...", ["pit_tests", "agent_unit"]),
+    ("Acceptance 7: relevant tests pass", 77, "pytest suite", ["full_test_suite"]),
+]
+
+
+@check("kb_chunking", "long source documents are chunked so their whole text is embedded, with part_of edges")
+def _():
+    rc, tail = pytest_ok("tests/test_kb_chunking.py")
+    with ro() as c:
+        n = c.execute("SELECT COUNT(*) FROM kb_edges WHERE type='part_of'").fetchone()[0]
+    return rc and n > 0, f"tests {tail}; {n} part_of edges in the production library"
+
+
 # ----------------------------------------------------------------------------- mapping
 RULES = [  # (section prefix or None, regex on text/context, checks) - first matching rule set is unioned per requirement
     ("1", r".", ["roster_all_collected", "experiments_recorded", "promotion_gate", "knowledge_library", "worker_gateway_e2e"]),
-    ("2", r"ollama|qwen|nomic|inference|embedding", ["ollama_models", "ollama_only_local"]),
+    ("2", r"ollama|qwen|nomic|inference|embedding", ["ollama_models", "ollama_only_local", "ollama_live_integration"]),
     ("2", r"worker|tunnel|access|queue|cloudflared|8090", ["access_protects_hub", "queue_dispatch", "hub_health"]),
     ("2", r"sqlite|chroma|vector|payload|preserved", ["db_integrity", "raw_payloads_verified", "knowledge_library"]),
     ("2", r"github|gh|gist|fastapi|python", ["audit_gists", "hub_health", "full_test_suite"]),
@@ -553,9 +715,9 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("5.1", r"eia|noaa|gfs|ecmwf|power burn|storage|production", ["knowledge_library"]),
     ("5.1", r"preserve|source|timestamp|revision", ["knowledge_library"]),
     ("5.2", r".", ["ollama_models", "knowledge_library", "knowledge_search_pit"]),
-    ("5.3", r".", ["knowledge_library", "unstructured_sources", "provenance_labels"]),
+    ("5.3", r".", ["knowledge_library", "unstructured_sources", "provenance_labels", "agents_live_run", "hypothesis_evaluated_live"]),
     ("5.3", r"permian pipeline|lng feedgas|ethane|cracker|propane export|power burn|ngl purity|associated gas|mont belvieu|basis", ["cross_domain_sources"]),
-    ("5.4", r".", ["hypothesis_memo"]),
+    ("5.4", r".", ["hypothesis_memo", "hypothesis_evaluated_live"]),
     ("5.5", r".", ["hypothesis_memo", "research_log_live"]),
     ("6.1", r".", ["queue_dispatch", "multi_feature_experiments"]),
     ("6.2", r".", ["queue_dispatch", "experiment_endpoint", "experiments_recorded"]),
@@ -594,7 +756,7 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("10", r"must be able to", ["roster_all_collected", "worker_gateway_e2e", "backtest_unit"]),
     ("12.1", r".", ["web_ui_browser", "ngl_term"]),
     ("12.2", r".", ["public_markets", "main_site_link", "access_protects_hub", "markets_local"]),
-    ("12.3", r".", ["knowledge_library", "knowledge_search_pit", "web_ui_browser"]),
+    ("12.3", r".", ["knowledge_library", "knowledge_search_pit", "web_ui_browser", "knowledge_explorer", "knowledge_explorer_browser", "agents_share_knowledge"]),
     ("12.4", r".", ["state_schema_contract", "web_ui_browser"]),
     ("12.4", r"ethane|butane|gasoline|fractionation|lng feedgas|power burn", ["roster_all_collected"]),
     ("12.5", r".", ["indicators", "web_ui_browser"]),
@@ -688,10 +850,22 @@ def main(argv=None) -> int:
     for t in trace:
         if t["status"] != "passed":
             lines.append(f"| {t['id']} | {t['line']} | {t['status']} | {t['text'][:110].replace('|', '/')} | {', '.join(t['checks']) or '—'} |")
+    drows = []
+    for req, line, impl, checks in DIRECTIVE:
+        sts = [results.get(c, {}).get("status", "unverified") for c in checks]
+        st = ("failed" if "failed" in sts else "blocked" if "blocked" in sts else "passed" if all(x == "passed" for x in sts) else "unverified")
+        drows.append({"requirement": req, "claude_md_line": line, "implementation": impl, "checks": checks, "status": st})
+    doc["directive"] = drows
+    lines += ["", "## CLAUDE.md directive (requirement -> implementation -> checks)", "",
+              "| Requirement | CLAUDE.md line | Implementation | Checks | Status |", "|---|---|---|---|---|"]
+    lines += [f"| {d['requirement']} | {d['claude_md_line']} | {d['implementation'].replace('|', '/')} | {', '.join(d['checks'])} | {d['status']} |" for d in drows]
     (REQ / "STATUS.md").write_text("\n".join(lines) + "\n")
     doc["blocked_by_cause"] = cats
     (REQ / "status.json").write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
-    print(json.dumps({"requirements": len(trace), **totals, "blocked_by_cause": cats}))
+    dt = {}
+    for d in drows:
+        dt[d["status"]] = dt.get(d["status"], 0) + 1
+    print(json.dumps({"requirements": len(trace), **totals, "blocked_by_cause": cats, "directive": dt}))
     return 0
 
 

@@ -196,7 +196,8 @@ async def ingest_now():
             kb = await asyncio.to_thread(kb_ingest.ingest, DB_PATH, kb_collection)
         except Exception as e:  # noqa: BLE001
             kb = {"error": str(e)[:200]}
-        return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:], "knowledge": kb}
+        return {"ok": p.returncode == 0, "exit": p.returncode, "results": lines[:20], "stderr": p.stderr[-300:], "knowledge": kb,
+                "agents": _agents_after_ingest()}
 
 
 class EdgePayload(BaseModel):
@@ -350,6 +351,60 @@ async def selfheal_rerun(req: RerunRequest):
         return {"collector": req.collector, "sha": req.sha, "verified": bool(verified), "ok": bool(ok), "detail": detail[-600:]}
     async with _SELFHEAL_LOCK:
         return await asyncio.to_thread(run)
+
+
+_AGENTS_LOCK = asyncio.Lock()
+_AGENTS_LAST: dict = {}
+
+
+async def _run_agents(notice_limit: int = 25, trigger: str = "api") -> dict:
+    from agents import workers
+    async with _AGENTS_LOCK:
+        rep = await asyncio.to_thread(workers.run_all, DB_PATH, kb_collection, None, None, max(1, min(notice_limit, 200)))
+        _AGENTS_LAST.update(trigger=trigger, at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            ok={k: v.get("ok") for k, v in rep.get("agents", {}).items()})
+        return rep
+
+
+@app.post("/agents/run")
+async def agents_run(notice_limit: int = 25):
+    """Run the research agents (diagnostics, data quality, repair assistance, pipeline-notice analyst, anomaly, cross-domain
+    synthesis) point-in-time now. They use local Ollama, the shared knowledge library (including this process's Chroma
+    collection) and the message bus. Access-protected like every privileged route."""
+    if _AGENTS_LOCK.locked():
+        raise HTTPException(status_code=409, detail="agents already running")
+    return await _run_agents(notice_limit, "api")
+
+
+def _agents_after_ingest() -> str:
+    """Start an agent run in the background after collection (the Worker's /ingest call must not wait for it)."""
+    if _AGENTS_LOCK.locked():
+        return "already running"
+
+    async def bg():
+        try:
+            await _run_agents(25, "after_ingest")
+        except Exception as e:  # noqa: BLE001
+            _AGENTS_LAST.update(trigger="after_ingest", error=str(e)[:300])
+    asyncio.get_running_loop().create_task(bg())
+    return "started"
+
+
+@app.get("/agents/activity")
+async def agents_activity(limit: int = 20):
+    from agents import llm as agent_llm
+
+    def q():
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+        try:
+            return kb_ingest.agent_activity(conn, max(1, min(limit, 100)))
+        finally:
+            conn.close()
+    out = await asyncio.to_thread(q)
+    out["ollama"] = await asyncio.to_thread(agent_llm.status)
+    out["last_trigger"] = _AGENTS_LAST
+    out["running"] = _AGENTS_LOCK.locked()
+    return out
 
 
 _KB_LOCK = asyncio.Lock()

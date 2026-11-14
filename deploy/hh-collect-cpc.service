@@ -1,0 +1,11 @@
+[Unit]
+Description=Henry Hub PIT collector: NOAA CPC degree days (HDD/CDD)
+
+[Service]
+TimeoutStopSec=3600
+Type=oneshot
+WorkingDirectory=/home/joey/Projects/henry_hub_atomic_agents
+Environment=DB_PATH=/home/joey/Projects/henry_hub_atomic_agents/henry_hub_pit.db
+ExecStart=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin/python /home/joey/Projects/henry_hub_atomic_agents/collectors/run_all.py
+ExecStartPost=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin/python /home/joey/Projects/henry_hub_atomic_agents/scripts/export_snapshot.py
+ExecStopPost=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin/python /home/joey/Projects/henry_hub_atomic_agents/scripts/run_agents.py

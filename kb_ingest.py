@@ -13,6 +13,10 @@ Edge types and what they do and do not claim:
   same_period         objects from different domains covering the same period (co-occurrence, NOT causation)
   builds_on           an /execute thesis that was generated with the linked node in its context
   semantic_neighbor   nearest EARLIER object by embedding similarity (retrieval aid, NOT proof of an analog or of causation)
+  part_of             a chunk of a long source document -> the document (parent-child; chunks carry the parent's PIT metadata)
+  evidence_for        written by the research agents (agents/): knowledge an agent cited when it produced a finding
+  evaluated_by        written by the synthesis agent: hypothesis -> its PIT walk-forward backtest evaluation
+Long source documents are chunked (chunk_text: paragraph boundaries, overlap on hard splits) so the whole text is embedded.
 """
 from __future__ import annotations
 
@@ -30,7 +34,7 @@ import numpy as np
 BASE_DIR = Path(__file__).resolve().parent
 OLLAMA_EMB_URL = os.environ.get("OLLAMA_EMB_URL", "http://127.0.0.1:11434/api/embeddings")
 EMBED_MODEL = "nomic-embed-text"
-EDGE_TYPES = ("previous_in_series", "same_period", "builds_on", "semantic_neighbor")
+EDGE_TYPES = ("previous_in_series", "same_period", "builds_on", "semantic_neighbor")   # derived here; part_of/evidence_for/evaluated_by are kept
 STORAGE = ["Agent_Storage_East", "Agent_Storage_Midwest", "Agent_Storage_Mountain", "Agent_Storage_Pacific",
            "Agent_Storage_SouthCentral_Salt", "Agent_Storage_SouthCentral_NonSalt"]
 BASINS = ["Agent_Prod_Appalachia", "Agent_Prod_Permian", "Agent_Prod_Haynesville", "Agent_Prod_EagleFord", "Agent_Prod_Bakken", "Agent_Prod_DJBasin"]
@@ -59,6 +63,31 @@ def _obj(domain, series_key, period, title, document, agents, available, source_
     return {"id": node_id(domain, f"{series_key}:{period}"), "domain": domain, "series_key": series_key, "period": period, "title": title,
             "document": document, "agent_ids": ",".join(agents), "available_timestamp": available, "available_epoch": epoch(available),
             "published_timestamp": published or available, "source_id": source_id, "raw_payload_hash": raw_hash or "", "provenance": provenance}
+
+
+CHUNK_CHARS, CHUNK_OVERLAP = 1800, 200
+
+
+def chunk_text(text: str, size: int = CHUNK_CHARS, overlap: int = CHUNK_OVERLAP) -> list:
+    """Split long source text on paragraph boundaries into pieces of at most `size` characters; a paragraph longer than
+    `size` is cut with `overlap` characters repeated, so no sentence is lost at a boundary. Concatenating the pieces (minus
+    overlaps) reproduces the whole text."""
+    paras = [p.strip() for p in text.replace("\r\n", "\n").split("\n\n") if p.strip()]
+    out, cur = [], ""
+    for p in paras:
+        while len(p) > size:                         # hard split of an oversized paragraph
+            if cur:
+                out.append(cur)
+                cur = ""
+            out.append(p[:size])
+            p = p[size - overlap:]
+        if cur and len(cur) + 2 + len(p) > size:
+            out.append(cur)
+            cur = ""
+        cur = f"{cur}\n\n{p}" if cur else p
+    if cur:
+        out.append(cur)
+    return out
 
 
 def _latest(conn, agent, target_like=None, limit=None):
@@ -154,7 +183,14 @@ def build_objects(conn, weeks: int = 12, months: int = 12) -> list:
                 "SELECT id,domain,source_id,source_url,title,body,published_timestamp,available_timestamp,raw_payload_hash FROM documents "
                 "ORDER BY available_timestamp DESC LIMIT ?", (weeks * 7,)):
             text = body if len(body) <= 4000 else body[:4000] + " [...]"
-            out.append(_obj(dom, f"document_{src}", did, title, text, [], av, src, h, provenance="source_document", published=pub))
+            parent = _obj(dom, f"document_{src}", did, title, text, [], av, src, h, provenance="source_document", published=pub)
+            out.append(parent)
+            parts = chunk_text(body) if len(body) > CHUNK_CHARS * 1.5 else []
+            for i, part in enumerate(parts):      # the full text, searchable piece by piece; same PIT metadata as the parent
+                o = _obj(dom, f"document_{src}_chunk", f"{did}#{i + 1}", f"{title} (part {i + 1}/{len(parts)})", part, [], av, src, h,
+                         provenance="source_document", published=pub)
+                o["parent"] = parent["id"]
+                out.append(o)
     except sqlite3.OperationalError:
         pass
     # ---- backtest experiments (results, not observations)
@@ -202,9 +238,12 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
             if collection is not None:
                 collection.upsert(ids=[o["id"]], embeddings=[vec.tolist()], documents=[o["title"] + ". " + o["document"]],
                                   metadatas=[{k: o[k] for k in ("domain", "series_key", "period", "source_id", "agent_ids", "available_timestamp", "available_epoch",
-                                                                "published_timestamp", "raw_payload_hash", "provenance")} | {"linked_nodes": "root"}])
+                                                                "published_timestamp", "raw_payload_hash", "provenance")} | {"linked_nodes": o.get("parent", "root")}])
             changed += o["id"] in known
             new += o["id"] not in known
+        for o in objs:                               # parent-child: every chunk is part_of its source document
+            if o.get("parent"):
+                conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (o["id"], o["parent"], "part_of", None))
         # mirror /execute theses already in the vector store so they appear in the graph
         mirrored = 0
         if collection is not None:
@@ -232,7 +271,7 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
 
 def rebuild_edges(conn) -> dict:
     """Recompute the derived edge types from the current nodes (builds_on edges are kept as recorded)."""
-    conn.execute("DELETE FROM kb_edges WHERE type<>'builds_on'")
+    conn.execute("DELETE FROM kb_edges WHERE type IN ('previous_in_series','same_period','semantic_neighbor')")   # derived here; agent edges are kept
     rows = conn.execute("SELECT id,domain,series_key,period,available_epoch,embedding FROM kb_nodes ORDER BY series_key, period").fetchall()
     counts = dict.fromkeys(EDGE_TYPES, 0)
     by_series: dict[str, list] = {}
@@ -293,12 +332,110 @@ def graph(conn, as_of_epoch: int, limit: int = 300, domain: str | None = None) -
     keys = ("id", "domain", "series_key", "period", "title", "document", "source_id", "agent_ids", "available_timestamp", "published_timestamp",
             "raw_payload_hash", "provenance")
     nodes = [dict(zip(keys, r)) for r in rows]
+    status = _finding_status(conn)
+    for n in nodes:
+        if n["id"] in status:
+            n["status"] = status[n["id"]][0]
     ids = {n["id"] for n in nodes}
     links = [{"source": s, "target": d, "type": t, "weight": w} for s, d, t, w in conn.execute("SELECT src,dst,type,weight FROM kb_edges") if s in ids and d in ids]
     doms = dict(conn.execute("SELECT domain, COUNT(*) FROM kb_nodes WHERE available_epoch<=? GROUP BY domain", (as_of_epoch,)).fetchall())
-    return {"total_nodes": sum(doms.values()), "nodes": nodes, "links": links, "domains": doms,
-            "edge_legend": {"previous_in_series": "prior object of the same series", "same_period": "different domains, same period (co-occurrence, not causation)",
-                            "builds_on": "thesis generated with the linked node in context", "semantic_neighbor": "nearest earlier object by embedding similarity (not causation)"}}
+    return {"total_nodes": sum(doms.values()), "nodes": nodes, "links": links, "domains": doms, "edge_legend": EDGE_LEGEND}
+
+
+EDGE_LEGEND = {"previous_in_series": "prior object of the same series", "same_period": "different domains, same period (co-occurrence, not causation)",
+               "builds_on": "thesis generated with the linked node in context", "semantic_neighbor": "nearest earlier object by embedding similarity (not causation)",
+               "evidence_for": "knowledge an agent cited when it produced the finding", "evaluated_by": "hypothesis tested by a PIT walk-forward backtest",
+               "part_of": "a chunk of a longer source document (parent-child)"}
+
+
+def _finding_status(conn) -> dict:
+    try:
+        return {r[0]: (r[1], r[2], r[3], r[4]) for r in conn.execute("SELECT node_id, status, reason, checked_at, checker FROM finding_status")}
+    except sqlite3.OperationalError:
+        return {}
+
+
+def node_detail(conn, node_id: str, as_of_epoch: int) -> dict | None:
+    """One knowledge object with its edges, verdict, source payload metadata and (for notices) the agent extraction, all PIT."""
+    keys = ("id", "domain", "series_key", "period", "title", "document", "source_id", "agent_ids", "available_timestamp", "available_epoch",
+            "published_timestamp", "raw_payload_hash", "provenance", "doc_hash", "created")
+    r = conn.execute(f"SELECT {','.join(keys)} FROM kb_nodes WHERE id=? AND available_epoch<=?", (node_id, as_of_epoch)).fetchone()
+    if not r:
+        return None
+    n = dict(zip(keys, r))
+    st = _finding_status(conn).get(node_id)
+    n["status"] = {"status": st[0], "reason": st[1], "checked_at": st[2], "checker": st[3]} if st else None
+    edges = []
+    for s, d, t, w in conn.execute("SELECT src, dst, type, weight FROM kb_edges WHERE src=? OR dst=?", (node_id, node_id)):
+        other = d if s == node_id else s
+        o = conn.execute("SELECT title, domain, available_timestamp FROM kb_nodes WHERE id=? AND available_epoch<=?", (other, as_of_epoch)).fetchone()
+        if o:
+            edges.append({"direction": "out" if s == node_id else "in", "type": t, "weight": w, "id": other, "title": o[0], "domain": o[1],
+                          "available_timestamp": o[2]})
+    n["edges"] = edges
+    n["raw_payload"] = None
+    if n["raw_payload_hash"]:
+        try:
+            p = conn.execute("SELECT source_id, source_url, http_status, retrieved_timestamp, content_type, byte_length FROM raw_payloads "
+                             "WHERE raw_payload_hash=?", (n["raw_payload_hash"],)).fetchone()
+        except sqlite3.OperationalError:
+            p = None
+        if p:
+            n["raw_payload"] = dict(zip(("source_id", "source_url", "http_status", "retrieved_timestamp", "content_type", "byte_length"), p))
+    n["extraction"] = None
+    if n["domain"] == "pipeline_notice":
+        try:
+            e = conn.execute("SELECT event_type, severity, location, summary, model, extracted_at, checks FROM notice_extractions WHERE document_id=?",
+                             (n["period"],)).fetchone()
+        except sqlite3.OperationalError:
+            e = None
+        if e:
+            n["extraction"] = {**dict(zip(("event_type", "severity", "location", "summary", "model", "extracted_at", "checks"), e)),
+                               "provenance": "model extraction (validated against the source label)"}
+    return n
+
+
+def agent_activity(conn, limit: int = 20) -> dict:
+    """Read-only view of the agent system: runs, bus messages, model-call statistics and finding verdicts."""
+    def q(sql, args=()):
+        try:
+            return conn.execute(sql, args).fetchall()
+        except sqlite3.OperationalError:
+            return []
+    cols = {r[1] for r in q("PRAGMA table_info(llm_calls)")}
+    fb = "SUM(COALESCE(fallback,0))" if "fallback" in cols else "0"
+    return {
+        "runs": [{"agent": r[0], "started": r[1], "finished": r[2], "as_of": r[3], "ok": bool(r[4]), "summary": _short_summary(r[5])}
+                 for r in q("SELECT agent, started, finished, as_of, ok, summary FROM agent_runs ORDER BY id DESC LIMIT ?", (limit,))],
+        "messages": [{"id": m[0], "at": m[1], "from": m[2], "topic": m[3], "ref": m[4],
+                      "consumed_by": [c[0] for c in q("SELECT consumer FROM agent_message_reads WHERE message_id=?", (m[0],))]}
+                     for m in q("SELECT id, at, sender, topic, ref FROM agent_messages ORDER BY id DESC LIMIT ?", (limit,))],
+        "topics": dict(q("SELECT topic, COUNT(*) FROM agent_messages GROUP BY topic")),
+        "llm_calls": [{"agent": c[0], "task": c[1], "model": c[2], "calls": c[3], "ok": c[4], "fallback": c[5], "avg_ms": c[6], "last": c[7]}
+                      for c in q(f"SELECT agent, task, model, COUNT(*), SUM(ok), {fb}, CAST(AVG(ms) AS INTEGER), MAX(at) FROM llm_calls GROUP BY 1,2,3 ORDER BY 8 DESC")],
+        "finding_status": dict(q("SELECT status, COUNT(*) FROM finding_status GROUP BY status")),
+        "findings": [{"id": r[0], "title": r[1], "available_timestamp": r[2], "provenance": r[3], "status": r[4]}
+                     for r in q("SELECT n.id, n.title, n.available_timestamp, n.provenance, s.status FROM kb_nodes n LEFT JOIN finding_status s "
+                                "ON s.node_id=n.id WHERE n.domain='agent_finding' ORDER BY n.created DESC LIMIT ?", (limit,))],
+    }
+
+
+def _short_summary(s):
+    try:
+        d = json.loads(s or "{}")
+    except ValueError:
+        return {}
+    keep = ("error", "extracted", "events_published", "by_source", "anomalies", "failing_collectors", "issues_detected", "new_issues", "incidents_consumed",
+            "messages_consumed", "retrieved", "observations", "valid", "problems", "finding", "evidence_linked", "rechecked")
+    out = {k: d[k] for k in keep if k in d}
+    if isinstance(out.get("anomalies"), list):
+        out["anomalies"] = len(out["anomalies"])
+    if "hypothesis" in d:
+        h = d["hypothesis"]
+        out["hypothesis"] = {k: h.get(k) for k in ("relationship_id", "relationship", "direction", "horizon_days", "confidence") if k in h}
+    if "evaluation" in d:
+        out["evaluation"] = {k: d["evaluation"].get(k) for k in ("status", "experiment", "outcome", "reason")}
+    return out
 
 
 def search(conn, query_vec, as_of_epoch: int, limit: int = 8) -> list:

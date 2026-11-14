@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-14T00:52:46Z",
+ "generated_at": "2026-11-14T02:16:43Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
  "requirements": 422,
  "totals": {
@@ -16,16 +16,57 @@
    "blocked_by": null,
    "seconds": 4.8,
    "block_category": null,
+   "block_reason": null,
+   "carried_over": true
+  },
+  "agent_unit": {
+   "status": "passed",
+   "evidence": "31 passed in 2.17s",
+   "desc": "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off",
+   "blocked_by": null,
+   "seconds": 2.4,
+   "block_category": null,
    "block_reason": null
+  },
+  "agents_live_run": {
+   "status": "passed",
+   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synthesis': 16}; embedding ok calls 62",
+   "desc": "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
+  },
+  "agents_scheduled": {
+   "status": "passed",
+   "evidence": "timer enabled; ExecStopPost run_agents.py=True; /ingest trigger=True",
+   "desc": "agents run after every scheduled collection (timer ExecStopPost and the hub's /ingest trigger)",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
+  },
+  "agents_share_knowledge": {
+   "status": "passed",
+   "evidence": "22 cross-agent message reads {'data_quality': 1, 'pipeline_event': 1}; 21 findings, 13 linked to source/data evidence, 15 finding->finding links (later runs build on earlier findings); 21 mirrored in Chroma",
+   "desc": "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
   },
   "alert_delivery": {
    "status": "passed",
-   "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[backtests] backtests event st', '[selfheal] selfheal event stre']",
+   "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[data-quality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre']",
    "desc": "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues",
    "blocked_by": null,
-   "seconds": 1.3,
+   "seconds": 1.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "architecture_doc": {
    "status": "passed",
@@ -34,7 +75,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "audit_gists": {
    "status": "passed",
@@ -43,16 +85,18 @@
    "blocked_by": null,
    "seconds": 0.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "backtest_unit": {
    "status": "passed",
-   "evidence": "11 passed in 0.52s",
+   "evidence": "11 passed in 0.43s",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "branch_protection": {
    "status": "blocked",
@@ -61,7 +105,8 @@
    "blocked_by": "owner decision (GitHub settings)",
    "seconds": 0.3,
    "block_category": "platform_limit",
-   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
+   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo",
+   "carried_over": true
   },
   "branch_pushed": {
    "status": "passed",
@@ -70,7 +115,8 @@
    "blocked_by": null,
    "seconds": 0.5,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collector_freshness": {
    "status": "passed",
@@ -79,7 +125,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collector_schedule": {
    "status": "passed",
@@ -88,7 +135,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collectors_run": {
    "status": "passed",
@@ -100,21 +148,23 @@
   },
   "cross_domain_sources": {
    "status": "blocked",
-   "evidence": "have ['alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
+   "evidence": "have ['agent_finding', 'alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
    "desc": "FERC filings, LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products are ingested",
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
    "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds"
+   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds",
+   "carried_over": true
   },
   "db_integrity": {
    "status": "passed",
    "evidence": "ok",
    "desc": "SQLite integrity_check returns ok",
    "blocked_by": null,
-   "seconds": 0.1,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "edge_collection": {
    "status": "passed",
@@ -123,16 +173,18 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "edge_ingest_unit": {
    "status": "passed",
-   "evidence": "3 passed in 0.71s",
+   "evidence": "3 passed in 0.63s",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 1.0,
+   "seconds": 0.9,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "env_locked": {
    "status": "passed",
@@ -141,16 +193,18 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "execute_sandbox_tests": {
    "status": "passed",
-   "evidence": "11 passed in 0.19s",
+   "evidence": "11 passed in 0.18s",
    "desc": "/execute SQL sandbox, as_of normalisation, scenario arithmetic, thesis sign check",
    "blocked_by": null,
    "seconds": 0.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "experiment_endpoint": {
    "status": "passed",
@@ -159,43 +213,57 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "experiments_recorded": {
    "status": "passed",
-   "evidence": "36 experiments, 0 incomplete",
+   "evidence": "38 experiments, 0 incomplete",
    "desc": "every experiment (including rejected) is recorded with periods, data version and baseline",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "full_test_suite": {
    "status": "passed",
-   "evidence": "131 passed in 4.57s",
+   "evidence": "175 passed in 26.58s",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 4.9,
+   "seconds": 26.9,
    "block_category": null,
    "block_reason": null
   },
   "gatekeeper": {
    "status": "passed",
-   "evidence": "3 passed in 0.10s",
+   "evidence": "3 passed in 0.09s",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "hub_health": {
    "status": "passed",
-   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":195}",
+   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":245}",
    "desc": "privileged hub answers locally on 127.0.0.1:8090",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
+  },
+  "hypothesis_evaluated_live": {
+   "status": "passed",
+   "evidence": "finding verdicts {'evaluated': 2, 'rejected': 6, 'superseded': 3, 'valid': 7}; evaluated_by edges 2; memos 1",
+   "desc": "an agent hypothesis was evaluated by the PIT walk-forward backtester and a complete 5.4 memo was persisted",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
   },
   "hypothesis_memo": {
    "status": "passed",
@@ -204,52 +272,88 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "indicators": {
    "status": "passed",
    "evidence": "9 passed in 0.07s",
    "desc": "triangles, Bollinger squeeze, 50/200 crossovers, RSI/MACD divergence, Fibonacci, frac spread, WTI ratio",
    "blocked_by": null,
+   "seconds": 0.2,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
+  },
+  "kb_chunking": {
+   "status": "passed",
+   "evidence": "tests 2 passed in 0.15s; 17 part_of edges in the production library",
+   "desc": "long source documents are chunked so their whole text is embedded, with part_of edges",
+   "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
+  },
+  "knowledge_explorer": {
+   "status": "passed",
+   "evidence": "/knowledge 200; graph 245 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=6; tests 7 passed in 0.37s",
+   "desc": "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering",
+   "blocked_by": null,
+   "seconds": 0.6,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
+  },
+  "knowledge_explorer_browser": {
+   "status": "passed",
+   "evidence": "251 nodes, 340 edges, 22 agent findings drawn, console errors=0",
+   "desc": "the /knowledge page renders the interactive graph in headless Chrome with no console errors",
+   "blocked_by": null,
+   "seconds": 0.6,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_library": {
    "status": "passed",
-   "evidence": "194 nodes, 9 domains, edges {'builds_on': 64, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata",
+   "evidence": "245 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 2, 'evidence_for': 38, 'part_of': 17, 'previous_in_series': 185, 'same_period': 24, 'semantic_neighbor': 234}, 0 missing PIT metadata",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_search_pit": {
    "status": "passed",
    "evidence": "old cutoff -> 0 results; now -> 8",
    "desc": "semantic search returns nothing that was unavailable at the cutoff",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 0.8,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "leaderboard_versioned": {
    "status": "passed",
-   "evidence": "tracked=True; 36/36 experiments listed",
+   "evidence": "tracked=True; 38/38 experiments listed",
    "desc": "LEADERBOARD.md exists, matches the experiments table and is tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "main_site_link": {
    "status": "blocked",
    "evidence": "HTTP 200, link present=False",
    "desc": "https://joeysvault.app links to markets.joeysvault.app",
    "blocked_by": "deploy after the public routes serve",
-   "seconds": 2.3,
+   "seconds": 2.2,
    "block_category": "owner_action",
-   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)"
+   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)",
+   "carried_over": true
   },
   "markets_local": {
    "status": "passed",
@@ -258,7 +362,8 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "multi_feature_experiments": {
    "status": "passed",
@@ -267,7 +372,8 @@
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ngl_term": {
    "status": "passed",
@@ -276,7 +382,8 @@
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
@@ -285,7 +392,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "observations_reference_payloads": {
    "status": "passed",
@@ -294,7 +402,18 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
+  },
+  "ollama_live_integration": {
+   "status": "passed",
+   "evidence": "4 passed in 23.67s",
+   "desc": "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run",
+   "blocked_by": null,
+   "seconds": 23.9,
+   "block_category": null,
+   "block_reason": null,
+   "carried_over": true
   },
   "ollama_models": {
    "status": "passed",
@@ -303,7 +422,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ollama_only_local": {
    "status": "passed",
@@ -312,16 +432,18 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "pit_tests": {
    "status": "passed",
-   "evidence": "23 passed in 1.15s",
+   "evidence": "23 passed in 0.96s",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 1.3,
+   "seconds": 1.1,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "promotion_gate": {
    "status": "passed",
@@ -330,7 +452,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "provenance_labels": {
    "status": "passed",
@@ -339,43 +462,48 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "public_markets": {
    "status": "blocked",
    "evidence": "markets.joeysvault.app 404, ngl.joeysvault.app 404",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 4.5,
+   "seconds": 4.4,
    "block_category": "owner_action",
-   "block_reason": "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh"
+   "block_reason": "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh",
+   "carried_over": true
   },
   "queue_dispatch": {
    "status": "passed",
    "evidence": "│ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1        ",
    "desc": "Cloudflare Queue producer/consumer bound on the Worker",
    "blocked_by": null,
-   "seconds": 1.2,
+   "seconds": 1.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "raw_payloads_verified": {
    "status": "passed",
    "evidence": "179/179 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 1.1,
+   "seconds": 1.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "research_log_live": {
    "status": "passed",
    "evidence": "5\tOPEN\tAlpha hypothesis: [REJECTED] Rising US shale gas output (3-month change, six basins) pre\talpha-hypothesis\t2026-11",
    "desc": "alpha memos are published with gh issue create",
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
-   "seconds": 0.5,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "roster_81": {
    "status": "passed",
@@ -384,7 +512,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "roster_all_collected": {
    "status": "blocked",
@@ -393,7 +522,8 @@
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
    "seconds": 1.8,
    "block_category": "external_data",
-   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
+   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed",
+   "carried_over": true
   },
   "schema_16_columns": {
    "status": "passed",
@@ -402,25 +532,28 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "selfheal_live_ollama": {
    "status": "passed",
-   "evidence": "{'selector': 'span.px', 'attempts': ['span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
+   "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 1.3,
+   "seconds": 7.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "selfheal_pr_live": {
    "status": "passed",
    "evidence": "self-heal PRs: [(2, 'MERGED')]",
    "desc": "a validated, test-passing repair opens a real GitHub pull request (never merged automatically)",
    "blocked_by": null,
-   "seconds": 0.9,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "selfheal_unit": {
    "status": "passed",
@@ -429,7 +562,8 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "snapshots_versioned": {
    "status": "passed",
@@ -438,25 +572,28 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "state_schema_contract": {
    "status": "passed",
-   "evidence": "13 passed in 0.28s",
+   "evidence": "13 passed in 0.24s",
    "desc": "state.json carries every section the UI and terminal render, with explicit provenance",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "unstructured_sources": {
    "status": "passed",
-   "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 1, 'pipeline_notice': 83}",
+   "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 19, 'pipeline_notice': 91}",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "web_ui_browser": {
    "status": "passed",
@@ -465,16 +602,18 @@
    "blocked_by": null,
    "seconds": 1.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "webhook_recovery": {
    "status": "passed",
    "evidence": "GitHub deliveries accepted after signature check: 3 of 3; reruns verified+ok=2, forged refused=1",
    "desc": "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "worker_gateway_e2e": {
    "status": "passed",
@@ -704,7 +843,8 @@
    "context": null,
    "checks": [
     "ollama_models",
-    "ollama_only_local"
+    "ollama_only_local",
+    "ollama_live_integration"
    ],
    "status": "passed"
   },
@@ -716,7 +856,8 @@
    "context": null,
    "checks": [
     "ollama_models",
-    "ollama_only_local"
+    "ollama_only_local",
+    "ollama_live_integration"
    ],
    "status": "passed"
   },
@@ -728,7 +869,8 @@
    "context": null,
    "checks": [
     "ollama_models",
-    "ollama_only_local"
+    "ollama_only_local",
+    "ollama_live_integration"
    ],
    "status": "passed"
   },
@@ -2480,7 +2622,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2494,6 +2638,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2511,6 +2657,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2528,6 +2676,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2545,6 +2695,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2562,6 +2714,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2579,6 +2733,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2595,7 +2751,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2609,6 +2767,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2626,6 +2786,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2643,6 +2805,8 @@
     "knowledge_library",
     "unstructured_sources",
     "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
    "status": "blocked",
@@ -2659,7 +2823,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2672,7 +2838,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2685,7 +2853,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2698,7 +2868,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2711,7 +2883,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2724,7 +2898,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2737,7 +2913,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2750,7 +2928,9 @@
    "checks": [
     "knowledge_library",
     "unstructured_sources",
-    "provenance_labels"
+    "provenance_labels",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2761,7 +2941,8 @@
    "text": "The system must generate structured hypotheses containing:",
    "context": null,
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2772,7 +2953,8 @@
    "text": "Market relationship.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2783,7 +2965,8 @@
    "text": "Relevant assets and instruments.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2794,7 +2977,8 @@
    "text": "Supporting historical analogs.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2805,7 +2989,8 @@
    "text": "Supporting structured observations.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2816,7 +3001,8 @@
    "text": "Expected direction of impact.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2827,7 +3013,8 @@
    "text": "Estimated magnitude.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2838,7 +3025,8 @@
    "text": "Expected time horizon.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2849,7 +3037,8 @@
    "text": "Relevant geographic markets.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2860,7 +3049,8 @@
    "text": "Assumptions.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2871,7 +3061,8 @@
    "text": "Contradictory evidence.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2882,7 +3073,8 @@
    "text": "Confidence and uncertainty.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -2893,7 +3085,8 @@
    "text": "Proposed backtest methodology.",
    "context": "The system must generate structured hypotheses containing:",
    "checks": [
-    "hypothesis_memo"
+    "hypothesis_memo",
+    "hypothesis_evaluated_live"
    ],
    "status": "passed"
   },
@@ -5891,7 +6084,10 @@
    "checks": [
     "knowledge_library",
     "knowledge_search_pit",
-    "web_ui_browser"
+    "web_ui_browser",
+    "knowledge_explorer",
+    "knowledge_explorer_browser",
+    "agents_share_knowledge"
    ],
    "status": "passed"
   },
@@ -5904,7 +6100,10 @@
    "checks": [
     "knowledge_library",
     "knowledge_search_pit",
-    "web_ui_browser"
+    "web_ui_browser",
+    "knowledge_explorer",
+    "knowledge_explorer_browser",
+    "agents_share_knowledge"
    ],
    "status": "passed"
   },
@@ -6203,6 +6402,245 @@
    "context": "ngl-term.py MUST include:",
    "checks": [
     "ngl_term"
+   ],
+   "status": "passed"
+  }
+ ],
+ "directive": [
+  {
+   "requirement": "Ollama: agent reasoning and task assistance",
+   "claude_md_line": 21,
+   "implementation": "agents/workers.py SynthesisAgent, RepairAgent; agents/llm.py",
+   "checks": [
+    "agent_unit",
+    "ollama_live_integration",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: structured extraction, classification, normalization, validation",
+   "claude_md_line": 22,
+   "implementation": "agents/workers.py NoticeAnalystAgent (schema + source-label/severity/location checks), DiagnosticsAgent",
+   "checks": [
+    "agent_unit",
+    "ollama_live_integration",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: anomaly detection and data-quality investigation",
+   "claude_md_line": 23,
+   "implementation": "agents/workers.py AnomalyAgent, DataQualityAgent",
+   "checks": [
+    "agent_unit",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: agent-to-agent knowledge exchange and synthesis",
+   "claude_md_line": 24,
+   "implementation": "agents/memory.py publish/consume + findings; SynthesisAgent",
+   "checks": [
+    "agent_unit",
+    "agents_share_knowledge",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: research synthesis grounded in retrieved source data",
+   "claude_md_line": 25,
+   "implementation": "SynthesisAgent: PIT observations + semantic retrieval, numbers_grounded, evidence/observation citation checks",
+   "checks": [
+    "agent_unit",
+    "agents_live_run",
+    "hypothesis_evaluated_live"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: embedding generation and semantic retrieval",
+   "claude_md_line": 26,
+   "implementation": "agents/llm.py embed; agents/memory.py search; kb_ingest.search",
+   "checks": [
+    "ollama_live_integration",
+    "knowledge_search_pit",
+    "agents_share_knowledge"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Ollama: error diagnosis and bounded self-healing assistance",
+   "claude_md_line": 27,
+   "implementation": "DiagnosticsAgent -> incident -> RepairAgent (dry-run selfheal_pipeline.repair / code suggestion, never applied)",
+   "checks": [
+    "agent_unit",
+    "selfheal_unit",
+    "selfheal_live_ollama"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Model calls: explicit configuration, timeouts, error handling, logging, deterministic fallback",
+   "claude_md_line": 29,
+   "implementation": "agents/llm.py CONFIG/status/_post/json(fallback, validate)/llm_calls",
+   "checks": [
+    "agent_unit",
+    "ollama_live_integration"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Not operational merely because the daemon responds",
+   "claude_md_line": 29,
+   "implementation": "agents/llm.py status() requires the configured models; live tests",
+   "checks": [
+    "ollama_live_integration",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: ingestion of documents, source material, agent findings, validated intelligence",
+   "claude_md_line": 35,
+   "implementation": "kb_ingest.build_objects/ingest; agents/memory.add_finding",
+   "checks": [
+    "knowledge_library",
+    "agents_share_knowledge"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: text extraction, chunking, metadata, source attribution, provenance",
+   "claude_md_line": 36,
+   "implementation": "kb_ingest.chunk_text + part_of edges; kb_nodes metadata",
+   "checks": [
+    "kb_chunking",
+    "knowledge_library",
+    "provenance_labels"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: vector embeddings and persistent vector indexing",
+   "claude_md_line": 37,
+   "implementation": "kb_nodes.embedding + Chroma henry_hub_alpha_graph",
+   "checks": [
+    "knowledge_library",
+    "agents_share_knowledge",
+    "hub_health"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: semantic search and retrieval by agents and research workflows",
+   "claude_md_line": 38,
+   "implementation": "agents/memory.search; /execute retrieve_vector_nodes; /api/knowledge-search",
+   "checks": [
+    "knowledge_search_pit",
+    "agents_live_run",
+    "worker_gateway_e2e"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: relationships between documents, concepts, series, agents, findings, features",
+   "claude_md_line": 39,
+   "implementation": "kb_edges types previous_in_series, same_period, builds_on, semantic_neighbor, part_of, evidence_for, evaluated_by",
+   "checks": [
+    "knowledge_library",
+    "agents_share_knowledge",
+    "hypothesis_evaluated_live"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: graphical interface for exploring, searching, inspecting, navigating",
+   "claude_md_line": 40,
+   "implementation": "web/knowledge.html + web/knowledge.js at /knowledge; /api/knowledge-graph, /api/knowledge-node, /api/agents/activity",
+   "checks": [
+    "knowledge_explorer",
+    "knowledge_explorer_browser",
+    "web_ui_browser"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: persistent across runs, updates, deduplication, traceable sources",
+   "claude_md_line": 41,
+   "implementation": "doc_hash idempotent ingest; finding content-hash ids; raw_payloads",
+   "checks": [
+    "knowledge_library",
+    "agent_unit",
+    "raw_payloads_verified"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Library: Ollama for embedding and synthesis",
+   "claude_md_line": 42,
+   "implementation": "nomic-embed-text embeddings; qwen3:4b synthesis",
+   "checks": [
+    "ollama_live_integration",
+    "agents_live_run"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Agents use shared intelligence and knowledge infrastructure (verified execution)",
+   "claude_md_line": 47,
+   "implementation": "agents/ via /agents/run and the daily timer",
+   "checks": [
+    "agents_live_run",
+    "agents_share_knowledge",
+    "agents_scheduled"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Point-in-time correctness, no look-ahead in features, retrieval, inputs, training, backtesting",
+   "claude_md_line": 50,
+   "implementation": "markets_engine.load_series, kb_ingest.search, memory.search assertions, observations(), evaluate(created<=as_of), backtest.py",
+   "checks": [
+    "pit_tests",
+    "knowledge_search_pit",
+    "agent_unit",
+    "backtest_unit"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "End-to-end: acquisition -> ... -> agent collaboration -> Ollama synthesis -> backtesting -> persistent knowledge",
+   "claude_md_line": 53,
+   "implementation": "collectors -> pit_market_data -> kb_ingest -> agents -> experiments -> kb findings/memos",
+   "checks": [
+    "collectors_run",
+    "knowledge_library",
+    "agents_live_run",
+    "hypothesis_evaluated_live",
+    "experiments_recorded"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Acceptance 6: point-in-time and no-look-ahead tests pass",
+   "claude_md_line": 76,
+   "implementation": "tests/test_backtest.py, test_ingest.py, test_agents.py, ...",
+   "checks": [
+    "pit_tests",
+    "agent_unit"
+   ],
+   "status": "passed"
+  },
+  {
+   "requirement": "Acceptance 7: relevant tests pass",
+   "claude_md_line": 77,
+   "implementation": "pytest suite",
+   "checks": [
+    "full_test_suite"
    ],
    "status": "passed"
   }

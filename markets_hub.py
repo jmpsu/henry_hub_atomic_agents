@@ -103,6 +103,37 @@ def knowledge_graph(limit: int = Query(300, ge=1, le=600), as_of: str | None = Q
         conn.close()
 
 
+@app.get("/api/knowledge-node/{node_id}")
+def knowledge_node(node_id: str, as_of: str | None = Query(None, max_length=40)):
+    """One knowledge object: provenance, PIT timestamps, edges, verdict, source payload metadata (never the archive path)."""
+    if len(node_id) > 64 or not all(ch.isalnum() or ch == "_" for ch in node_id):
+        raise HTTPException(status_code=422, detail="bad node id")
+    cutoff = _cutoff(as_of)
+    conn = _ro()
+    try:
+        n = kb_ingest.node_detail(conn, node_id, kb_ingest.epoch(cutoff))
+    finally:
+        conn.close()
+    if not n:
+        raise HTTPException(status_code=404, detail="no such knowledge object at this cutoff")
+    return {"as_of": cutoff, "node": n}
+
+
+@app.get("/api/agents/activity")
+def agents_activity(limit: int = Query(20, ge=1, le=100)):
+    """Read-only view of the research agents: runs, message bus, local model calls and finding verdicts."""
+    conn = _ro()
+    try:
+        return kb_ingest.agent_activity(conn, limit)
+    finally:
+        conn.close()
+
+
+@app.get("/knowledge")
+def knowledge_page():
+    return FileResponse(WEB_DIR / "knowledge.html", headers={"Cache-Control": "no-cache"})
+
+
 class SearchReq(BaseModel):
     query: str = Field(min_length=2, max_length=200)
     as_of: str | None = Field(default=None, max_length=40)

@@ -13,9 +13,13 @@ import os  # noqa: E402
 os.environ.setdefault("RAW_DIR", str(ROOT / "raw"))   # test payloads never land in the project's real raw/ archive
 
 
+_MINE: list = []   # directories created by THIS process; concurrent test runs share ROOT and must not delete each other's
+
+
 def mkdtemp() -> str:
     d = ROOT / uuid.uuid4().hex
     d.mkdir(parents=True)
+    _MINE.append(d)
     return str(d)
 
 
@@ -33,4 +37,13 @@ class TemporaryDirectory:
         self.cleanup()
 
 
-atexit.register(lambda: shutil.rmtree(ROOT, ignore_errors=True))
+def _cleanup():
+    for d in _MINE:
+        shutil.rmtree(d, ignore_errors=True)
+    try:
+        ROOT.rmdir()            # only when no other run still has directories here
+    except OSError:
+        pass
+
+
+atexit.register(_cleanup)

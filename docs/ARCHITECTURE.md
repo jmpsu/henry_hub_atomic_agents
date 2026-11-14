@@ -22,11 +22,14 @@ Cloudflare Access ─► Cloudflare Tunnel dell-secret-tunnel ─► 127.0.0.1:8
                                                          └─► 127.0.0.1:8095  markets_hub (markets_hub.py, read-only, public)
                                                               markets.joeysvault.app, ngl.joeysvault.app
 local: Ollama 127.0.0.1:11434 (qwen3:4b, nomic-embed-text) · SQLite henry_hub_pit.db · ChromaDB chroma_pit_kb · raw/<sha256>
-timers: hh-collect-cpc.timer (user) daily 09:30 local -> collectors/run_all.py, then scripts/export_snapshot.py
+timers: hh-collect-cpc.timer (user) daily 09:30 local -> collectors/run_all.py, then scripts/export_snapshot.py,
+        then (ExecStopPost, also after a failed collector) scripts/run_agents.py -> hub /kb/ingest + /agents/run
 ```
 
-Privileged routes (`/execute`, `/ingest`, `/ingest/edge`, `/kb/ingest`, `/experiments/run`) exist only on :8090 behind Access.
-The public service on :8095 opens the database read-only and has no write, LLM-generation or ingestion route.
+Privileged routes (`/execute`, `/ingest`, `/ingest/edge`, `/kb/ingest`, `/experiments/run`, `/agents/run`) exist only on :8090 behind
+Access. The public service on :8095 opens the database read-only and has no write, LLM-generation, agent or ingestion route; it serves the
+dashboard (`/`), the knowledge explorer (`/knowledge`) and read-only JSON (`/api/state.json`, `/api/knowledge-graph`,
+`/api/knowledge-node/{id}`, `/api/knowledge-search`, `/api/agents/activity`).
 
 ## Data contract (Sections 3.3, 3.4, 9)
 
@@ -65,9 +68,58 @@ detached worktree of exactly that commit, record `selfheal_runs`, report on the 
 production, monthly prices with WTI ratio, RGGI auctions), source documents (pipeline notices, CPC discussions),
 experiments and `/execute` theses; embeds with nomic-embed-text; stores `kb_nodes`/`kb_edges` in SQLite and the Chroma
 collection. Edge types: `previous_in_series`, `same_period` (co-occurrence, not causation), `builds_on`,
-`semantic_neighbor` (similarity, not causation). Search is PIT-filtered. Hypothesis memos (`alerts.py`) require every
+`semantic_neighbor` (similarity, not causation), `part_of` (chunk -> source document), and the agent edges `evidence_for` and
+`evaluated_by`. Source documents longer than 2,700 characters are also chunked (`chunk_text`: paragraph boundaries, 1,800 characters,
+overlap on hard splits) so their whole text is embedded; chunks carry the parent's PIT metadata. Search is PIT-filtered. Hypothesis memos (`alerts.py`) require every
 field of 5.4 and an out-of-sample, cost-inclusive backtest. Not yet sourced: FERC (blocks automated fetches), LNG terminal
 notices, NGL fractionation, cracker/refinery outages, Mont Belvieu purity products other than propane.
+
+## Research agents and the local Ollama layer (`agents/`, CLAUDE.md capabilities 1-3)
+
+`agents/llm.py` is the only path from agents to a model. Configuration is explicit and environment-overridable:
+`HH_OLLAMA_URL` (default `http://127.0.0.1:11434`), `HH_REASONING_MODEL` (`qwen3:4b`), `HH_EMBED_MODEL` (`nomic-embed-text`), per-task token
+budgets and timeouts (`HH_SYNTH_TIMEOUT` 240 s, `HH_EXTRACT_TIMEOUT` 90 s, `HH_EMBED_TIMEOUT` 30 s, ...), `HH_LLM_RETRIES` (1, for
+connection errors and HTTP 5xx; timeouts are not retried). `status()` reports ok only when every configured model is installed - a
+responding daemon is not enough; when it fails every agent runs on its deterministic fallback. Generations are JSON-schema constrained
+(free-text fields carry `maxLength`), `think=false`, temperature 0; truncated output (`done_reason=length`) is an error. Every call -
+including each fallback - is logged in `llm_calls` (agent, task, model, prompt version, prompt sha256, latency, ok, error, fallback).
+`numbers_grounded()` rejects model text containing numbers that were not in the evidence (sign and rounding tolerant).
+
+`agents/memory.py` is the shared memory and bus: PIT semantic retrieval over the knowledge library (keyword fallback when embeddings are
+down), findings persisted as `agent_finding` knowledge objects (content-hash ids, `evidence_for` edges to what they cited, never available
+before their evidence, mirrored into Chroma by the hub), verdicts in `finding_status` (valid / rejected / superseded / evaluated; the finding
+text is never rewritten), and the `agent_messages` bus (each consumer reads a message once).
+
+`agents/workers.py` runs six agents in order, one failure never stopping the others:
+
+| Agent | Deterministic part | Model part (fallback) | Publishes |
+|---|---|---|---|
+| diagnostics | latest failed `collector_runs` | qwen3:4b classifies the error (regex rules) | `incident` |
+| data_quality | stale series vs. their own cadence, revisions >= 10% of typical magnitude, duplicate vintages (all PIT) | qwen3:4b explains the cause, restricted to causes valid for the issue type (rules) | `data_quality`, owner event stream |
+| repair | consumes `incident`; parser problems only | selector agents: `selfheal_pipeline.repair(dry_run=True)` on a captured page inside the project; parser collectors: structured change suggestion (manual-fix note). Never edits code, never opens or merges a PR | `repair_proposal` |
+| notice_analyst | the notice's own `Type:` label sets the event type; high severity needs outage/curtailment/force-majeure wording; location must appear in the notice | qwen3:4b severity/location/summary (keyword rules) | `pipeline_event` (high severity / force majeure) |
+| anomaly | z-scores on PIT series | qwen3:4b interpretation with cited ids (fact only) | `anomaly` |
+| synthesis | PIT observations (with plain-language readings), retrieval excluding rejected findings, catalogue of 8 measurable cross-domain relationships with the direction the observations imply | qwen3:4b picks one relationship, direction, horizon, rationale, contradictory evidence, confidence (fails closed) | `finding` |
+
+Synthesis checks: cited knowledge ids and observation keys are schema enums of what was shown; at least one cited object must be source
+or data-derived (not only earlier hypotheses); direction must match the observations; numbers grounded; confidence capped by evidence and
+testability; one bounded retry with the validator's findings, then rejection. When the chosen relationship has no quantitative model, the
+best-supported testable one is also proposed. A valid testable hypothesis is evaluated with the latest cost-inclusive walk-forward
+experiment recorded at or before the cutoff (run on demand only for a current cutoff); the evaluation is linked (`evaluated_by`) and a
+complete Section 5.4 memo (`alerts.validate_hypothesis`) is persisted as a knowledge object. Earlier hypotheses and data-quality findings are
+re-checked against the current rules on every run.
+
+Triggers: `POST /agents/run` (hub, Access-protected, single-flight), the hub's `/ingest` (starts a background run after collection), and the
+daily timer's `scripts/run_agents.py`. `GET /agents/activity` (hub) and `/api/agents/activity` (public, read-only) show runs, bus traffic,
+model-call statistics and verdicts. CLI: `DB_PATH=... .venv/bin/python -m agents.workers [--as-of ISO] [--only synthesis]` (no Chroma mirror).
+
+## Graphical knowledge explorer (`/knowledge`, CLAUDE.md capability 2, Section 12.3)
+
+`web/knowledge.html` + `web/knowledge.js` (vendored D3, no CDN): zoomable/draggable force graph of the library at a point-in-time cutoff
+(slider over the last two years or an exact UTC timestamp), domain and edge-type filters, shapes per object kind, gold for valid/evaluated
+agent findings and their evidence links, PIT semantic search, and an inspector showing provenance, availability/publication timestamps,
+the finding verdict, the archived source payload's metadata (URL, HTTP status, retrieval time, size - never local paths), the agent
+extraction for pipeline notices, and every linked object. The page also shows recent agent runs, bus messages and Ollama call statistics.
 
 ## Architecture 4 — walk-forward backtesting (Section 6)
 
@@ -109,7 +161,8 @@ on `main` is not available on this repository's GitHub plan.
 - `scripts/acceptance.py [--with-side-effects]` — runs every check, writes `requirements/status.json` and `STATUS.md`,
   and classifies every blocked check (`external_data`, `owner_action`, `platform_limit`; anything unexplained is reported
   as `unfinished_implementation`).
-- `.venv/bin/python -m pytest -q` — unit suite.
+- `.venv/bin/python -m pytest -q` — unit suite, including `tests/test_ollama_live.py`, which calls the real local Ollama models and FAILS
+  (does not skip) when a configured model is missing.
 - `tests/e2e_worker.sh` — gateway end to end (creates one private gist).
 
 Verified end to end on 2026-11-14: self-heal PR #2 opened by the pipeline, tested on the merged result and merged; the
@@ -118,6 +171,11 @@ real GitHub `pull_request closed` delivery was verified by the Worker and the hu
 evidence. Incident #3 was opened and closed by `notify.py`; backtest events stream to issue #4.
 
 ## Operations notes
+
+- Deploying code changes: `sudo systemctl restart quant_hub.service` (hub, :8090) and `systemctl --user restart markets_hub.service`
+  (public read-only, :8095); `systemctl --user daemon-reload` after editing the timer unit (a copy is kept in `deploy/hh-collect-cpc.service`).
+- Run the agents now: `curl -X POST localhost:8090/agents/run` (loopback) or `.venv/bin/python scripts/run_agents.py` (knowledge refresh +
+  agents, exit 1 if any agent failed).
 
 - Public routes: DNS records for markets/ngl.joeysvault.app exist; the ingress rule is added by
   `sudo bash deploy/add_markets_ingress.sh` (validates, keeps a backup, restores on failure).
