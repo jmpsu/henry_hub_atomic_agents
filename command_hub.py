@@ -7,6 +7,7 @@ import chromadb
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import scenario
 import kb_ingest
+import notify
 
 app = FastAPI()
 OLLAMA_GEN_URL = "http://127.0.0.1:11434/api/generate"
@@ -280,6 +281,77 @@ async def ingest_edge(p: EdgePayload):
         return await asyncio.to_thread(run)
 
 
+class RerunRequest(BaseModel):
+    collector: str
+    sha: str
+    pr: int | None = None
+    base: str = "main"
+
+
+_SELFHEAL_LOCK = asyncio.Lock()
+
+
+@app.post("/selfheal/rerun")
+async def selfheal_rerun(req: RerunRequest):
+    """Spec 4.5: after an AUTHORIZED merge (GitHub webhook -> Worker verifies the HMAC -> here, through Access) retrieve the
+    approved change, verify its identity, and rerun the affected collector. Identity check: the commit must exist on
+    origin/main after a fresh fetch. The collector runs from a detached worktree of exactly that commit; the service's own
+    checkout is not modified. Every attempt is recorded in selfheal_runs and reported on the 'selfheal' event stream."""
+    import re as _re
+    sys.path.insert(0, _HERE)
+    from collectors import run_all
+    if req.collector not in run_all.names():
+        raise HTTPException(status_code=422, detail="unknown collector")
+    if not _re.fullmatch(r"[0-9a-f]{7,40}", req.sha):
+        raise HTTPException(status_code=422, detail="sha must be a hex commit id")
+    deployed = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=_HERE, capture_output=True, text=True, timeout=10).stdout.strip()
+    if req.base not in ("main", deployed):
+        raise HTTPException(status_code=422, detail=f"base must be main or the deployed branch ({deployed})")
+    if _SELFHEAL_LOCK.locked():
+        raise HTTPException(status_code=409, detail="a self-heal rerun is already running")
+
+    def run():
+        git = lambda *a, t=120: subprocess.run(["git", *a], cwd=_HERE, capture_output=True, text=True, timeout=t)
+        started = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        conn = sqlite3.connect(DB_PATH, timeout=30)
+        conn.execute("CREATE TABLE IF NOT EXISTS selfheal_runs(id INTEGER PRIMARY KEY AUTOINCREMENT, collector TEXT, sha TEXT, pr INTEGER, started TEXT, "
+                     "verified INTEGER, ok INTEGER, detail TEXT)")
+        verified, ok, detail, wt = 0, 0, "", None
+        try:
+            f = git("fetch", "--quiet", "origin", req.base)
+            full = git("rev-parse", "--verify", req.sha + "^{commit}")
+            anc = git("merge-base", "--is-ancestor", req.sha, f"origin/{req.base}") if full.returncode == 0 else None
+            if f.returncode != 0 or full.returncode != 0 or anc is None or anc.returncode != 0:
+                detail = f"identity check failed: commit not found on origin/{req.base} after fetch"
+            else:
+                verified = 1
+                sha = full.stdout.strip()
+                wt = os.path.join(_HERE, "runtime", "worktrees", sha[:12])
+                git("worktree", "remove", "--force", wt)
+                w = git("worktree", "add", "--detach", wt, sha)
+                if w.returncode != 0:
+                    detail = "worktree failed: " + w.stderr[-300:]
+                else:
+                    p = subprocess.run([sys.executable, os.path.join(wt, "collectors", "run_all.py"), "--only", req.collector], cwd=wt,
+                                       capture_output=True, text=True, timeout=600, env={**os.environ, "DB_PATH": DB_PATH, "RAW_DIR": os.path.join(_HERE, "raw")})
+                    ok = int(p.returncode == 0)
+                    detail = (p.stdout[-1200:] + p.stderr[-400:]).strip()
+        except Exception as e:  # noqa: BLE001
+            detail = f"{type(e).__name__}: {e}"[:500]
+        finally:
+            if wt:
+                git("worktree", "remove", "--force", wt)
+        conn.execute("INSERT INTO selfheal_runs(collector,sha,pr,started,verified,ok,detail) VALUES (?,?,?,?,?,?,?)",
+                     (req.collector, req.sha, req.pr, started, verified, ok, detail))
+        conn.commit()
+        conn.close()
+        notify.event("selfheal", f"Rerun after merge: {req.collector} @ {req.sha[:10]} -> {'ok' if ok else 'FAILED'}",
+                     f"PR: {req.pr or '-'}; identity verified on origin/{req.base}: {bool(verified)}\n\n```\n{detail[-1500:]}\n```")
+        return {"collector": req.collector, "sha": req.sha, "verified": bool(verified), "ok": bool(ok), "detail": detail[-600:]}
+    async with _SELFHEAL_LOCK:
+        return await asyncio.to_thread(run)
+
+
 _KB_LOCK = asyncio.Lock()
 
 
@@ -315,6 +387,13 @@ async def run_experiment(job: ExperimentJob):
         raise HTTPException(status_code=409, detail="an experiment is already running")
     async with _EXP_LOCK:
         out = await asyncio.to_thread(experiments.run, DB_PATH, job.n_decisions, (job.horizon_days,), (job.cost_bps,), (job.model,), job.slippage_bps)
+    lines = [f"- `{r[0]}` {r[1]} h={r[2]}d cost={r[3]}bps test {r[6]}: **{r[10]}**" for r in out if r[1] != "persistence"]
+    await asyncio.to_thread(notify.event, "backtests", f"Backtest completed: {job.model} {job.horizon_days}d", "\n".join(lines))
+    for r in out:
+        if r[9]:   # promoted: a statistically defensible out-of-sample improvement
+            await asyncio.to_thread(notify.event, "validated-hypotheses", f"Model promoted: {r[1]} {r[2]}d",
+                                    f"Experiment `{r[0]}` passed the promotion gate (lower holdout RMSE, Bonferroni-significant direction, "
+                                    f"positive net return after costs). Metrics: {json.dumps(r[7])[:1500]}")
     return {"ok": True, "results": [{"id": r[0], "model": r[1], "horizon_days": r[2], "cost_bps": r[3], "test_period": r[6],
                                      "metrics": r[7], "baseline_metrics": r[8], "promoted": r[9], "result": r[10], "pit_data_version": r[11]} for r in out]}
 

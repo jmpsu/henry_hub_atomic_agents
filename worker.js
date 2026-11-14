@@ -75,6 +75,40 @@ async function collectAtEdge(key, env) {
   return resp.status;
 }
 
+// GitHub webhook (spec 4.5): HMAC-SHA256 over the raw body with GITHUB_WEBHOOK_SECRET, compared in constant time.
+async function githubSignatureOk(env, body, header) {
+  if (!env.GITHUB_WEBHOOK_SECRET || !header || !header.startsWith("sha256=")) return false;
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.GITHUB_WEBHOOK_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(body)));
+  const hex = [...mac].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return safeEqual(header, "sha256=" + hex);
+}
+
+async function githubWebhook(request, env) {
+  const body = await request.text();
+  if (body.length > 1_000_000) return new Response("Payload Too Large", { status: 413 });
+  if (!(await githubSignatureOk(env, body, request.headers.get("X-Hub-Signature-256")))) return new Response("Bad signature", { status: 401 });
+  const ev = request.headers.get("X-GitHub-Event") || "";
+  if (ev === "ping") return Response.json({ pong: true });
+  if (ev !== "pull_request") return Response.json({ ignored: ev }, { status: 202 });
+  let p;
+  try { p = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
+  const pr = p.pull_request || {};
+  const m = /^selfheal\/([a-z0-9_]+)\//.exec((pr.head && pr.head.ref) || "");
+  const baseRef = env.SELFHEAL_BASE || "main";
+  if (p.action !== "closed" || !pr.merged || !pr.base || pr.base.ref !== baseRef || !m || !pr.merge_commit_sha) {
+    return Response.json({ ignored: `not a merged selfheal PR into ${baseRef}` }, { status: 202 });
+  }
+  const base = (env.ORIGIN_URL || "https://quant.joeysvault.app/execute").replace(/\/execute$/, "");
+  const r = await fetch(`${base}/selfheal/rerun`, {
+    method: "POST", headers: accessHeaders(env),
+    body: JSON.stringify({ collector: m[1], sha: pr.merge_commit_sha, pr: pr.number, base: baseRef }),
+  });
+  const out = await r.text();
+  console.log(`selfheal rerun ${m[1]} @ ${pr.merge_commit_sha}: hub HTTP ${r.status}`);
+  return new Response(out, { status: r.status, headers: { "Content-Type": "application/json" } });
+}
+
 export default {
   async scheduled(event, env, ctx) {
     for (const key of EDGE_SCHEDULE[event.cron] || []) {
@@ -111,6 +145,7 @@ export default {
   },
 
   async fetch(request, env) {
+    if (request.method === "POST" && new URL(request.url).pathname === "/github/webhook") return githubWebhook(request, env);
     if (request.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
     }
