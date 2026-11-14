@@ -59,7 +59,7 @@ class IngestTests(unittest.TestCase):
 
     def test_raw_payload_archived_by_hash(self):
         h = ingest.archive_payload(self.conn, b"<html>x</html>", "eia", "http://x", 200, "2026-01-08T15:30:00Z")
-        self.assertTrue((ingest.RAW_DIR / h).exists())
+        self.assertTrue((ingest.raw_dir() / h).exists())
         h2 = ingest.archive_payload(self.conn, b"<html>x</html>", "eia", "http://x", 200, "2026-01-08T15:30:00Z")
         self.assertEqual(h, h2)
 

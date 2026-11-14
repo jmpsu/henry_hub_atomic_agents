@@ -17,13 +17,18 @@ def utc_iso(ts: str) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def raw_dir() -> Path:
+    """Archive directory, read per call (RAW_DIR env overrides) so tests and worktrees can redirect it."""
+    return Path(os.environ.get("RAW_DIR", RAW_DIR))
+
+
 def archive_payload(conn, payload: bytes, source_id: str, source_url: str, http_status: int,
                     retrieved: str, content_type: str = "") -> str:
     """Store the original bytes under raw/<sha256> (never overwritten) and index them."""
     h = hashlib.sha256(payload).hexdigest()
-    raw_dir = Path(os.environ.get("RAW_DIR", RAW_DIR))      # read per call so tests and worktrees can redirect it
-    raw_dir.mkdir(parents=True, exist_ok=True)
-    path = raw_dir / h
+    d = raw_dir()
+    d.mkdir(parents=True, exist_ok=True)
+    path = d / h
     if not path.exists():
         path.write_bytes(payload)
     conn.execute(
