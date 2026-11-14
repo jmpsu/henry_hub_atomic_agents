@@ -507,6 +507,19 @@ def _():
     return all(x in t for x in secs) and rc == 0, f"sections present={[x for x in secs if x in t]}; tracked={rc == 0}"
 
 
+# Why each blocking check is blocked. Every "blocked" check must be listed here; anything else is unfinished implementation.
+BLOCK_CATEGORY = {
+    "roster_all_collected": ("external_data", "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) "
+                             "need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"),
+    "cross_domain_sources": ("external_data", "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages "
+                             "and Mont Belvieu purity products other than propane need paid feeds"),
+    "public_markets": ("owner_action", "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh"),
+    "main_site_link": ("owner_action", "deployed by wrangler right after the public routes serve (depends on public_markets)"),
+    "branch_protection": ("platform_limit", "GitHub requires Pro or a public repository for branch protection on this private repo"),
+    "research_log_live": ("none", "resolved when a memo issue exists"),
+}
+
+
 # ----------------------------------------------------------------------------- mapping
 RULES = [  # (section prefix or None, regex on text/context, checks) - first matching rule set is unioned per requirement
     ("1", r".", ["roster_all_collected", "experiments_recorded", "promotion_gate", "knowledge_library", "worker_gateway_e2e"]),
@@ -626,7 +639,9 @@ def main(argv=None) -> int:
         except Exception as e:  # noqa: BLE001
             ok, ev = False, f"error: {type(e).__name__}: {e}"[:300]
         status = "passed" if ok else ("blocked" if c["blocked_by"] else "failed")
-        results[name] = {"status": status, "evidence": str(ev)[:600], "desc": c["desc"], "blocked_by": c["blocked_by"], "seconds": round(time.time() - t0, 1)}
+        cat = BLOCK_CATEGORY.get(name, ("unfinished_implementation", "not explained")) if status == "blocked" else (None, None)
+        results[name] = {"status": status, "evidence": str(ev)[:600], "desc": c["desc"], "blocked_by": c["blocked_by"], "seconds": round(time.time() - t0, 1),
+                         "block_category": cat[0], "block_reason": cat[1]}
         print(f"{status:8} {name:28} {str(ev)[:110]}", flush=True)
     prev = json.loads((REQ / "status.json").read_text())["checks"] if (REQ / "status.json").exists() else {}
     for k, v in prev.items():                       # keep last known result for checks not run this time
@@ -656,15 +671,27 @@ def main(argv=None) -> int:
     lines = [f"# Requirement status ({now})", "", f"Source: `artifacts/Ultimate_Goal.md` (sha256 `{reg['source_sha256'][:16]}`) · {len(trace)} atomic requirements", "",
              "| Status | Count |", "|---|---|"] + [f"| {k} | {v} |" for k, v in totals.items()] + ["", "## Checks", "",
              "| Check | Status | Evidence | Blocked by |", "|---|---|---|---|"]
+    cats = {}
     for k in sorted(results):
         v = results[k]
-        lines.append(f"| `{k}` | {v['status']}{' (carried over)' if v.get('carried_over') else ''} | {str(v['evidence']).replace('|', '/')[:180]} | {v.get('blocked_by') or ''} |")
+        lines.append(f"| `{k}` | {v['status']}{' (carried over)' if v.get('carried_over') else ''} | {str(v['evidence']).replace('|', '/')[:180]} | "
+                     f"{(v.get('block_category') or '') + (': ' + v['block_reason'] if v.get('block_reason') else '') if v['status'] == 'blocked' else ''} |")
+    for t in trace:
+        if t["status"] == "blocked":
+            bc = sorted({results[c].get("block_category") or "?" for c in t["checks"] if results.get(c, {}).get("status") == "blocked"})
+            for b in bc:
+                cats[b] = cats.get(b, 0) + 1
+            t["block_categories"] = bc
+    lines += ["", "## Blocked requirements by cause", "", "A requirement blocked by several checks is counted under each cause.", "",
+              "| Cause | Requirements |", "|---|---|"] + [f"| {k} | {v} |" for k, v in sorted(cats.items())]
     lines += ["", "## Requirements not passed", "", "| ID | Line | Status | Requirement | Checks |", "|---|---|---|---|---|"]
     for t in trace:
         if t["status"] != "passed":
             lines.append(f"| {t['id']} | {t['line']} | {t['status']} | {t['text'][:110].replace('|', '/')} | {', '.join(t['checks']) or '—'} |")
     (REQ / "STATUS.md").write_text("\n".join(lines) + "\n")
-    print(json.dumps({"requirements": len(trace), **totals}))
+    doc["blocked_by_cause"] = cats
+    (REQ / "status.json").write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n")
+    print(json.dumps({"requirements": len(trace), **totals, "blocked_by_cause": cats}))
     return 0
 
 

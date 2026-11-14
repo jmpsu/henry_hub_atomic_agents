@@ -106,6 +106,22 @@ on `main` is not available on this repository's GitHub plan.
 ## Verification
 
 - `scripts/requirements_registry.py` — registry of 422 requirements, byte-identical on re-run.
-- `scripts/acceptance.py [--with-side-effects]` — runs every check, writes `requirements/status.json` and `STATUS.md`.
+- `scripts/acceptance.py [--with-side-effects]` — runs every check, writes `requirements/status.json` and `STATUS.md`,
+  and classifies every blocked check (`external_data`, `owner_action`, `platform_limit`; anything unexplained is reported
+  as `unfinished_implementation`).
 - `.venv/bin/python -m pytest -q` — unit suite.
 - `tests/e2e_worker.sh` — gateway end to end (creates one private gist).
+
+Verified end to end on 2026-11-14: self-heal PR #2 opened by the pipeline, tested on the merged result and merged; the
+real GitHub `pull_request closed` delivery was verified by the Worker and the hub reran `selfheal_demo` from merge commit
+`f962948` (recorded in `selfheal_runs`). Research memo issue #5 documents a rejected hypothesis with its out-of-sample
+evidence. Incident #3 was opened and closed by `notify.py`; backtest events stream to issue #4.
+
+## Operations notes
+
+- Public routes: DNS records for markets/ngl.joeysvault.app exist; the ingress rule is added by
+  `sudo bash deploy/add_markets_ingress.sh` (validates, keeps a backup, restores on failure).
+- Disk: Timeshift's config included `/home/joey` in system snapshots (`+ /home/joey/**`), filling the disk.
+  `sudo bash deploy/timeshift_exclude_home.sh` removes only the two include rules (backup kept, no snapshots deleted).
+- Large payloads (> 5 MB) are archived gzip-compressed; `ingest.read_payload()` returns the original bytes.
+- External rate limits are respected: the ECMWF open-data bucket throttles bursts (`SlowDown`); collectors fetch once per run.
