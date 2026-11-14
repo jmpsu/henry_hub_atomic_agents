@@ -52,8 +52,8 @@ def _label(name: str) -> None:
 
 
 def _find_open(prefix: str, label: str):
-    rc, out, _ = _gh("issue", "list", "--repo", REPO, "--state", "open", "--label", label, "--search", f"\"{prefix}\" in:title",
-                     "--json", "number,title", "--limit", "20")
+    # plain listing (consistent immediately), filtered here; GitHub's search index lags behind new issues
+    rc, out, _ = _gh("issue", "list", "--repo", REPO, "--state", "open", "--label", label, "--json", "number,title", "--limit", "200")
     if rc != 0:
         return None
     for i in json.loads(out or "[]"):

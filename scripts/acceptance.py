@@ -209,15 +209,29 @@ def _():
     return rc == 0, (lines[-1][:200] if rc == 0 else " / ".join(l[:120] for l in lines[-4:])) if lines else ""
 
 
-@check("selfheal_pr_live", "a validated repair opens a real GitHub pull request", blocked_by="owner approval to open PRs automatically")
+@check("selfheal_pr_live", "a validated, test-passing repair opens a real GitHub pull request (never merged automatically)", network=True)
 def _():
-    return False, "open_pull_request runs dry-run only"
+    rc, out = sh("gh pr list -R jmpsu/henry_hub_atomic_agents --state all --search head:selfheal/ --json number,headRefName,state,files --limit 10")
+    prs = json.loads(out) if rc == 0 and out.strip().startswith("[") else []
+    good = [p for p in prs if any(f["path"] == "ingestion/selectors.json" for f in p.get("files", []))]
+    return bool(good), f"self-heal PRs: {[(p['number'], p['state']) for p in prs]}"
 
 
-@check("webhook_recovery", "GitHub merge webhook -> Worker (authenticated) -> rerun of the affected collector", blocked_by="a GitHub webhook secret (new credential)")
+@check("webhook_recovery", "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector")
 def _():
     src = (ROOT / "worker.js").read_text()
-    return "x-hub-signature-256" in src.lower(), "no webhook handler in worker.js"
+    with ro() as c:
+        try:
+            runs = c.execute("SELECT verified, ok FROM selfheal_runs").fetchall()
+        except sqlite3.OperationalError:
+            runs = []
+    rc, hid = sh("gh api repos/jmpsu/henry_hub_atomic_agents/hooks --jq '.[] | select(.config.url|test(\"quant-gateway\")) | .id'")
+    rc2, out = sh(f"gh api repos/jmpsu/henry_hub_atomic_agents/hooks/{hid.strip()}/deliveries --jq '[.[] | {{e: .event, c: .status_code}}]'") if rc == 0 and hid.strip() else (1, "[]")
+    deliveries = json.loads(out) if rc2 == 0 and out.strip().startswith("[") else []
+    verified = [d for d in deliveries if d["c"] in (200, 202)]          # 200 = processed, 202 = verified but not a merge event
+    ok = "X-Hub-Signature-256" in src and bool(verified) and any(v and o for v, o in runs) and any(not v for v, o in runs)
+    return ok, (f"GitHub deliveries accepted after signature check: {len(verified)} of {len(deliveries)}; "
+                f"reruns verified+ok={sum(1 for v, o in runs if v and o)}, forged refused={sum(1 for v, o in runs if not v)}")
 
 
 # ----------------------------------------------------------------------------- vector engine
@@ -383,9 +397,16 @@ def _():
     return rc == 0 and "PIT Alpha Hub" in out, f"{len([l for l in out.splitlines() if 'PIT Alpha Hub' in l])} recent hub gists"
 
 
-@check("alert_delivery", "material events, collector failures and validated hypotheses are delivered to the owner", blocked_by="choose a delivery channel (issue, email, push)")
+@check("alert_delivery", "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues", network=True)
 def _():
-    return False, "alerts are computed and shown in state.json/UI; no outbound notification channel configured"
+    src = (ROOT / "collectors" / "run_all.py").read_text() + (ROOT / "command_hub.py").read_text()
+    rc, out = sh("gh issue list -R jmpsu/henry_hub_atomic_agents --state all --label incident --label events --json number,title,state,labels --limit 50")
+    rc1, inc = sh("gh issue list -R jmpsu/henry_hub_atomic_agents --state all --label incident --json number,state --limit 50")
+    rc2, ev = sh("gh issue list -R jmpsu/henry_hub_atomic_agents --state all --label events --json number,title --limit 50")
+    inc = json.loads(inc) if rc1 == 0 else []
+    ev = json.loads(ev) if rc2 == 0 else []
+    wired = "notify.incident" in src and "notify.resolve" in src and "notify.event" in src
+    return wired and any(i["state"] == "CLOSED" for i in inc) and bool(ev), f"incident issues {[(i['number'], i['state']) for i in inc]}; event streams {[e['title'][:30] for e in ev]}"
 
 
 # ----------------------------------------------------------------------------- visual platform

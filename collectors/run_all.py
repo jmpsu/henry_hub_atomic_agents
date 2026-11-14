@@ -19,6 +19,20 @@ from collectors import (cpc_degree_days, ecmwf_hdd, eia_coal_spot, eia_ng_monthl
                         gfs_hdd, kinder_morgan_notices, noaa_cpc_discussion, rggi_auctions, steo_production)
 
 
+def selector_agents() -> dict:
+    """'Collector' for HTML-selector agents (ingestion/selectors.json): every agent's selector list must still extract the
+    known value from each preserved fixture. Run after a self-heal merge to confirm the repaired configuration."""
+    import json
+    import selfheal_pipeline as sp
+    root = Path(__file__).resolve().parent.parent
+    reg = json.loads((root / sp.REG).read_text())
+    out = {a: sp.validate_list(cfg["selectors"], sp.fixtures(root / cfg["fixtures"])) for a, cfg in reg.items()}
+    bad = [a for a, v in out.items() if not v["passed"]]
+    if bad:
+        raise ValueError(f"selector agents failing their fixtures: {bad}")
+    return {a: f"{v['n_fixtures']} fixtures ok" for a, v in out.items()}
+
+
 def jobs(conn) -> list:
     now = datetime.now(timezone.utc)
     out = [("cpc_heating", lambda: cpc_degree_days.collect(conn, "Heating", now.year)),
@@ -33,7 +47,8 @@ def jobs(conn) -> list:
            ("eia_coal_spot", lambda: eia_coal_spot.collect(conn)),
            ("kinder_morgan_notices", lambda: kinder_morgan_notices.collect(conn)),
            ("gfs_hdd", lambda: gfs_hdd.collect(conn)),
-           ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn))]
+           ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn)),
+           ("selfheal_demo", selector_agents)]
     if now.month == 1:  # year-end observations and late-December revisions live in the prior-year file
         out += [("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
                 ("cpc_cooling_prev_year", lambda: cpc_degree_days.collect(conn, "Cooling", now.year - 1))]
