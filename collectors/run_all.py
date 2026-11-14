@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import notify  # noqa: E402
-from collectors import (cpc_degree_days, ecmwf_hdd, eia_coal_spot, eia_ng_monthly, eia_petroleum_spot, eia_prices, eia_storage,  # noqa: E402
+from collectors import (cpc_degree_days, ecmwf_hdd, eia_coal_rail, eia_coal_spot, eia_ng_monthly, eia_petroleum_spot, eia_prices, eia_storage,  # noqa: E402
                         gfs_hdd, kinder_morgan_notices, noaa_cpc_discussion, rggi_auctions, steo_production)
 
 
@@ -45,6 +45,7 @@ def jobs(conn) -> list:
            ("eia_petroleum_spot", lambda: eia_petroleum_spot.collect(conn)),
            ("noaa_cpc_discussion", lambda: noaa_cpc_discussion.collect(conn)),
            ("eia_coal_spot", lambda: eia_coal_spot.collect(conn)),
+           ("eia_coal_rail", lambda: eia_coal_rail.collect(conn)),
            ("kinder_morgan_notices", lambda: kinder_morgan_notices.collect(conn)),
            ("gfs_hdd", lambda: gfs_hdd.collect(conn)),
            ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn)),
