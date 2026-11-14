@@ -24,18 +24,35 @@ def raw_dir() -> Path:
 
 def archive_payload(conn, payload: bytes, source_id: str, source_url: str, http_status: int,
                     retrieved: str, content_type: str = "") -> str:
-    """Store the original bytes under raw/<sha256> (never overwritten) and index them."""
+    """Store the original bytes under raw/<sha256> (never overwritten) and index them. Payloads over 5 MB are stored
+    gzip-compressed as raw/<sha256>.gz; the hash is always of the ORIGINAL bytes (read_payload() returns them)."""
     h = hashlib.sha256(payload).hexdigest()
     d = raw_dir()
     d.mkdir(parents=True, exist_ok=True)
     path = d / h
-    if not path.exists():
+    if len(payload) > 5_000_000:
+        import gzip
+        path = d / f"{h}.gz"
+        if not path.exists():
+            tmp = d / f".{h}.gz.part"
+            tmp.write_bytes(gzip.compress(payload, compresslevel=6, mtime=0))
+            tmp.replace(path)
+    elif not path.exists():
         path.write_bytes(payload)
     conn.execute(
         "INSERT OR IGNORE INTO raw_payloads (raw_payload_hash,source_id,source_url,http_status,"
         "retrieved_timestamp,content_type,byte_length,archive_path) VALUES (?,?,?,?,?,?,?,?)",
         (h, source_id, source_url, http_status, utc_iso(retrieved), content_type, len(payload), str(path)))
     return h
+
+
+def read_payload(archive_path: str) -> bytes:
+    """Original payload bytes from an archive path (transparently decompresses .gz archives)."""
+    p = Path(archive_path)
+    if p.suffix == ".gz":
+        import gzip
+        return gzip.decompress(p.read_bytes())
+    return p.read_bytes()
 
 
 def record_observation(conn, *, agent_id, target_timestamp, available_timestamp, value, source_id,

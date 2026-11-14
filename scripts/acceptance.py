@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parent.parent
 PY = str(ROOT / ".venv" / "bin" / "python")
 DB = os.environ.get("DB_PATH") or str(ROOT / "henry_hub_pit.db")
 REQ = ROOT / "requirements"
+sys.path.insert(0, str(ROOT))
+import ingest as ingest_mod  # noqa: E402
 CHECKS: dict[str, dict] = {}
 
 
@@ -101,8 +103,8 @@ def _():
             n += 1
             f = Path(p) if Path(p).is_absolute() else ROOT / p
             if not f.is_file():
-                f = ROOT / "raw" / h
-            if not f.is_file() or hashlib.sha256(f.read_bytes()).hexdigest() != h:
+                f = next((x for x in (ROOT / "raw" / h, ROOT / "raw" / f"{h}.gz") if x.is_file()), f)
+            if not f.is_file() or hashlib.sha256(ingest_mod.read_payload(str(f))).hexdigest() != h:
                 bad.append(h[:12])
     return not bad and n > 0, f"{n - len(bad)}/{n} verified" + (f"; bad {bad[:5]}" if bad else "")
 

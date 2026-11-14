@@ -73,3 +73,20 @@ class IngestTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LargePayloads(unittest.TestCase):
+    def test_large_payload_gzip_round_trip_hash_of_original(self):
+        import hashlib, os, sqlite3, sys
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
+        import _scratch, init_db
+        d = _scratch.mkdtemp(); db = os.path.join(d, "t.db"); init_db.migrate(db); c = sqlite3.connect(db)
+        os.environ["RAW_DIR"] = os.path.join(d, "raw")
+        big = (b"BA,hour,MW\n" + b"AECI,1,1142\n" * 600_000)
+        h = ingest.archive_payload(c, big, "s", "u", 200, "2026-11-13T00:00:00Z")
+        path = c.execute("SELECT archive_path, byte_length FROM raw_payloads").fetchone()
+        self.assertTrue(path[0].endswith(".gz")); self.assertEqual(path[1], len(big))
+        self.assertLess(os.path.getsize(path[0]), len(big) // 5)
+        self.assertEqual(hashlib.sha256(ingest.read_payload(path[0])).hexdigest(), h)
+        small = ingest.archive_payload(c, b"<html>x</html>", "s", "u", 200, "2026-11-13T00:00:00Z")
+        self.assertTrue((ingest.raw_dir() / small).exists())
