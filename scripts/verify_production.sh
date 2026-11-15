@@ -109,7 +109,10 @@ if [[ -n "${MOBILE_COMMAND_SECRET:-}" ]]; then
   python3 - "$E2E_RESP" <<'PY'
 import json, sys
 d = json.loads(sys.argv[1])
-assert "alpha_thesis" in d and "sql_query" in d, f"Unexpected E2E payload: {list(d)}"
+for k in ("as_of_timestamp", "db_rows", "sql_source", "data_quality", "analysis"):
+    assert k in d, f"Missing {k} in E2E payload: {list(d)}"
+assert isinstance(d["analysis"], dict) and d["analysis"], f"Empty analysis in E2E payload: {d}"
+print(f"    Synthetic Cloudflare -> Hub E2E OK (analysis_keys={sorted(d['analysis'])})")
 print("    Synthetic Cloudflare -> Hub E2E OK")
 PY
 else

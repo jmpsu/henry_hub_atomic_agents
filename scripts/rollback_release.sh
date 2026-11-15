@@ -42,7 +42,7 @@ if [[ -n "$PREV_WORKER_VER" ]]; then
   fi
   if command -v wrangler >/dev/null 2>&1; then WRANGLER="wrangler"; else WRANGLER="npx --yes wrangler"; fi
   echo "Rolling back Cloudflare Worker quant-gateway -> $PREV_WORKER_VER"
-  $WRANGLER rollback "$PREV_WORKER_VER" --name quant-gateway --yes || true
+  $WRANGLER rollback "$PREV_WORKER_VER" --name quant-gateway --message "Automated rollback" --yes || true
 elif [[ -n "$PREV_DIR" && -d "${PREV_DIR}-worker" ]]; then
   "$(dirname "${BASH_SOURCE[0]}")/deploy_worker.sh" "${PREV_DIR}-worker"
 fi
