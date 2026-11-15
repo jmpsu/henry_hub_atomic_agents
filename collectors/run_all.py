@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import notify  # noqa: E402
 from collectors import (cpc_degree_days, ecmwf_hdd, eia930_power_burn, eia_coal_rail, eia_coal_spot, eia_ng_monthly, eia_petroleum_spot, eia_prices, eia_storage,  # noqa: E402
-                        gfs_hdd, kinder_morgan_notices, noaa_cpc_discussion, rggi_auctions, steo_production)
+                        gfs_hdd, hh_forward_yahoo, kinder_morgan_notices, noaa_cpc_discussion, rggi_auctions, steo_production)
 
 
 def selector_agents() -> dict:
@@ -50,6 +50,7 @@ def jobs(conn) -> list:
            ("kinder_morgan_notices", lambda: kinder_morgan_notices.collect(conn)),
            ("gfs_hdd", lambda: gfs_hdd.collect(conn)),
            ("ecmwf_hdd", lambda: ecmwf_hdd.collect(conn)),
+           ("hh_forward_yahoo", lambda: hh_forward_yahoo.collect(conn)),
            ("selfheal_demo", selector_agents)]
     if now.month == 1:  # year-end observations and late-December revisions live in the prior-year file
         out += [("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
