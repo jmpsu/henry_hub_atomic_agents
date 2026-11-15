@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Semantic version without leading v (e.g. 1.0.0)"
+        description: "Semantic version without leading v (e.g. 1.0.1)"
         required: true
 
 jobs:
@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,11 +38,16 @@ jobs:
         run: |
           VER="${{ github.event.inputs.version || '' }}"
           if [ -z "$VER" ]; then VER="${GITHUB_REF_NAME#v}"; fi
+          CODE_VER="$(python3 -c 'import sys; sys.path.insert(0, "release"); import version; print(version.VERSION)')"
+          if [ "$VER" != "$CODE_VER" ]; then
+            echo "ERROR: release/version.py ($CODE_VER) does not match requested release ($VER)" >&2
+            exit 1
+          fi
           echo "version=$VER" >> "$GITHUB_OUTPUT"
           echo "tag=v$VER" >> "$GITHUB_OUTPUT"
           bash scripts/build_release.sh "$VER" "${GITHUB_SHA}" "dist/$VER"
           bash scripts/verify_release.sh "dist/$VER" "v$VER"
-      - name: Publish approved GitHub Release
+      - name: Publish approved GitHub Release and dispatch production deploy
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -55,3 +61,5 @@ jobs:
             "dist/$VER/RELEASE_NOTES.md" \
             --title "$TAG" \
             --notes-file "dist/$VER/RELEASE_NOTES.md"
+          DEFAULT_BRANCH="$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
+          gh workflow run production-deploy.yml --ref "$DEFAULT_BRANCH" -f release_tag="$TAG" || true

@@ -34,5 +34,6 @@ jobs:
           npx --yes wrangler@4 deploy --dry-run --outdir /tmp/worker-dryrun
       - name: Validate release build & manifest schema
         run: |
-          bash scripts/build_release.sh 1.0.0 "${GITHUB_SHA}" /tmp/test-release
-          bash scripts/verify_release.sh /tmp/test-release v1.0.0
+          VER="$(python3 -c 'import sys; sys.path.insert(0, "release"); import version; print(version.VERSION)')"
+          bash scripts/build_release.sh "$VER" "${GITHUB_SHA}" /tmp/test-release
+          bash scripts/verify_release.sh /tmp/test-release "v$VER"
