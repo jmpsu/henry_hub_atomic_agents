@@ -184,3 +184,24 @@ def static(path: str):
     # vendored libraries and basemap are immutable for a deploy; the app's own JS/CSS must revalidate on every load
     cc = "no-cache" if target.parent == WEB_DIR.resolve() else "public, max-age=3600"
     return FileResponse(target, headers={"Cache-Control": cc})
+
+
+# --- Coordinated release version reporting ---
+import json as _rel_json
+from fastapi import Request as _RelRequest
+from fastapi.responses import JSONResponse as _RelJSONResponse
+from release.version import get_release_info as _get_release_info
+
+@app.middleware("http")
+async def _inject_markets_release_version(request: _RelRequest, call_next):
+    resp = await call_next(request)
+    if request.url.path in ("/health", "/api/health") and resp.status_code == 200 and "application/json" in resp.headers.get("content-type", ""):
+        body = b"".join([chunk async for chunk in resp.body_iterator])
+        try:
+            data = _rel_json.loads(body.decode("utf-8"))
+            if isinstance(data, dict):
+                data.update(_get_release_info())
+                return _RelJSONResponse(content=data, status_code=resp.status_code)
+        except Exception:
+            pass
+    return resp

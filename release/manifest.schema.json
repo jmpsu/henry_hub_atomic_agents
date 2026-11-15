@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuantHubCoordinatedReleaseManifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "version",
+    "tag",
+    "git_commit",
+    "created_at",
+    "repository",
+    "artifacts",
+    "worker",
+    "migrations"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "tag": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "git_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "created_at": { "type": "string" },
+    "repository": { "type": "string" },
+    "artifacts": {
+      "type": "object",
+      "required": ["linux", "worker"],
+      "properties": {
+        "linux": {
+          "type": "object",
+          "required": ["filename", "sha256", "size_bytes"],
+          "properties": {
+            "filename": { "type": "string" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "size_bytes": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "worker": {
+          "type": "object",
+          "required": ["filename", "sha256", "size_bytes"],
+          "properties": {
+            "filename": { "type": "string" },
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "size_bytes": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "worker": {
+      "type": "object",
+      "required": ["name", "compatibility_date", "queues", "crons"],
+      "properties": {
+        "name": { "type": "string" },
+        "compatibility_date": { "type": "string" },
+        "queues": { "type": "array", "items": { "type": "string" } },
+        "crons": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "migrations": {
+      "type": "object",
+      "required": ["latest_version", "files"],
+      "properties": {
+        "latest_version": { "type": "string" },
+        "files": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

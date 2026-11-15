@@ -145,6 +145,16 @@ export default {
   },
 
   async fetch(request, env) {
+    const _relUrl = new URL(request.url);
+    if (request.method === "GET" && _relUrl.pathname === "/_release") {
+      return new Response(JSON.stringify({
+        service: "quant-gateway",
+        version: env.RELEASE_VERSION || "dev",
+        commit: env.RELEASE_COMMIT || "unknown",
+        compatibility_date: "2026-11-01"
+      }), { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+    }
+
     if (request.method === "POST" && new URL(request.url).pathname === "/github/webhook") return githubWebhook(request, env);
     if (request.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });

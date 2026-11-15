@@ -1,0 +1,17 @@
+[Unit]
+Description=Henry Hub Read-Only Visual Intelligence Markets Hub
+After=network-online.target quant_hub.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=joey
+WorkingDirectory=/opt/quant-hub/current
+Environment=PATH=/opt/quant-hub/current/.venv/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=/opt/quant-hub/shared/.env
+ExecStart=/opt/quant-hub/current/.venv/bin/uvicorn markets_hub:app --host 127.0.0.1 --port 8095
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

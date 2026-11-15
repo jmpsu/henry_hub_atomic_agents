@@ -1,0 +1,28 @@
+name: Coordinated Production Deploy
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Approved release tag (leave empty for latest stable release)"
+        required: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install release, deploy Worker, and run unified verification
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          TAG="${{ github.event.inputs.release_tag || github.event.release.tag_name }}"
+          if [ -n "$TAG" ]; then
+            bash scripts/install_release.sh --tag "$TAG"
+          else
+            bash scripts/install_release.sh
+          fi
