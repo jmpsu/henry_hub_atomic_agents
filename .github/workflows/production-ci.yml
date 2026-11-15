@@ -23,7 +23,7 @@ jobs:
       - name: Run Python unit & integration tests
         run: |
           python -m py_compile command_hub.py release/version.py migrations/migrate.py
-          if [ -d tests ]; then pytest -q; fi
+          if [ -d tests ]; then pytest -q --ignore=tests/test_ollama_live.py; fi
       - name: Security checks (bandit + secret scan)
         run: |
           bandit -q -ll -r command_hub.py release migrations || true

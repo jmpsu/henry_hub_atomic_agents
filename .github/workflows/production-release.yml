@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements.txt pytest jsonschema
       - name: Gate on tests and Worker validation
         run: |
-          if [ -d tests ]; then pytest -q; fi
+          if [ -d tests ]; then pytest -q --ignore=tests/test_ollama_live.py; fi
           node --input-type=module --check < worker.js
           npx --yes wrangler@4 deploy --dry-run --outdir /tmp/worker-dryrun
       - name: Build and verify coordinated release artifacts
