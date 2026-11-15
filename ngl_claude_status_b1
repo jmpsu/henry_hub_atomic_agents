@@ -1,0 +1,505 @@
+❯ 1. Take over and Do not stop after the inventory or requirement matrix. Read /home/joey/Projects/henry_hub_atomic_    d = ROOT / uuid.uuid4().hex
+    d.mkdir(parents=True)
+    _MINE.append(d)
+    return str(d)
+
+
+        self.cleanup()
+
+                                                                                                          atexit.register(lambda: shutil.rmtree(ROOT, ignore_errors=True))                                            def _cleanup():
+    for d in _MINE:
+        shutil.rmtree(d, ignore_errors=True)                                                                  try:
+        ROOT.rmdir()            # only when no other run still has directories here
+    except OSError:
+        pass
+
+                                                                                                         atexit.register(_cleanup)                                                                                    (timeout 5m)
+The overlapped long run now passes. To confirm the diagnosis, I'll replay the same overlap with the short process
+applying the old exit behaviour, which deletes the whole shared directory:
+  Ran 1 shell command
+
+The intermittent failure is now reproduced: the same three tests fail with the same sqlite3.OperationalError, and
+the fix is verified. I'm running the final full suite and refreshing the status file next. · summary
+
+● Bash(.venv/bin/python -m pytest -q 2>&1 | tail -1 && .venv/bin/python scripts/acceptance.py --only full_test_suite
+      agent_unit 2>&1 | tail -3 && git diff --stat)                                                            5 passed in 26.93s
+passed   full_test_suite              175 passed in 26.58s
+passed   agent_unit                   31 passed in 2.17s
+… +28 lines
+Updated requirements/STATUS.md (+61 -61)
+# Requirement status (2026-11-14T02:14:10Z)
+# Requirement status (2026-11-14T02:16:43Z)
+                                                                                                              Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic requirements
+
+                                                                                                        | Check | Status | Evidence | Blocked by |                                                                  |---|---|---|---|
+| `access_protects_hub` | passed | /execute 403, /ingest 403 |  |                                          | `agent_unit` | passed | 31 passed in 3.87s |  |
+| `agents_live_run` | passed | ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'a        nomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synthesis': 16}; em
+bedding o |  |
+| `agents_scheduled` | passed | timer enabled; ExecStopPost run_agents.py=True; /ingest trigger=True      |  |
+| `agents_share_knowledge` | passed | 22 cross-agent message reads {'data_quality': 1, 'pipeline_even
+t': 1}; 21 findings, 13 linked to source/data evidence, 15 finding->finding links (later runs build o
+n earlier findin |  |
+| `alert_delivery` | passed | incidvent streams ['[data-quality] data-qu
+ality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre'] |  |
+| `architecture_doc` | passed | sec1', 'Architecture 2', 'Architecture 3
+', 'Architecture 4', 'Architecture 5']; tracked=True |  |
+| `audit_gists` | passed | 5 recent
+| `backtest_unit` | passed | 11 passed in 0.43s |  |
+| `branch_protection` | blocked | {Pro or make this repository public to
+ enable this feature.","documentation_url":"https://d | platform_limit: GitHub requires Pro or a publ
+ic repository for branch protection
+| `branch_pushed` | passed | ## quant-hub-build...origin/quant-hub-build |  |
+| `collector_freshness` | passed | ays) |  |
+| `collector_schedule` | passed | timer enabled; worker crons ['crons = ["30 13 * * *", "45 15 * * TH
+U"]  # daily 13:30 UTC (CPC); Thursreleased 15:30Z). Day NAME used: Clou
+dflare numbe |  |
+| `access_protects_hub` | passed (c/ingest 403 |  |
+| `agent_unit` | passed | 31 passed in 2.17s |  |
+| `agents_live_run` | passed (carriics', 'data_quality', 'repair', 'noti
+ce_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synt
+hesis': 16}; embedding o |  |
+| `agents_scheduled` | passed (carried over) | timer enabled; ExecStopPost run_agents.py=True; /inges
+t trigger=True |  |
+| `agents_share_knowledge` | passed (carried over) | 22 cross-agent message reads {'data_quality': 1,
+ 'pipeline_event': 1}; 21 findings,dence, 15 finding->finding links (lat
+er runs build on earlier findin |  |
+| `alert_delivery` | passed (carrie, 'CLOSED')]; event streams ['[data-q
+uality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre'] |  |
+| `architecture_doc` | passed (carr['Architecture 1', 'Architecture 2',
+'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
+| `audit_gists` | passed (carried o|
+| `backtest_unit` | passed (carried over) | 11 passed in 0.43s |  |
+| `branch_protection` | blocked (carade to GitHub Pro or make this repos
+itory public to enable this feature.","documentation_url":"https://d | platform_limit: GitHub require
+s Pro or a public repository for brte repo |
+| `branch_pushed` | passed (carried over) | ## quant-hub-build...origin/quant-hub-build |  |
+| `collector_freshness` | passed (ces fresh (<=5 days) |  |
+| `collector_schedule` | passed (carried over) | timer enabled; worker crons ['crons = ["30 13 * * *"
+, "45 15 * * THU"]  # daily 13:30 U (EIA storage, released 15:30Z). Day
+NAME used: Cloudflare numbe |  |
+| `collectors_run` | passed (carrieagent': 'Agent_Weather_Actual_HDD', '
+obse / OK   cpc_cooling {'agent': 'Agent_Weather_Actual_CDD', 'obse / OK   eia_storage [{'agent': 'Ag
+ent_Storage_East', 'obs |  |
+| `cross_domain_sources` | blocked | have ['agent_finding', 'alpha_synthesis', 'backtest', 'carbon',
+'noaa_discussion', 'pipeline_noticeorage', 'weather']; missing ['ferc',
+'lng_notice', ' | external_data: FERC blocks automated fetches (403); LNG terminal notices, NGL fract
+ionation, cracker/refinery outages cts other than propane need paid feed
+s |
+| `db_integrity` | passed | ok |  |
+| `db_integrity` | passed | ok |  |
+| `edge_collection` | passed | edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia
+_storage'] |  |
+| `edge_ingest_unit` | passed | 3 passed in 0.63s |  |
+| `env_locked` | passed | mode 0o60et files: none |  |
+… 92 more lines
+… 1 more file changed
+(timeout 10m)
+
+❯ joey@joey-dell:~/Projects/henry_hub_atomic_agents$ bash
+  /home/joey/Projects/henry_hub_atomic_agentsdit.sh
+
+
+  ========== AUDIT METADATA ==========
+  2026-11-13T21:15:47-05:00
+  Audit user: uid=1000(joey) gid=1000(joey) groups=1000(joey),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users
+  ),105(lpadmin),125(sambashare),128(docker),
+  Project: /home/joey/Projects/henry_hub_atomic_agents
+  Live application: /home/joey/Projects/henryt_hub
+  Database: /home/joey/Projects/henry_hub_atomic_agents/.venv/quant_hub/henry_hub_pit.db
+  API: http://127.0.0.1:8090
+  Domain: quant.joeysvault.app
+  Worker: https://quant-gateway.joe-metz-psu.
+  Audit mode: READ ONLY (no intentional file/database/service changes)
+  Script version: reconstructed 27-section re
+
+
+  ========== 1. OPERATING SYSTEM ==========
+
+  --- hostnamectl  ---
+   Static hostname: joey-dell
+         Icon name: computer-laptop
+           Chassis: laptop 💻
+        Machine ID: 092e3c830a8e43a5899cb50934174e9c
+           Boot ID: 150fc122921b49429e64090d2
+  Operating System: Linux Mint 22.3
+            Kernel: Linux 7.0.0-34-generic
+      Architecture: x86-64
+   Hardware Vendor: Dell Inc.
+    Hardware Model: Latitude 5450
+  Firmware Version: 1.4.1
+  Firmware Version: 1.4.1
+     Firmware Date: Tue 2024-05-21
+      Firmware Age: 2y 5month 3w 3d
+  [exit=0]
+
+  --- uname -a  ---
+  Linux joey-dell 7.0.0-34-generic #34~24.04.Fri Sep  4 15:38:29 UTC 2 x86_64 x86_64
+  x86_64 GNU/Linux
+  [exit=0]
+
+  --- cat /etc/os-release  ---
+  NAME="Linux Mint"
+  VERSION="22.3 (Zena)"
+  ID=linuxmint
+  ID_LIKE="ubuntu debian"
+  PRETTY_NAME="Linux Mint 22.3"
+  VERSION_ID="22.3"
+  HOME_URL="https://www.linuxmint.com/"
+  SUPPORT_URL="https://forums.linuxmint.com/"
+  BUG_REPORT_URL="http://linuxmint-troubleshooting-guide.readthedocs.io/en/latest/"
+  PRIVACY_POLICY_URL="https://www.linuxmint.c
+  VERSION_CODENAME=zena
+  UBUNTU_CODENAME=noble
+  [exit=0]
+
+  --- uptime  ---
+   21:15:47 up 3 days, 23:44,  1 user,  load
+  [exit=0]
+
+  --- timedatectl  ---
+                 Local time: Fri 2026-11-13 2
+             Universal time: Sat 2026-11-14 02:15:47 UTC
+                   RTC time: Sat 2026-11-14 0
+                  Time zone: America/New_York (EST, -0500)
+  System clock synchronized: yes
+                NTP service: active
+            RTC in local TZ: no
+  [exit=0]
+
+  --- df -hT  ---
+  Filesystem     Type      Size  Used Avail U
+  tmpfs          tmpfs
+  ──── (8952 lines hidden) ─────────────────────────────────────────────────────────────
+  N             0                  4096                                                       127.0.0.1:46171
+                       0.0.0.0:*
+  tcp               LISTEN             0                  512
+  127.0.0.1:39193                            ers:(("claude",pid=1139078,fd=22))
+
+  tcp               LISTEN             0
+  127.0.0.1:8095                               0.0.0.0:*                users:(("uvicorn",pid=1311237,fd=12))
+
+  tcp               LISTEN             0                  2048
+  127.0.0.1:8090                             ers:(("uvicorn",pid=1307645,fd=20))
+
+  tcp               LISTEN             0
+     [::1]:631                                   [::]:*
+
+  tcp               LISTEN             0                  8192
+      [::]:3000
+
+  [exit=0]
+
+  --- Endpoint status: http://127.0.0.1:8090/
+  http_code=200 remote_ip=127.0.0.1 time_total=0.001528
+
+  --- Endpoint status: http://127.0.0.1:8090/openapi.json ---
+  http_code=200 remote_ip=127.0.0.1 time_tota
+
+  --- Endpoint status: https://quant.joeysvau
+  http_code=403 remote_ip=172.67.187.191 time_total=0.342684
+
+  --- Endpoint status: https://quant-gateway.joe-metz-psu.workers.dev ---
+  http_code=405 remote_ip=104.21.28.127 time_
+
+
+  ========== 27. AUDIT COMPLETION ==========
+  2026-11-13T21:15:54-05:00
+  Project: /home/joey/Projects/henry_hub_atomic_agents
+  Live application: /home/joey/Projects/henryt_hub
+  Live application: /home/joey/Projects/henryt_hub
+  Database: /home/joey/Projects/henry_hub_atomic_agents/.venv/quant_hub/henry_hub_pit.db
+  No files intentionally modified. No databass intentionally displayed.
+  NOTE: This is a reconstructed read-only audit based on the supplied report; it is not byte-for-byte recovery of the
+  missing original source.
+  joey@joey-dell:~/Projects/henry_hub_atomic_agents$
+
+Audit output shows a serious issue: section 22 exposed live API and tunnel secrets from agent-fetch-prompt.odt,
+which is tracked in git, so they are in repare also wrong (it points at a nonexistent
+.venv db), which explains the "missing" results, so I'll check those paths and the failed hh-collect-cpc.service
+next. · summary
+
+  Ran 1 shell command
+You've hit your 5-hour limit · resets 12:20am (America/New_York)
+/upgrade or /usage-credits to finish wha
+
+● Usage limit reached · continuing automatical
+
+✻ Sautéed for 1h 4m 58s · done Friday 9:17 PM
+
+❯ # AUTHORITATIVE PROJECT DIRECTIVE: HENRY HU
+
+  This project must deliver the complete origHenry Hub and NGL market intelligence
+  platform. Documentation, plans, status reports, and partial implementations do not constitute completion.
+
+  ## MANDATORY FIRST ACTION
+  Before changing code:
+  1. Read every project-level instruction file, specification, requirements document, acceptance criterion,
+  architecture document, and relevant artifac
+  2. Inspect the complete repository, including tracked and untracked files, existing agents, scripts, databases,
+  tests, deployment configuration, and the ar
+  3. Recover the original intended functionality from the actual project sources. Do not silently discard, simplify,
+  replace, or redefine requirements.
+  4. Identify implemented, partially implemented, missing, broken, and unverified capabilities.
+  5. Maintain a traceable requirement-to-impl
+
+  ## REQUIRED SYSTEM CAPABILITIES
+
+  ### 1. Ollama intelligence layer
+  Ollama must operate as an integrated local intelligence service used by the agent system, not as an isolated
+  demonstration or optional future feature.
+
+  Inspect the actual installed models and exiproject's designated model where available.
+  Do not assume a Llama model if the configured model is Qwen or another model.
+
+  Implement and test the appropriate integrations for:
+  - Agent reasoning and task assistance.
+  - Structured extraction, classification, normalization, and validation.
+  - Anomaly detection and data-quality invest
+  - Agent-to-agent knowledge exchange and synthesis.
+  - Research synthesis grounded in retrieved
+  - Embedding generation and semantic retrieval where supported by the selected model.
+  - Error diagnosis and bounded self-healing
+
+  All model calls must have explicit configurng, logging, and deterministic fallback
+  behavior where necessary. Never report a model integration as operational merely because the Ollama daemon
+  responds.
+
+  ### 2. Graphical Vector Knowledge Library
+  Implement the actual graphical, persistent, searchable knowledge library intended by this project. Do not
+  substitute a conventional SQL query or a templete.
+
+  It must support:
+  - Ingestion of relevant research, documents, source material, agent findings, and validated market intelligence.
+  - Text extraction, chunking, metadata, soure.
+  - Vector embeddings and persistent vector indexing.
+  - Semantic search and retrieval by agents aows.
+  - Relationships between documents, market concepts, data series, agents, findings, and derived features where
+  required by the original specifications.
+  - A graphical interface for exploring, searching, inspecting, and navigating the knowledge.
+  - Persistent knowledge across runs, with upceable source references.
+  - Ollama integration for supported embedding and synthesis operations.
+
+  Inspect existing dependencies and architecture before choosing or introducing a vector database. Do not invent a
+  technology choice or claim an integration e
+
+  ### 3. Agent integration
+  Agents must actually use the shared intelligence and knowledge infrastructure. Implement working interfaces, shared
+  schemas, retrieval, persistence, provenanceration. Verify actual execution rather
+  than relying on configuration files or documentation.
+
+  ### 4. Market data and quantitative integrity
+  Preserve and enforce point-in-time correctn between target_timestamp and
+  available_timestamp. Prevent look-ahead leakage in feature generation, retrieval, model inputs, training, and
+  backtesting. Preserve source provenance and
+
+  ### 5. End-to-end operation
+  The intended pipeline must work as an integrated system:
+  source acquisition -> extraction -> normali-in-time database -> knowledge ingestion
+  and vector indexing -> semantic retrieval -> agent collaboration -> Ollama-assisted synthesis -> quantitative
+  research -> backtesting -> persistent, trac
+
+  ## EXECUTION RULES
+  - Build the missing functionality. Do not spend the session merely writing plans, audits, documentation, or
+  progress reports.
+  - Do not mark a requirement complete without executable evidence.
+  - Do not fabricate test results, runtime stions, or deployment success.
+  - Do not replace real integrations with mocks and report them as production-ready.
+  - Preserve existing working functionality a
+  - Do not delete databases, snapshots, artifacts, backups, or project files.
+  - Do not perform destructive migrations or xplicit authorization.
+  - Do not expand scope beyond the original requirements.
+  - Run relevant tests after each material chite before declaring completion.
+  - Fix failures rather than hiding, skipping, or weakening tests.
+  - If an external dependency or credential bt everything possible and identify the
+  exact blocker and evidence.
+
+  ## ACCEPTANCE REQUIREMENTS
+  The project is complete only when:
+  1. Every original requirement has a traceable implementation and passing verification, or a clearly evidenced
+  external blocker.
+  2. Ollama is demonstrated working through real agent workflows.
+  3. The Graphical Vector Knowledge Library isisting, retrieving, and graphically
+  displaying actual project knowledge.
+  4. Agents demonstrably share and retrieve p
+  5. The end-to-end pipeline executes against real project data.
+  6. Point-in-time and no-look-ahead tests pa
+  7. Relevant tests pass and deployment instructions match the actual implementation.
+
+  - Do not delete databases, snapshots, artifacts, backups, or project files.
+  - Do not perform destructive migrations or xplicit authorization.
+  - Do not expand scope beyond the original requirements.
+  - Run relevant tests after each material chite before declaring completion.
+  - Fix failures rather than hiding, skipping, or weakening tests.
+  - If an external dependency or credential bt everything possible and identify the
+  exact blocker and evidence.
+
+  ## ACCEPTANCE REQUIREMENTS
+
+  The project is complete only when:
+  1. Every original requirement has a traceab verification, or a clearly evidenced
+  external blocker.
+  2. Ollama is demonstrated working through r
+  3. The Graphical Vector Knowledge Library demonstrably ingests, persists, retrieves, and graphically displays
+  actual project knowledge.
+  4. Agents demonstrably share and retrieve persistent knowledge.
+  5. The end-to-end pipeline executes against
+  6. Point-in-time and no-look-ahead tests pass.
+  7. Relevant tests pass and deployment instrementation.
+
+  At completion, report every requirement witlocation, exact test or runtime evidence,
+  and status. Separate VERIFIED, PARTIAL, BLOCKED, and NOT IMPLEMENTED. Never equate documentation with
+  implementation.
+
+  Begin by inspecting the repository and origed directly to implementation.
+  ~
+  ~
+  ~
+  ~
+  ~
+  ~
+  ~
+  ~
+
+● Usage limit reached again · continuing auto cancel
+You've hit your 5-hour limit · resets 12:20am (America/New_York)
+/upgrade or /usage-credits to finish wha
+
+✻ Cogitated for 0s · done 9:19 PM
+
+● Usage limit reset · Continuing automaticall
+
+Verification passed and the work is ready te files I created or changed, leaving out
+CLAUDE.md, host_executor.py and the audit script. · summary
+
+  Ran 1 shell command
+
+Staging is clean, with no secrets in the diff. artifacts/Ultimate_Goal.md stays unstaged because it's your edit. One
+more full test run, then commit and push to
+
+  Ran 1 shell command
+
+I committed and pushed everything to quant- suite passes (175 tests, stable across 6
+runs). In the full acceptance run, Ultimate_Goal.md is at 328 passed, 94 blocked, 0 failed, and the CLAUDE.md table
+I added is at 22 of 22 passed.
+
+First, a security problem in your audit out-fetch-prompt.odt, and that file contains
+live secrets:
+- a Cloudflare API token and a worker-admin
+- the secrets for three Cloudflare tunnels;
+- MCP OAuth access and refresh tokens.
+
+The file has been tracked in git since commrigin/main, origin/quant-hub-build and a
+self-heal branch. The repo is private, but you should rotate all of these. Both API tokens are already in your vault
+(CLOUDFLARE_API_TOKEN, CLOUDFLARE_API_TOKENfile from git history means rewriting it
+and force-pushing, so I haven't done that; tell me if you want it.
+
+About your audit script: it looks for .venv/quant_hub/henry_hub_pit.db, which doesn't exist, so its "database
+missing" and "root/live" sections are falsee project root.
+
+What I built and fixed this session:
+
+1. The Ollama layer (agents/llm.py):
+   - Models, token budgets and timeouts are explicit and overridable by environment variable.
+   - Network failures retry once. "Availablalled, not just that the daemon answers.
+   - Every model call and every fallback is logged, and model text containing numbers not in the evidence is
+     rejected.
+2. Six agents (agents/workers.py), each with a rule-based fallback where one makes sense:
+   - collector-failure diagnosis;
+   - a new data-quality agent;
+   - repair suggestions that are never appl
+   - pipeline-notice extraction, where the notice's own type label overrides the model;
+   - anomaly interpretation;
+   - cross-domain synthesis, which proposes hypotheses, checks them against the data, and sends testable ones to the
+     backtester.
+3. Shared memory (agents/memory.py): agents read each other's findings and messages. Every finding links to the
+   evidence it used and is mirrored into th
+4. Graphical explorer at /knowledge on the public read-only service: a zoomable graph with domain and edge-type
+   filters, a point-in-time slider, semantiat shows provenance, source-payload details
+   and the verdict on each finding.
+5. Chunking: the NOAA forecast discussions  were cut off at 4,000 characters. They're
+   now chunked so the whole text is embedded, with each chunk linked to its source document.
+6. Scheduling: agents now run after every dter a collector failure, and after the hub's
+   /ingest.
+7. Real bugs fixed:
+   - a test-cleanup race that caused the intermittent "test suite failed" your earlier audit recorded (two pytest
+     runs deleted each other's databases; r
+   - the rule fallback misreading "header not found" as an HTTP 404;
+   - kinds with underscores never matching
+   - data-quality percentages blowing up near zero;
+   - truncated model output.
+
+Status by category:
+
+
+
+
+
+
+
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │                                                                                       ✕
+  │ verified    │ configuration, timeouts, fallbacks and  │ unit tests over a mocked http layer cover retry,     │    │3 files changed                                        /diff to close  source: current ▾
+  │             │ logging                                 │ timeout fallback, rejected output and missing model  │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │artifacts/completion_acceptance_audit.md
+  │             │ agents share and retrieve persistent    │ 22 messages read by other agents; 21 findings, all   │    │artifacts/ngl  technical audit latest version output
+  │ verified    │ knowledge                               │ mirrored in chroma; 15 links where findings build on │    │scripts/ngl_full_readonly_audit.sh
+  │             │                                         │  earlier findings                                    │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │ graphical library ingests, persists,    │ 245 objects shown at /knowledge in headless chrome   │    │artifacts/completion_acceptance_audit.md (untracked)
+  │ verified    │ searches and displays real knowledge    │ with 0 console errors; search returns nothing before │    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │                                         │  its cutoff; 17 chunk links                          │    │new file not yet staged.
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │run `git add :/artifacts/completion_acceptance_audit.md` to see line counts.
+  │             │                                         │ collectors → database → knowledge library → agents → │    │
+  │ verified    │ pipeline end to end on real data        │  qwen3:4b hypothesis → walk-forward experiment       │    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │                                         │ 22d2632719 → stored memo                             │    │artifacts/ngl  technical audit latest version output (untracked)
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │                                         │ point-in-time and backtest tests pass; retrieval,    │    │new file not yet staged.
+  │ verified    │ no look-ahead                           │ observations and evaluation all have cutoff          │    │stage it with git add to see line counts.
+  │             │                                         │ assertions and tests                                 │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │                                         │ qwen3:4b often misreads signs. the checks catch it   │    │scripts/ngl_full_readonly_audit.sh (untracked)
+  │ partial     │ hypothesis quality                      │ (examples above), but most hypotheses are rejected;  │    │────────────────────────────────────────────────────────────────────────────────────────
+  │             │                                         │ none has beaten the persistence baseline             │    │new file not yet staged.
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │run `git add :/scripts/ngl_full_readonly_audit.sh` to see line counts.
+  │             │                                         │ 4 of 8 relationship types have a quantitative model. │    │
+  │ partial     │ testability                             │  power burn, pipeline events, coal switching and     │    │+12 files edited before this session (show)
+  │             │                                         │ storage surprises still need feature models          │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │
+  │ partial     │ repair for script-based collectors      │ produces a written change suggestion only, by        │    │
+  │             │                                         │ design; html-selector agents get a validated dry run │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │
+  │             │ paid or login-only data: ngi cash, cme  │                                                      │    │
+  │ blocked     │ months 5–12, pipeline flows, lng        │ evidenced in requirements/status.md                  │    │
+  │ (88)        │ feedgas, ecmwf days 10–15, ferc, ngl    │                                                      │    │
+  │             │ products other than propane             │                                                      │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │
+  │ blocked (4) │ public markets/ngl subdomains and       │ you need to run sudo bash                            │    │
+  │             │ main-site link                          │ deploy/add_markets_ingress.sh                        │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │
+  │ blocked (2) │ branch protection                       │ needs github pro or a public repo                    │    │
+  ├─────────────┼─────────────────────────────────────────┼──────────────────────────────────────────────────────┤    │
+  │ not         │ none of the claude.md requirements      │ —                                                    │    │
+  │ implemented │                                         │                                                      │    │
+  └─────────────┴─────────────────────────────────────────┴──────────────────────────────────────────────────────┘    │
+                                                                                                                      │
+  two acceptance checks weren't re-run this session because they have side effects: collector runs and the worker     │
+  gateway end-to-end test. their results are carried over from 00:52z today.                                          │
+                                                                                                                      │
+  things you should know:                                                                                             │
+  - this morning's 09:31 timer run failed because eia storage returned http 403 and no ecmwf run was available. both  │
+    collectors succeeded at 00:36z, so the unit will clear on its next run.                                           │
+  - the data-quality agent found a real anomaly: noaa's hdd for 2026-11-05 was recorded as 7, then 22, then 7. that   │
+    middle value looks like a bad source version; it's worth checking.                                                │
+  - agent runs post to github: they created a [data-quality] event-stream issue on your private repo. that's the      │
+    designed alert path.                                                                                              │
+                                                                                                                      │
+  the file-by-file requirement table is in requirements/status.md under "claude.md directive".                        │
+                                                                                                                      │
+✻ brewed for 1m 26s · done 12:22 am                                                                                   │
+                                                                                                                      │
+● how is claude doing this session? (optional)                                                                        │
+  1: bad    2: fine   3: good   0: dismiss                                                                            │
+                                                                              new task? /clear to save 873.7k tokens  │
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ auto mode on (shift+tab to cycle)

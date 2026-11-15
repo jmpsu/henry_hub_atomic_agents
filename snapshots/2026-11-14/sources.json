@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-14T00:38:46Z",
+ "as_of": "2026-11-14T14:33:17Z",
  "note": "Payload bytes are archived under raw/<sha256> on the host and are not committed.",
  "payloads": [
   {
@@ -1547,6 +1547,348 @@
    "http_status": 200,
    "raw_payload_hash": "cb8073187412942891486272151758bc4bde3f15020dcc1a416b9bcd8134a09b",
    "retrieved_timestamp": "2026-11-14T00:36:59Z",
+   "source_id": "kinder_morgan_notices_tgp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=TGP"
+  },
+  {
+   "byte_length": 16407,
+   "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+   "http_status": 200,
+   "raw_payload_hash": "f982ad8ec91bc77a504aa49dd543729863d82c99ee57f141e4efbf9d16bfb942",
+   "retrieved_timestamp": "2026-11-14T00:39:52Z",
+   "source_id": "eia_coal_transportation",
+   "source_url": "https://www.eia.gov/coal/transportationrates/excel/Table%201_Nominal.xlsx"
+  },
+  {
+   "byte_length": 48256021,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "1146158b972439db7c7f4cc7d0491e07644ddbf244d03b8ecb44cb2c833d10f1",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2025_Jul_Dec.csv"
+  },
+  {
+   "byte_length": 41742812,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "26768c495c3ba987e29d79df2e40d4e741f9dbcff086f53c12ff774465756a10",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2024_Jan_Jun.csv"
+  },
+  {
+   "byte_length": 35525364,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "945cd62a3edeb99c56de8c57d708772a56a8bc85b6b188d49d8db02ae74076ad",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2026_Jul_Dec.csv"
+  },
+  {
+   "byte_length": 47928993,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "a602a8e577cfdd2fa3083413eaa4dd8ba7f0d2b26a2986f8f6d22917465ea49f",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2024_Jul_Dec.csv"
+  },
+  {
+   "byte_length": 47106615,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "c4ee108252941b43117f6284bd2aa0d7f9a27cfdc9089ff4e2ba66d553b9beec",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2026_Jan_Jun.csv"
+  },
+  {
+   "byte_length": 47565054,
+   "content_type": "application/octet-stream",
+   "http_status": 200,
+   "raw_payload_hash": "fac4bb991dfa1dab3b4b35300ccab54ac99be13a40ce91954db8ddafb2816242",
+   "retrieved_timestamp": "2026-11-14T00:41:37Z",
+   "source_id": "eia930_balance",
+   "source_url": "https://www.eia.gov/electricity/gridmonitor/sixMonthFiles/EIA930_BALANCE_2025_Jan_Jun.csv"
+  },
+  {
+   "byte_length": 10383,
+   "content_type": "text/plain; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "4bd3a3f37484e0a1b16a38bf8ee6d8e692754d6fae883e17260aad5ece760ad7",
+   "retrieved_timestamp": "2026-11-14T13:30:35Z",
+   "source_id": "noaa_cpc_degree_days",
+   "source_url": "https://ftp.cpc.ncep.noaa.gov/htdocs/degree_days/weighted/daily_data/2026/Population.Heating.txt"
+  },
+  {
+   "byte_length": 9953,
+   "content_type": "text/plain; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "c249d4bb7a6f135e321fbcdc317b266536d5d240f0b4c150561452a401c8833c",
+   "retrieved_timestamp": "2026-11-14T13:30:43Z",
+   "source_id": "noaa_cpc_degree_days",
+   "source_url": "https://ftp.cpc.ncep.noaa.gov/htdocs/degree_days/weighted/daily_data/2026/Population.Cooling.txt"
+  },
+  {
+   "byte_length": 430575,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "21bcce794b7b0ce31ef5deae8d24b49c4b4d22bc7ae832b5ccd0c4bc98ab6e78",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_epng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EPNG"
+  },
+  {
+   "byte_length": 284743,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "2fd8f470155ae0fb44a51bda13f9dcb98b1c9ff8922132995836cb5a12e5552f",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_kmlp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=KMLP"
+  },
+  {
+   "byte_length": 303038,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "30cf7faf9f4ca6e388a699c7174da5c6f49b9e38cc094fe1f69e9df476265390",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_eec",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EEC"
+  },
+  {
+   "byte_length": 445015,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "96fad11bcf8cf54ecb0f17e8afb170db4d8094d09110b0d6645bca24fff54517",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_tgp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=TGP"
+  },
+  {
+   "byte_length": 437664,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "a37075dd40866ab79a7236c774f1a3799ba333e58e6347c90cebd03c7f63c30e",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_sng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=SNG"
+  },
+  {
+   "byte_length": 433991,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "af31fb5d36ec6248327a30a779a31e712037d2b30b9227c1769dcf663c299d71",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_ngpl",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=NGPL"
+  },
+  {
+   "byte_length": 371808,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "d6d392739f8e55446a776eb646e4087078e9eba6a5101992f9e8d694a6aea3fa",
+   "retrieved_timestamp": "2026-11-14T13:31:19Z",
+   "source_id": "kinder_morgan_notices_cig",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=CIG"
+  },
+  {
+   "byte_length": 3465903,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "23463366e9fb7c1c85308d2938cb597467ecb2fc97ab446cd83b96a9939c6e3f",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f240"
+  },
+  {
+   "byte_length": 3457272,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "273794d84b564ab6b1b4a670ab928953e501f207a638e8f22018716cf6651a2d",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f264"
+  },
+  {
+   "byte_length": 3481071,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "6fe8dbdb478aac61bf63893db85e87ccbfe6dc421d1d79fedd81ab0e1bd0de09",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f072"
+  },
+  {
+   "byte_length": 3463438,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "84fc7d1a0ad41fb2fb3dbd59cc90898f2426e322c2ebcce5d3587f502300ed0a",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f360"
+  },
+  {
+   "byte_length": 3499750,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "93458bf1e9dbeb99c0ef756e49536761c38bbdd24812d2884430b4ee75b98501",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f168"
+  },
+  {
+   "byte_length": 3480519,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "979cea5988e7ac129fb7e880e0b636ee1c70d7db40485a700cce5a45abbfe729",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f288"
+  },
+  {
+   "byte_length": 3467895,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "a947d5c15e9f145422eea21fc08f520846087a126fda3f741374265c91d20fa3",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f336"
+  },
+  {
+   "byte_length": 3471796,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "affba6429920b85b4d8c46567dc2b8741ad6f89867f2f7bc82c8bc797fa05a88",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f048"
+  },
+  {
+   "byte_length": 3497941,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "b10396aeab9538e308e8236f5cb753594e021af2cc4541d42b86fd80ae8f4d2a",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f144"
+  },
+  {
+   "byte_length": 3482271,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "c1ac114a7f799674e402eb4d791a495c7419bebc02cd03d52104b00c76bb0c44",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f120"
+  },
+  {
+   "byte_length": 3454656,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "c3ea3fb3726db9f8df516cc31de85dfe24281065a29b6e55fb4416e68a56887a",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f096"
+  },
+  {
+   "byte_length": 3489988,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "d86edec2fa48d2b832481b0ba43c597ea6c907d37c0cd6e2d7b4258612e6c391",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f216"
+  },
+  {
+   "byte_length": 3484207,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "e47c3b83f8437561d1191dfffac4bb70aecbdcfcbeff108a4f430358c6d1699f",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f024"
+  },
+  {
+   "byte_length": 3481448,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "ebec070e45a27a74ef9db48f454f7599dde0ff966b5c3ac24a985a3d89b220ba",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f312"
+  },
+  {
+   "byte_length": 3494277,
+   "content_type": "application/grib2",
+   "http_status": 206,
+   "raw_payload_hash": "f1a422f13c6ed62180fde4507f19cc5414eae86f527f617abaf8f25899a7f990",
+   "retrieved_timestamp": "2026-11-14T13:31:24Z",
+   "source_id": "noaa_gfs_open_data",
+   "source_url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20261114/00/atmos/gfs.t00z.pgrb2.0p25.f192"
+  },
+  {
+   "byte_length": 284743,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "055a8105cb2c1e5d5732f74ffd4bafac4fa215e9533b1da4385a9bd8e54dac5e",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_kmlp",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=KMLP"
+  },
+  {
+   "byte_length": 433991,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "5cad7955c637e01428092fb0d782d5ffc00352451b54abbc42f464b89e6f9902",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_ngpl",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=NGPL"
+  },
+  {
+   "byte_length": 430575,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "8499bbbfd2dd93ae791b02e89157565a6cc512886ea6075b5da1a8f5f8f1df7b",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_epng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EPNG"
+  },
+  {
+   "byte_length": 303038,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "999b2a03bbd198c0a1f741c15a87049155f196cff80375411daee43b19b1bacf",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_eec",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EEC"
+  },
+  {
+   "byte_length": 371808,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "abc3404110056a161d32d9563f1158c6b61faa4c4fc96a4943c2385401a1f685",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_cig",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=CIG"
+  },
+  {
+   "byte_length": 437664,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "f9f74b70357dd92ff7532d10e9055bf09958ea3e1b1544a4874659f3d3438844",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
+   "source_id": "kinder_morgan_notices_sng",
+   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=SNG"
+  },
+  {
+   "byte_length": 445015,
+   "content_type": "text/html; charset=utf-8",
+   "http_status": 200,
+   "raw_payload_hash": "fd6e09ba62a24687b82118e4776e20eb5016fd7da58ca33f049920c9e3605663",
+   "retrieved_timestamp": "2026-11-14T14:32:32Z",
    "source_id": "kinder_morgan_notices_tgp",
    "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=TGP"
   }

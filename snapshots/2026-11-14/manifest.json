@@ -16,6 +16,14 @@
    "rows_sha256": "caa4366aff3aeec8bc7af64a825c343cd6185a351782390491f1f3b6e3b8eabb",
    "targets": 825
   },
+  "Agent_Coal_Rail_TransportRate": {
+   "first_target": "2008-01-01T00:00:00Z",
+   "last_available": "2025-12-31T16:00:00Z",
+   "last_target": "2024-01-01T00:00:00Z",
+   "rows": 17,
+   "rows_sha256": "5519e867e646243a14e470adfc372b68e2d05981fac6089b30cebc45011673c7",
+   "targets": 17
+  },
   "Agent_Crude_WTI_Spot": {
    "first_target": "1986-01-02T00:00:00Z",
    "last_available": "2026-11-11T21:00:00Z",
@@ -31,6 +39,14 @@
    "rows": 308,
    "rows_sha256": "59125b41f40ca64a3da7a242faebf1de3d301be44ba3e13257f5046185eda703",
    "targets": 308
+  },
+  "Agent_Demand_PowerBurn": {
+   "first_target": "2024-01-02T00:00:00Z",
+   "last_available": "2026-11-14T12:00:00Z",
+   "last_target": "2026-11-12T00:00:00Z",
+   "rows": 1045,
+   "rows_sha256": "e68dc5a9e7a25a02713efa81fefb21ea3eba0c1779ac10e470f3a7bcc960d035",
+   "targets": 1045
   },
   "Agent_Demand_ResComm": {
    "first_target": "2001-01-01T00:00:00Z",
@@ -114,123 +130,123 @@
   },
   "Agent_GFS_00z_HDD_Day1": {
    "first_target": "2026-11-12T00:00:00Z",
-   "last_available": "2026-11-13T03:50:00Z",
-   "last_target": "2026-11-13T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "26d6fb97ef21e268810d8f93c75aab5ea493dfbb90059171939370c28a8cbc90",
-   "targets": 2
+   "last_available": "2026-11-14T03:39:18Z",
+   "last_target": "2026-11-14T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "39e0672cefb23162eedf9d9af5d13d19acf3033bb2fcf2eaef5542f0888c7c0f",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day10": {
    "first_target": "2026-11-21T00:00:00Z",
-   "last_available": "2026-11-13T04:46:10Z",
-   "last_target": "2026-11-22T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "d38118d6b0f984eb22fea0ddf8ca45a31f7d6191e6ee4589e6c11ee687eb9127",
-   "targets": 2
+   "last_available": "2026-11-14T04:36:18Z",
+   "last_target": "2026-11-23T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "7dd7729d99a695696d8cd1f03eed8984431631a8f0f68d73008f23ec4a3d31a1",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day11": {
    "first_target": "2026-11-22T00:00:00Z",
-   "last_available": "2026-11-13T04:41:55Z",
-   "last_target": "2026-11-23T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "c81ab5cf5225e2218cc8c03b824b3e479fa47ec6dada30793ca579efa9984091",
-   "targets": 2
+   "last_available": "2026-11-14T04:42:42Z",
+   "last_target": "2026-11-24T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "dfb81de8170f6e748e4da7278be9dd884a62b36251bec1ca45922dc75cc74822",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day12": {
    "first_target": "2026-11-23T00:00:00Z",
-   "last_available": "2026-11-13T04:48:21Z",
-   "last_target": "2026-11-24T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "506a1deddb35449b60fd07d9cb8b16cf02c911de274cb00fad3a4193b2ec4a4d",
-   "targets": 2
+   "last_available": "2026-11-14T05:04:02Z",
+   "last_target": "2026-11-25T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "a93988c25633b6a5876719463deb5ba753d6d8c400ecdafe5efa710d66e1e7cb",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day13": {
    "first_target": "2026-11-24T00:00:00Z",
-   "last_available": "2026-11-13T04:55:50Z",
-   "last_target": "2026-11-25T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "b2130ae0ef3d6ab79e31b3ef28d34d6baef26185f1ff1859cd3b8fbcf9cf84b3",
-   "targets": 2
+   "last_available": "2026-11-14T04:57:09Z",
+   "last_target": "2026-11-26T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "aa6aa4c2f0ebd26988bdf826154823bb98aa7977da978be2d37d9f271ac68d59",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day14": {
    "first_target": "2026-11-25T00:00:00Z",
-   "last_available": "2026-11-13T05:01:31Z",
-   "last_target": "2026-11-26T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "be9970c625642e2e1ca21ac82c8ffc7459ac5a33a110bdb81b1d0d90730f8626",
-   "targets": 2
+   "last_available": "2026-11-14T05:01:19Z",
+   "last_target": "2026-11-27T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "57c825fb4788785b85ec67e228dab57220eefcc96978bbc86b07ac45f97cf73a",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day15": {
    "first_target": "2026-11-26T00:00:00Z",
-   "last_available": "2026-11-13T05:17:11Z",
-   "last_target": "2026-11-27T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "b40097cc1539223a870aeec8c75dc19da6dc9863191eaf10ef0183b0f297409b",
-   "targets": 2
+   "last_available": "2026-11-14T05:07:39Z",
+   "last_target": "2026-11-28T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "6642b68d37b83f9710020211378f907795c269d9620e10b414171346dedc4e4e",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day2": {
    "first_target": "2026-11-13T00:00:00Z",
-   "last_available": "2026-11-13T03:45:55Z",
-   "last_target": "2026-11-14T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "35aadc46d0f537b101b15d50c10dca9fe2ea3d7dab0626ffb349486103f43556",
-   "targets": 2
+   "last_available": "2026-11-14T03:58:22Z",
+   "last_target": "2026-11-15T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "b6c3262538942583d0bd079dd94cdd7b2e9e4879cd4eb2ff896d3f387743ad80",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day3": {
    "first_target": "2026-11-14T00:00:00Z",
-   "last_available": "2026-11-13T04:04:36Z",
-   "last_target": "2026-11-15T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "d98bf735c008e7d9d5be5ce11b8e48ba1cf422fc2db0a81cbb6804fd746375d4",
-   "targets": 2
+   "last_available": "2026-11-14T04:01:31Z",
+   "last_target": "2026-11-16T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "df6435482a8f3b926ea6687f64a2affb5e2f2dedb518ba993358bed0a4a85c97",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day4": {
    "first_target": "2026-11-15T00:00:00Z",
-   "last_available": "2026-11-13T04:13:29Z",
-   "last_target": "2026-11-16T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "255f6d80531a788530d34d0b571013c23d89d8f5e14d2dc3712ef0dda733fe37",
-   "targets": 2
+   "last_available": "2026-11-14T04:00:31Z",
+   "last_target": "2026-11-17T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "39cfd1ccc0ee4b5f8e7e08dafb6dd916961434916b625ee47a8ed5b05c1f9841",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day5": {
    "first_target": "2026-11-16T00:00:00Z",
-   "last_available": "2026-11-13T04:14:10Z",
-   "last_target": "2026-11-17T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "fc3b8e8b6d1f3ee8d02b78fa7087367825949b3932915db3125867a5bfb0c033",
-   "targets": 2
+   "last_available": "2026-11-14T04:09:43Z",
+   "last_target": "2026-11-18T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "2f97c271f1ec42b39561bc75f9c9d0fa19f808308ee373d80f79cd1e750d4723",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day6": {
    "first_target": "2026-11-17T00:00:00Z",
-   "last_available": "2026-11-13T04:21:50Z",
-   "last_target": "2026-11-18T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "3886a7c59762d7d7d14470abd54e5df5c0c2f03775b78fd2bbb6f2aa3a034d85",
-   "targets": 2
+   "last_available": "2026-11-14T04:20:30Z",
+   "last_target": "2026-11-19T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "79335c0776f608ceb2ab4c4b8bb768fb3aae09772db9c21981df71bcc68bb44c",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day7": {
    "first_target": "2026-11-18T00:00:00Z",
-   "last_available": "2026-11-13T04:31:15Z",
-   "last_target": "2026-11-19T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "8a35fc5eb23d4b3cc5c4f0a41b096319d9218529fecd534c82f37441bd041c12",
-   "targets": 2
+   "last_available": "2026-11-14T04:17:26Z",
+   "last_target": "2026-11-20T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "5be44d2ebba0ebee3db62794d056f84d08d57095c0297f78c0b6b21a1ba31e00",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day8": {
    "first_target": "2026-11-19T00:00:00Z",
-   "last_available": "2026-11-13T04:22:56Z",
-   "last_target": "2026-11-20T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "22217e324c88f4c99744d7405bf2f020ddef449d80aa2cbd28637b49a73ae9f6",
-   "targets": 2
+   "last_available": "2026-11-14T04:36:31Z",
+   "last_target": "2026-11-21T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "34f3c6f940f773c09c67b953fb1be85a80e028479e5ad875b49a4c6c8e988d33",
+   "targets": 3
   },
   "Agent_GFS_00z_HDD_Day9": {
    "first_target": "2026-11-20T00:00:00Z",
-   "last_available": "2026-11-13T04:29:19Z",
-   "last_target": "2026-11-21T00:00:00Z",
-   "rows": 2,
-   "rows_sha256": "9f2b4112332cf1b8179fff4a8da38fdb5797ea2b53100cbf9df8326e322511ec",
-   "targets": 2
+   "last_available": "2026-11-14T04:29:55Z",
+   "last_target": "2026-11-22T00:00:00Z",
+   "rows": 3,
+   "rows_sha256": "735c2955546f7c906e3c15dcfc76caa233ac823f43faef9241bd77fe76dd10cb",
+   "targets": 3
   },
   "Agent_HH_Cash_Midpoint": {
    "first_target": "2026-11-11T00:00:00Z",
@@ -410,30 +426,32 @@
   },
   "Agent_Weather_Actual_CDD": {
    "first_target": "1981-01-01T00:00:00Z",
-   "last_available": "2026-11-13T13:19:12Z",
-   "last_target": "2026-11-11T00:00:00Z",
-   "rows": 17067,
-   "rows_sha256": "bdcf56875e955e2d1cb702eb6a4591e2f254476ef17c8f17dac067f367ce8046",
-   "targets": 16751
+   "last_available": "2026-11-14T13:30:43Z",
+   "last_target": "2026-11-12T00:00:00Z",
+   "rows": 17068,
+   "rows_sha256": "12493b1f3ad1a91058b4f2e39045af89b1bbcacef67aedc4b32f7d5c48c5d851",
+   "targets": 16752
   },
   "Agent_Weather_Actual_HDD": {
    "first_target": "1981-01-01T00:00:00Z",
-   "last_available": "2026-11-13T13:19:06Z",
-   "last_target": "2026-11-11T00:00:00Z",
-   "rows": 17068,
-   "rows_sha256": "91e207ddea504b51033b8bded08486d30188feeb75882caf33fa7b156bb47a16",
-   "targets": 16751
+   "last_available": "2026-11-14T13:30:35Z",
+   "last_target": "2026-11-12T00:00:00Z",
+   "rows": 17069,
+   "rows_sha256": "efb069bea9d573dae4186ea7a6a33440dbec12243fdba8ff40165cec436d5062",
+   "targets": 16752
   }
  },
- "agents_with_rows": 53,
- "as_of": "2026-11-14T00:38:46Z",
- "database_rows_sha256": "73b12c6320d26142746b78b0dc3943050461bbf8698893713febc69d600a5f41",
- "pit_rows": 105292,
+ "agents_with_rows": 55,
+ "as_of": "2026-11-14T14:33:17Z",
+ "database_rows_sha256": "355442d65cdf2664ffee5e807526ddd739f5bd2c08c314a94df61c9739a00727",
+ "pit_rows": 106371,
  "roster_agents": 81,
  "roster_agents_with_real_data": [
   "Agent_Coal_CAPP_SpotPrice",
   "Agent_Coal_PRB_SpotPrice",
+  "Agent_Coal_Rail_TransportRate",
   "Agent_Demand_Industrial",
+  "Agent_Demand_PowerBurn",
   "Agent_Demand_ResComm",
   "Agent_ECMWF_00z_HDD_Day1",
   "Agent_ECMWF_00z_HDD_Day2",
@@ -481,8 +499,6 @@
   "Agent_Weather_Actual_HDD"
  ],
  "roster_agents_without_real_data": [
-  "Agent_Coal_Rail_TransportRate",
-  "Agent_Demand_PowerBurn",
   "Agent_ECMWF_00z_HDD_Day10",
   "Agent_ECMWF_00z_HDD_Day11",
   "Agent_ECMWF_00z_HDD_Day12",

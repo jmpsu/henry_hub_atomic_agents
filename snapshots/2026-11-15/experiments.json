@@ -1,0 +1,1997 @@
+{
+ "as_of": "2026-11-15T14:33:13Z",
+ "experiments": [
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 1,
+    "model": "mean20"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "06efd3bfb1",
+   "metrics": {
+    "bias": -0.0004285714285714131,
+    "dir_hit": 0.41836734693877553,
+    "dir_p": 0.12971446778791296,
+    "directional_hit_rate": 0.41836734693877553,
+    "mae": 0.1714081632653061,
+    "mean_return_after_costs": -0.0022295309157147765,
+    "n": 98,
+    "net_return": -0.2184940297400481,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.21117527056442753
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.130 (alpha 0.0042), net_ret=-0.2185",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 5,
+    "model": "persistence"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "0844b654ee",
+   "metrics": {
+    "bias": -0.006111111111111123,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "net_return": 0.0,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 5,
+    "model": "mean20"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "3653dedcd8",
+   "metrics": {
+    "bias": 0.0009236111111111297,
+    "dir_hit": 0.5833333333333334,
+    "dir_p": 0.19485064860886947,
+    "directional_hit_rate": 0.5833333333333334,
+    "mae": 0.17781249999999998,
+    "mean_return_after_costs": 0.00879615826699639,
+    "n": 72,
+    "net_return": 0.6333233952237401,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.224068418680545
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.195 (alpha 0.0042), net_ret=0.6333",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 1,
+    "model": "ar1"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "3fe1db173e",
+   "metrics": {
+    "bias": 0.006632851692315928,
+    "dir_hit": 0.41379310344827586,
+    "dir_p": 0.1333665417926821,
+    "directional_hit_rate": 0.41379310344827586,
+    "mae": 0.0822951633008934,
+    "mean_return_after_costs": 0.0008731995745269902,
+    "n": 98,
+    "net_return": 0.08557355830364503,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10919243272850118
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.133 (alpha 0.0042), net_ret=0.0856",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 1,
+    "model": "mean20"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "5bcafb6ac3",
+   "metrics": {
+    "bias": -0.0004285714285714131,
+    "dir_hit": 0.41836734693877553,
+    "dir_p": 0.12971446778791296,
+    "directional_hit_rate": 0.41836734693877553,
+    "mae": 0.1714081632653061,
+    "mean_return_after_costs": -0.003229530915714777,
+    "n": 98,
+    "net_return": -0.31649402974004814,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.21117527056442753
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.130 (alpha 0.0042), net_ret=-0.3165",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 1,
+    "model": "persistence"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "7ace7cafba",
+   "metrics": {
+    "bias": 0.007755102040816338,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 1,
+    "model": "persistence"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "addd29297f",
+   "metrics": {
+    "bias": 0.007755102040816338,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 5,
+    "model": "persistence"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "b7a3b4020c",
+   "metrics": {
+    "bias": -0.006111111111111123,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "net_return": 0.0,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 0,
+    "horizon_days": 5,
+    "model": "ar1"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "bcc0c81125",
+   "metrics": {
+    "bias": -0.005236839795791241,
+    "dir_hit": 0.609375,
+    "dir_p": 0.10416255883043911,
+    "directional_hit_rate": 0.609375,
+    "mae": 0.1507430106705638,
+    "mean_return_after_costs": 0.01788860985605523,
+    "n": 72,
+    "net_return": 1.2879799096359765,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.18790462828224025
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.104 (alpha 0.0042), net_ret=1.2880",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 5,
+    "model": "mean20"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "dc5cbd17d1",
+   "metrics": {
+    "bias": 0.0009236111111111297,
+    "dir_hit": 0.5833333333333334,
+    "dir_p": 0.19485064860886947,
+    "directional_hit_rate": 0.5833333333333334,
+    "mae": 0.17781249999999998,
+    "mean_return_after_costs": 0.00779615826699639,
+    "n": 72,
+    "net_return": 0.5613233952237401,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.224068418680545
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.195 (alpha 0.0042), net_ret=0.5613",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007755102040816338,
+    "directional_hit_rate": null,
+    "mae": 0.08122448979591837,
+    "mean_return_after_costs": 0.0,
+    "n": 98,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10874046990848608
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 1,
+    "model": "ar1"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "e6ad1f4e07",
+   "metrics": {
+    "bias": 0.006632851692315928,
+    "dir_hit": 0.41379310344827586,
+    "dir_p": 0.1333665417926821,
+    "directional_hit_rate": 0.41379310344827586,
+    "mae": 0.0822951633008934,
+    "mean_return_after_costs": -1.4555527513826688e-05,
+    "n": 98,
+    "net_return": -0.0014264416963550154,
+    "persistence_rmse": 0.10874046990848608,
+    "rmse": 0.10919243272850118
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.133 (alpha 0.0042), net_ret=-0.0014",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-07T00:00:00Z",
+   "validation_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.006111111111111123,
+    "directional_hit_rate": null,
+    "mae": 0.1525,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.1898756903286405
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "horizon_days": 5,
+    "model": "ar1"
+   },
+   "created": "2026-11-12T22:22:04Z",
+   "id": "fd46465d8a",
+   "metrics": {
+    "bias": -0.005236839795791241,
+    "dir_hit": 0.609375,
+    "dir_p": 0.10416255883043911,
+    "directional_hit_rate": 0.609375,
+    "mae": 0.1507430106705638,
+    "mean_return_after_costs": 0.01699972096716634,
+    "n": 72,
+    "net_return": 1.2239799096359765,
+    "persistence_rmse": 0.1898756903286405,
+    "rmse": 0.18790462828224025
+   },
+   "pit_data_version": "03461f62fe83",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.104 (alpha 0.0042), net_ret=1.2240",
+   "test_period": "2026-05-20T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-13T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.016428571428571397,
+    "directional_hit_rate": null,
+    "mae": 0.16642857142857137,
+    "mean_return_after_costs": 0.0,
+    "n": 14,
+    "persistence_rmse": 0.20341723483660723,
+    "rmse": 0.20341723483660723
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 5.0,
+    "horizon_days": 3,
+    "model": "ar1"
+   },
+   "created": "2026-11-13T13:25:05Z",
+   "id": "5c31f73b12",
+   "metrics": {
+    "bias": 0.018608441803727813,
+    "dir_hit": 0.5384615384615384,
+    "dir_p": 1.0,
+    "directional_hit_rate": 0.5384615384615384,
+    "mae": 0.16515783158186959,
+    "mean_return_after_costs": 0.014218984971471085,
+    "n": 14,
+    "net_return": 0.19906578960059518,
+    "persistence_rmse": 0.20341723483660723,
+    "rmse": 0.20215555923392178
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=1.000 (alpha 0.0056), net_ret=0.1991",
+   "test_period": "2026-10-09T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2026-06-26T00:00:00Z..2026-08-31T00:00:00Z",
+   "validation_period": "2026-09-03T00:00:00Z..2026-10-08T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.016428571428571397,
+    "directional_hit_rate": null,
+    "mae": 0.16642857142857137,
+    "mean_return_after_costs": 0.0,
+    "n": 14,
+    "persistence_rmse": 0.20341723483660723,
+    "rmse": 0.20341723483660723
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 5.0,
+    "horizon_days": 3,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T13:25:05Z",
+   "id": "fb69fcea38",
+   "metrics": {
+    "bias": 0.016428571428571397,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.16642857142857137,
+    "mean_return_after_costs": 0.0,
+    "n": 14,
+    "net_return": 0.0,
+    "persistence_rmse": 0.20341723483660723,
+    "rmse": 0.20341723483660723
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-10-09T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2026-06-26T00:00:00Z..2026-08-31T00:00:00Z",
+   "validation_period": "2026-09-03T00:00:00Z..2026-10-08T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "horizon_days": 5,
+    "model": "ar1"
+   },
+   "created": "2026-11-13T13:28:27Z",
+   "id": "20639e532a",
+   "metrics": {
+    "bias": -0.01399310718645213,
+    "dir_hit": 0.6176470588235294,
+    "dir_p": 0.2299490567942136,
+    "directional_hit_rate": 0.6176470588235294,
+    "mae": 0.15065982958200125,
+    "mean_return_after_costs": 0.020426075847904547,
+    "n": 36,
+    "net_return": 0.7353387305245637,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19109328618284246
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.230 (alpha 0.0050), net_ret=0.7353",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "horizon_days": 5,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T13:28:27Z",
+   "id": "3fc873e04a",
+   "metrics": {
+    "bias": -0.015000000000000001,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "net_return": 0.0,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.01666666666666664,
+    "directional_hit_rate": null,
+    "mae": 0.15399999999999994,
+    "mean_return_after_costs": 0.0,
+    "n": 15,
+    "persistence_rmse": 0.19546525692988678,
+    "rmse": 0.19546525692988678
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "horizon_days": 2,
+    "model": "mean20"
+   },
+   "created": "2026-11-13T13:30:25Z",
+   "id": "5c080020b9",
+   "metrics": {
+    "bias": 0.10946666666666668,
+    "dir_hit": 0.26666666666666666,
+    "dir_p": 0.12133525035848217,
+    "directional_hit_rate": 0.26666666666666666,
+    "mae": 0.2607333333333334,
+    "mean_return_after_costs": -0.017801220665083196,
+    "n": 15,
+    "net_return": -0.2670183099762479,
+    "persistence_rmse": 0.19546525692988678,
+    "rmse": 0.29029668731603997
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.121 (alpha 0.0045), net_ret=-0.2670",
+   "test_period": "2026-10-08T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2026-06-25T00:00:00Z..2026-09-02T00:00:00Z",
+   "validation_period": "2026-09-03T00:00:00Z..2026-10-07T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.01666666666666664,
+    "directional_hit_rate": null,
+    "mae": 0.15399999999999994,
+    "mean_return_after_costs": 0.0,
+    "n": 15,
+    "persistence_rmse": 0.19546525692988678,
+    "rmse": 0.19546525692988678
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "horizon_days": 2,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T13:30:25Z",
+   "id": "e06354154f",
+   "metrics": {
+    "bias": 0.01666666666666664,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.15399999999999994,
+    "mean_return_after_costs": 0.0,
+    "n": 15,
+    "net_return": 0.0,
+    "persistence_rmse": 0.19546525692988678,
+    "rmse": 0.19546525692988678
+   },
+   "pit_data_version": "281c24545e18",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-10-08T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2026-06-25T00:00:00Z..2026-09-02T00:00:00Z",
+   "validation_period": "2026-09-03T00:00:00Z..2026-10-07T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.002653061224489803,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "horizon_days": 1,
+    "model": "ar1"
+   },
+   "created": "2026-11-13T13:32:44Z",
+   "id": "5127b4a07e",
+   "metrics": {
+    "bias": 0.001407203157051136,
+    "dir_hit": 0.4,
+    "dir_p": 0.23303798227390543,
+    "directional_hit_rate": 0.4,
+    "mae": 0.08969851908293401,
+    "mean_return_after_costs": -0.0006582900858195526,
+    "n": 49,
+    "net_return": -0.032256214205158076,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10802608190179208
+   },
+   "pit_data_version": "c3936b77d8c5",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.233 (alpha 0.0042), net_ret=-0.0323",
+   "test_period": "2026-08-18T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z",
+   "validation_period": "2026-05-19T00:00:00Z..2026-08-14T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.002653061224489803,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 1,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T13:34:28Z",
+   "id": "173edbc825",
+   "metrics": {
+    "bias": 0.002653061224489803,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "pit_data_version": "c3936b77d8c5",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-18T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z",
+   "validation_period": "2026-05-19T00:00:00Z..2026-08-14T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.002653061224489803,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Weather_Actual_HDD",
+     "Agent_Weather_30YrNormal_HDD"
+    ],
+    "horizon_days": 1,
+    "model": "hdd_anomaly"
+   },
+   "created": "2026-11-13T13:34:28Z",
+   "id": "617131ddb8",
+   "metrics": {
+    "bias": 0.002653061224489803,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "pit_data_version": "c3936b77d8c5",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=1.000 (alpha 0.0038), net_ret=0.0000",
+   "test_period": "2026-08-18T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z",
+   "validation_period": "2026-05-19T00:00:00Z..2026-08-14T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.002653061224489803,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 1,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T14:22:11Z",
+   "id": "99e2e98e5a",
+   "metrics": {
+    "bias": 0.002653061224489803,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-18T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z",
+   "validation_period": "2026-05-19T00:00:00Z..2026-08-14T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.002653061224489803,
+    "directional_hit_rate": null,
+    "mae": 0.0879591836734694,
+    "mean_return_after_costs": 0.0,
+    "n": 49,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.10725708196969123
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Weather_Actual_HDD",
+     "Agent_Weather_30YrNormal_HDD"
+    ],
+    "horizon_days": 1,
+    "model": "hdd_anomaly"
+   },
+   "created": "2026-11-13T14:22:11Z",
+   "id": "a6d30d02be",
+   "metrics": {
+    "bias": 0.0813547544888133,
+    "dir_hit": 0.46938775510204084,
+    "dir_p": 0.7750969621959847,
+    "directional_hit_rate": 0.46938775510204084,
+    "mae": 0.12307872664119675,
+    "mean_return_after_costs": 0.002353893159112563,
+    "n": 49,
+    "net_return": 0.1153407647965156,
+    "persistence_rmse": 0.10725708196969123,
+    "rmse": 0.16213141503304201
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.775 (alpha 0.0036), net_ret=0.1153",
+   "test_period": "2026-08-18T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-13T00:00:00Z..2026-05-15T00:00:00Z",
+   "validation_period": "2026-05-19T00:00:00Z..2026-08-14T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 5,
+    "model": "persistence"
+   },
+   "created": "2026-11-13T14:22:29Z",
+   "id": "622c754bbc",
+   "metrics": {
+    "bias": -0.015000000000000001,
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "net_return": 0.0,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Weather_Actual_HDD",
+     "Agent_Weather_30YrNormal_HDD"
+    ],
+    "horizon_days": 5,
+    "model": "hdd_anomaly"
+   },
+   "created": "2026-11-13T14:22:29Z",
+   "id": "6c0b75098a",
+   "metrics": {
+    "bias": -0.032627047108828196,
+    "dir_hit": 0.5555555555555556,
+    "dir_p": 0.6170750774519738,
+    "directional_hit_rate": 0.5555555555555556,
+    "mae": 0.1430440168317462,
+    "mean_return_after_costs": 0.018448626190363377,
+    "n": 36,
+    "net_return": 0.6641505428530816,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.1768462370146715
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.617 (alpha 0.0033), net_ret=0.6642",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.296844515978764,
+      "rmse": 0.296844515978764
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 30,
+      "persistence_rmse": 0.16383935221226106,
+      "rmse": 0.16383935221226106
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Weather_Actual_HDD",
+     "Agent_Weather_30YrNormal_HDD"
+    ],
+    "horizon_days": 5,
+    "model": "hdd_anomaly",
+    "slippage_bps": 5.0
+   },
+   "created": "2026-11-13T14:23:41Z",
+   "id": "7b8c232093",
+   "metrics": {
+    "bias": -0.032627047108828196,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.8333333333333334,
+      "max_drawdown": 0.020156716417910545,
+      "mean_return_after_costs": 0.09552316862769382,
+      "n": 6,
+      "persistence_rmse": 0.296844515978764,
+      "rmse": 0.2222046086992724
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.3088233037293832,
+      "mean_return_after_costs": 0.0024337177028972913,
+      "n": 30,
+      "persistence_rmse": 0.16383935221226106,
+      "rmse": 0.16629651899561784
+     }
+    },
+    "dir_hit": 0.5555555555555556,
+    "dir_p": 0.6170750774519738,
+    "directional_hit_rate": 0.5555555555555556,
+    "mae": 0.1430440168317462,
+    "max_drawdown": 0.3088233037293832,
+    "mean_return_after_costs": 0.017948626190363377,
+    "n": 36,
+    "net_return": 0.6461505428530816,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.1768462370146715,
+    "sharpe_per_decision": 0.27028616719131
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.617 (alpha 0.0031), net_ret=0.6462",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.015000000000000001,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.296844515978764,
+      "rmse": 0.296844515978764
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 30,
+      "persistence_rmse": 0.16383935221226106,
+      "rmse": 0.16383935221226106
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 5,
+    "model": "persistence",
+    "slippage_bps": 5.0
+   },
+   "created": "2026-11-13T14:23:41Z",
+   "id": "d1cc3aeca9",
+   "metrics": {
+    "bias": -0.015000000000000001,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.296844515978764,
+      "rmse": 0.296844515978764
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 30,
+      "persistence_rmse": 0.16383935221226106,
+      "rmse": 0.16383935221226106
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.15166666666666667,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 36,
+    "net_return": 0.0,
+    "persistence_rmse": 0.19249819623974546,
+    "rmse": 0.19249819623974546,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "ac0d0170a671",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-11-12T00:00:00Z..2026-05-19T00:00:00Z",
+   "validation_period": "2026-05-20T00:00:00Z..2026-08-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 5,
+    "model": "propane_wti_revert",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:50:15Z",
+   "id": "27b95e4009",
+   "metrics": {
+    "bias": -0.8688214947584263,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.8333333333333334,
+      "max_drawdown": 0.01137735849056598,
+      "mean_return_after_costs": 0.09081997996513298,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.159176274425198
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.6261308520310676,
+      "mean_return_after_costs": -0.005633576402502832,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.687029916743558
+     }
+    },
+    "dir_hit": 0.5277777777777778,
+    "dir_p": 0.7236736098317631,
+    "directional_hit_rate": 0.5277777777777778,
+    "mae": 4.2523841387609025,
+    "max_drawdown": 0.6261308520310676,
+    "mean_return_after_costs": 0.002404219961466819,
+    "n": 72,
+    "net_return": 0.17310383722561096,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.879446289591786,
+    "sharpe_per_decision": 0.03816638353847197
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.724 (alpha 0.0029), net_ret=0.1731",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 10,
+    "model": "propane_wti_revert",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:51:02Z",
+   "id": "2ae67347dd",
+   "metrics": {
+    "bias": -2.585637220142653,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.07933333333333335,
+      "mean_return_after_costs": 0.0312759702559425,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 10.37450742646422
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.53125,
+      "max_drawdown": 1.2229709361729244,
+      "mean_return_after_costs": 0.004498403933483323,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.768650789819662
+     }
+    },
+    "dir_hit": 0.5294117647058824,
+    "dir_p": 0.7160047955043312,
+    "directional_hit_rate": 0.5294117647058824,
+    "mae": 6.062507809147301,
+    "max_drawdown": 1.2959834984309546,
+    "mean_return_after_costs": 0.006073554893627981,
+    "n": 68,
+    "net_return": 0.4130017327667027,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.945629082740699,
+    "sharpe_per_decision": 0.06952612379817251
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.716 (alpha 0.0028), net_ret=0.4130",
+   "test_period": "2026-05-14T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-11T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:51:02Z",
+   "id": "f151f45a02",
+   "metrics": {
+    "bias": -1.680882352941177,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 11.743615286614258,
+      "rmse": 11.743615286614258
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 7.281268776799823,
+      "rmse": 7.281268776799823
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 5.845588235294118,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "net_return": 0.0,
+    "persistence_rmse": 7.616477879841682,
+    "rmse": 7.616477879841682,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-14T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-11T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Crude_WTI_Spot"
+    ],
+    "horizon_days": 5,
+    "model": "propane_wti_momentum",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:52:05Z",
+   "id": "354c6b8c81",
+   "metrics": {
+    "bias": -0.3991023822837858,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.3333333333333333,
+      "max_drawdown": 0.3006371140529239,
+      "mean_return_after_costs": -0.015076601912157433,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 14.094545258337785
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5454545454545454,
+      "max_drawdown": 0.3918083469418523,
+      "mean_return_after_costs": 0.010612336860221925,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.370980026341064
+     }
+    },
+    "dir_hit": 0.5277777777777778,
+    "dir_p": 0.7236736098317631,
+    "directional_hit_rate": 0.5277777777777778,
+    "mae": 4.195719228476505,
+    "max_drawdown": 0.3918083469418523,
+    "mean_return_after_costs": 0.008471591962523646,
+    "n": 72,
+    "net_return": 0.6099546213017025,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.836782335162142,
+    "sharpe_per_decision": 0.13584729156680683
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.724 (alpha 0.0026), net_ret=0.6100",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_NGL_MontBelvieu_Propane",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 5,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:52:05Z",
+   "id": "dff4f96b30",
+   "metrics": {
+    "bias": -0.4388888888888882,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 13.819249859043243,
+      "rmse": 13.819249859043243
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 66,
+      "persistence_rmse": 4.417201225512221,
+      "rmse": 4.417201225512221
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 4.161111111111111,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 72,
+    "net_return": 0.0,
+    "persistence_rmse": 5.813776741499453,
+    "rmse": 5.813776741499453,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "9621199c0b00",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-19T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2024-11-12T00:00:00Z..2025-11-10T00:00:00Z",
+   "validation_period": "2025-11-11T00:00:00Z..2026-05-18T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [
+     "Agent_Prod_Appalachia",
+     "Agent_Prod_Permian",
+     "Agent_Prod_Haynesville",
+     "Agent_Prod_EagleFord",
+     "Agent_Prod_Bakken",
+     "Agent_Prod_DJBasin"
+    ],
+    "horizon_days": 10,
+    "model": "hh_production_momentum",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:55:18Z",
+   "id": "9a65e97edf",
+   "metrics": {
+    "bias": -0.09041017934111771,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.5,
+      "max_drawdown": 0.19521487603305793,
+      "mean_return_after_costs": -0.022406803000697896,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.3001039636073003
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.375,
+      "max_drawdown": 0.9000391766678509,
+      "mean_return_after_costs": 6.085966591794093e-05,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.25755130526969516
+     }
+    },
+    "dir_hit": 0.38235294117647056,
+    "dir_p": 0.06890880788626996,
+    "directional_hit_rate": 0.38235294117647056,
+    "mae": 0.21601137073068533,
+    "max_drawdown": 0.9000391766678509,
+    "mean_return_after_costs": -0.0012607675497653436,
+    "n": 68,
+    "net_return": -0.08573219338404336,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.2602470756473312,
+    "sharpe_per_decision": -0.016030982443937605
+   },
+   "pit_data_version": "bb14e2db97fc",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.069 (alpha 0.0025), net_ret=-0.0857",
+   "test_period": "2026-05-18T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-13T19:55:18Z",
+   "id": "ee837469a5",
+   "metrics": {
+    "bias": 0.007647058823529405,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 64,
+      "persistence_rmse": 0.2329565410114084,
+      "rmse": 0.2329565410114084
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.1755882352941176,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 68,
+    "net_return": 0.0,
+    "persistence_rmse": 0.23593992256255303,
+    "rmse": 0.23593992256255303,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "bb14e2db97fc",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-05-18T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2024-11-18T00:00:00Z..2025-10-31T00:00:00Z",
+   "validation_period": "2025-11-03T00:00:00Z..2026-05-15T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.0004999999999999894,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 36,
+      "persistence_rmse": 0.24727402703164045,
+      "rmse": 0.24727402703164045
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.18649999999999997,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 40,
+    "persistence_rmse": 0.2506691045980737,
+    "rmse": 0.2506691045980737,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "ar1",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-14T00:35:37Z",
+   "id": "6bf4b522ee",
+   "metrics": {
+    "bias": 0.0012627742633448459,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.75,
+      "max_drawdown": 0.08733093525179848,
+      "mean_return_after_costs": 0.049392310247074654,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27151835108683864
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.5588235294117647,
+      "max_drawdown": 0.265676251623444,
+      "mean_return_after_costs": 0.0023225767598680854,
+      "n": 36,
+      "persistence_rmse": 0.24727402703164045,
+      "rmse": 0.24787523746387255
+     }
+    },
+    "dir_hit": 0.5789473684210527,
+    "dir_p": 0.4173041656274045,
+    "directional_hit_rate": 0.5789473684210527,
+    "mae": 0.18583242437874387,
+    "max_drawdown": 0.35300718687524246,
+    "mean_return_after_costs": 0.007029550108588742,
+    "n": 40,
+    "net_return": 0.2811820043435497,
+    "persistence_rmse": 0.2506691045980737,
+    "rmse": 0.2503400517509846,
+    "sharpe_per_decision": 0.0838486029843734
+   },
+   "pit_data_version": "e9896caa24c6",
+   "promoted": false,
+   "result": "rejected: rmse < baseline, dir_p=0.417 (alpha 0.0024), net_ret=0.2812",
+   "test_period": "2026-08-06T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2025-09-08T00:00:00Z..2026-04-17T00:00:00Z",
+   "validation_period": "2026-04-20T00:00:00Z..2026-08-03T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.0004999999999999894,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 36,
+      "persistence_rmse": 0.24727402703164045,
+      "rmse": 0.24727402703164045
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.18649999999999997,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 40,
+    "persistence_rmse": 0.2506691045980737,
+    "rmse": 0.2506691045980737,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10.0,
+    "features": [],
+    "horizon_days": 10,
+    "model": "persistence",
+    "slippage_bps": 0.0
+   },
+   "created": "2026-11-14T00:35:37Z",
+   "id": "9884b58ee1",
+   "metrics": {
+    "bias": 0.0004999999999999894,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 4,
+      "persistence_rmse": 0.27937430089397985,
+      "rmse": 0.27937430089397985
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 36,
+      "persistence_rmse": 0.24727402703164045,
+      "rmse": 0.24727402703164045
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.18649999999999997,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 40,
+    "net_return": 0.0,
+    "persistence_rmse": 0.2506691045980737,
+    "rmse": 0.2506691045980737,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "e9896caa24c6",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-08-06T00:00:00Z..2026-11-09T00:00:00Z",
+   "train_period": "2025-09-08T00:00:00Z..2026-04-17T00:00:00Z",
+   "validation_period": "2026-04-20T00:00:00Z..2026-08-03T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.005084745762711876,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.058736700622353574,
+      "rmse": 0.058736700622353574
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 53,
+      "persistence_rmse": 0.10499775379448265,
+      "rmse": 0.10499775379448265
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.08169491525423729,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 59,
+    "persistence_rmse": 0.10126320796881558,
+    "rmse": 0.10126320796881558,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "features": [
+     "Agent_Prod_Appalachia",
+     "Agent_Prod_Permian",
+     "Agent_Prod_Haynesville",
+     "Agent_Prod_EagleFord",
+     "Agent_Prod_Bakken",
+     "Agent_Prod_DJBasin"
+    ],
+    "horizon_days": 1,
+    "model": "hh_production_momentum",
+    "slippage_bps": 5.0
+   },
+   "created": "2026-11-14T01:59:34Z",
+   "id": "22d2632719",
+   "metrics": {
+    "bias": 0.05309977529077913,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": 0.3333333333333333,
+      "max_drawdown": 0.015935980362163586,
+      "mean_return_after_costs": 0.008843229040167044,
+      "n": 6,
+      "persistence_rmse": 0.058736700622353574,
+      "rmse": 0.05244655685134718
+     },
+     "non_heating_season": {
+      "directional_hit_rate": 0.41509433962264153,
+      "max_drawdown": 0.24531640333009885,
+      "mean_return_after_costs": -0.004144992837440802,
+      "n": 53,
+      "persistence_rmse": 0.10499775379448265,
+      "rmse": 0.11816422816147898
+     }
+    },
+    "dir_hit": 0.4067796610169492,
+    "dir_p": 0.19295429576907747,
+    "directional_hit_rate": 0.4067796610169492,
+    "mae": 0.09066691761584861,
+    "max_drawdown": 0.24531640333009885,
+    "mean_return_after_costs": -0.0028241567142942405,
+    "n": 59,
+    "net_return": -0.1666252461433602,
+    "persistence_rmse": 0.10126320796881558,
+    "rmse": 0.1132367733327742,
+    "sharpe_per_decision": -0.07917175185787625
+   },
+   "pit_data_version": "92ffac528f37",
+   "promoted": false,
+   "result": "rejected: rmse >= baseline, dir_p=0.193 (alpha 0.0023), net_ret=-0.1666",
+   "test_period": "2026-07-30T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-08-29T00:00:00Z..2026-04-10T00:00:00Z",
+   "validation_period": "2026-04-14T00:00:00Z..2026-07-29T00:00:00Z"
+  },
+  {
+   "baseline_metrics": {
+    "bias": 0.005084745762711876,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.058736700622353574,
+      "rmse": 0.058736700622353574
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 53,
+      "persistence_rmse": 0.10499775379448265,
+      "rmse": 0.10499775379448265
+     }
+    },
+    "directional_hit_rate": null,
+    "mae": 0.08169491525423729,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 59,
+    "persistence_rmse": 0.10126320796881558,
+    "rmse": 0.10126320796881558,
+    "sharpe_per_decision": null
+   },
+   "config": {
+    "agent": "Agent_HH_Spot_EIA",
+    "cost_bps": 10,
+    "features": [],
+    "horizon_days": 1,
+    "model": "persistence",
+    "slippage_bps": 5.0
+   },
+   "created": "2026-11-14T01:59:34Z",
+   "id": "cf087c7ea4",
+   "metrics": {
+    "bias": 0.005084745762711876,
+    "by_regime": {
+     "heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 6,
+      "persistence_rmse": 0.058736700622353574,
+      "rmse": 0.058736700622353574
+     },
+     "non_heating_season": {
+      "directional_hit_rate": null,
+      "max_drawdown": 0.0,
+      "mean_return_after_costs": 0.0,
+      "n": 53,
+      "persistence_rmse": 0.10499775379448265,
+      "rmse": 0.10499775379448265
+     }
+    },
+    "dir_hit": null,
+    "dir_p": 1.0,
+    "directional_hit_rate": null,
+    "mae": 0.08169491525423729,
+    "max_drawdown": 0.0,
+    "mean_return_after_costs": 0.0,
+    "n": 59,
+    "net_return": 0.0,
+    "persistence_rmse": 0.10126320796881558,
+    "rmse": 0.10126320796881558,
+    "sharpe_per_decision": null
+   },
+   "pit_data_version": "92ffac528f37",
+   "promoted": false,
+   "result": "baseline",
+   "test_period": "2026-07-30T00:00:00Z..2026-11-11T00:00:00Z",
+   "train_period": "2025-08-29T00:00:00Z..2026-04-10T00:00:00Z",
+   "validation_period": "2026-04-14T00:00:00Z..2026-07-29T00:00:00Z"
+  }
+ ],
+ "promoted": [],
+ "schema": "pit-snapshot/1"
+}

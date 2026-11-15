@@ -1,0 +1,141 @@
+
+
+
+
+Here is the itemized, evidence-backed deep-dive audit of every single gap, bug, and security issue found across the 86 project files and system configs you just dumped—followed by the exact remediation plan and production commands to bring every component into 100% alignment with artifacts/Ultimate_Goal.md.
+PART 1 — NUCLEAR DEEP-DIVE AUDIT (EVERY GAP, BUG & RISK FOUND)
+1. Critical Security & Hygiene Finding
+Live Cloudflare OAuth/MCP Tokens Sitting Untracked Inside Repo:
+artifacts/mcp_credentials.json (19,487 bytes, UNTRACKED) contains live access_token and refresh_token credentials with full account admin scopes (argotunnel.write, workers-scripts.write, dns.write, access.write, zone.write). Although listed in .gitignore, storing live admin tokens inside a git repo directory is an unnecessary exposure risk.
+Repo Clutter: artifacts/.~lock.Ultimate_Goal.md.odt# (LibreOffice lock file) is sitting untracked in artifacts/. (Note: tests/_scratch.py is actually a real test helper imported by test_backtest.py, test_ingest.py, etc. — it should be committed, not deleted.)
+2. Git & GitHub Sync (INCOMPLETE)
+quant-hub-build@bbec506 has 10 unpushed commits ahead of origin/main@e11a221 (Nov 11) and 45 dirty/untracked items (markets_engine.py, markets_hub.py, kb_ingest.py, eia_petroleum_spot.py, web/, deploy/markets_hub.service, runtime_paths.py, scripts/).
+Section 3.5 (GitHub Data Audit) is MISSING: There is no automated daily snapshot/manifest exporter committing snapshots/YYYY-MM-DD/manifest.json + ingestion records + LEADERBOARD.md to GitHub.
+joeysvault-site (493ebe0) has ZERO link to markets.joeysvault.app or ngl.joeysvault.app in src/pages/www.html or src/pages/projects.html. (Important: joeysvault-site/README.md line 19 explicitly states Cloudflare Workers Builds auto-deploys on push to main—do not run wrangler deploy manually there.)
+3. Architecture 1: Edge-to-Core Distributed Scraping & 81 Agents (INCOMPLETE — 49/81 measured)
+What works: henry_hub_pit.db has 103,654 rows, 16/16 columns, 153 raw_payloads, and 642 multi-vintage revision keys (e.g., eia_prices.py, eia_ng_monthly.py, eia_petroleum_spot.py, cpc_degree_days.py all preserve revisions).
+Gaps:
+Only 49/81 roster agents have real data (total=51 includes 2 unverified_seed rows for Agent_HH_Cash_Midpoint and Agent_LNG_SabinePass_Flow).
+32 Missing Roster Agents: Agent_HH_Cash_* (4 NGI), Agent_HH_M5..M12 (8 CME; plus M1..M4 ended 2024-04-05), Agent_Flow_* (5 border flows), Agent_LNG_*_Flow (8 LNG terminals), Agent_Demand_PowerBurn (1), Agent_Coal_* (3), and Agent_ECMWF_00z_HDD_Day10..15 (6 — ecmwf_hdd.py stops at MAX_STEP = 240).
+Missing NGLs Required by Sec. 5.1 & 12.5: No collectors for Mont Belvieu Ethane (C2), Normal Butane (nC4), Isobutane (iC4), Natural Gasoline (C5+), Conway Propane, Fractionation, or Cracker Outages—so Frac Spread and Mont Belvieu vs Conway curves show pending_collector.
+Edge Collection (Sec. 3.1) Not Distributed: worker.js does not scrape any sources at the Cloudflare edge; its scheduled() only calls /ingest on joey-dell (30 13 * * * & 45 15 * * THU), so 100% of scraping originates from joey-dell.
+4. Architecture 2: Self-Healing Scraper & Automated PR Pipeline (NOT PROVEN LIVE)
+selfheal.py is unit-tested (test_selfheal.py), but:
+Nothing in collectors/run_all.py or command_hub.py invokes selfheal.diagnose() -> propose_repair() -> open_pull_request() on a real collector failure.
+0 Pull Requests exist on jmpsu/henry_hub_atomic_agents.
+No GitHub merge webhook -> Worker -> authenticated collector rerun loop (Sec. 4.5) exists in worker.js.
+5. Architecture 3: Cross-Domain Semantic Friction Vector Engine (PARTIAL)
+kb_ingest.py (104 nodes in chroma_pit_kb + kb_nodes/kb_edges) is strong for structured summaries, but:
+Missing unstructured text corpus (Sec. 5.1): No ingestion of pipeline critical notices, force majeure declarations, FERC filings, NOAA 6–10/8–14 day forecast discussions, LNG notices, or petrochemical cracker outage reports.
+0 GitHub Research Memo Issues (Sec. 5.5): alerts.py has never been run with dry_run=False.
+6. Architecture 4: Serverless Walk-Forward Backtest Orchestrator (NOT VERIFIED LIVE)
+Why POST /backtest returned HTTP 403 (error code: 1010): Cloudflare Bot Fight / Security blocked Python urllib.request's default User-Agent (error code: 1010). Also, wrangler queues list failed in the dump because CLOUDFLARE_API_TOKEN wasn't exported into sudo's environment.
+Quantitative Gaps:
+0 promoted models out of 27 experiments in LEADERBOARD.md.
+experiments.py only tests persistence, ar1, mean20, and hdd_anomaly on Agent_HH_Spot_EIA—no cross-domain features using storage deviations, LNG feedgas, shale production, WTI/NGL ratios, or vector-derived features, and no geographic/instrument breakdown beyond heating_season vs non_heating_season.
+7. Visual Hub (markets.joeysvault.app, ngl.joeysvault.app, ngl-term.py — UNFINISHED)
+markets_hub.py IS running locally on 127.0.0.1:8095 (PID 3846400), but:
+Not systemd-managed: PID 3846400 is an ad-hoc terminal process (PPID 1553); [ABSENT] /etc/systemd/system/markets_hub.service (only a user unit template exists in deploy/markets_hub.service, not enabled).
+Not routed in Cloudflare: Neither markets.joeysvault.app nor ngl.joeysvault.app is in /etc/cloudflared/config.yml or DNS (HTTP 0).
+ngl-term.py does NOT exist (False): The Python rich terminal dashboard with Unicode Braille (U+2800–U+28FF) North American map synced to ngl.joeysvault.app/api/state.json hasn't been created yet.
+host_executor.py (port 8091) is untracked, unauthenticated, and not running/used.
+PART 2 — HOW TO FIX EVERY GAP TO REACH 100% ULTIMATE GOAL COMPLIANCE
+Execute these phases in dependency order:
+Phase 1 — Security Cleanup & Git Sync (henry_hub_atomic_agents)
+Move artifacts/mcp_credentials.json out of the repo to ~/.config/joey-secrets/mcp_credentials.json (chmod 600) and remove artifacts/.~lock.Ultimate_Goal.md.odt#.
+Add artifacts/Ultimate_Goal.md.odt (or keep if desired) and commit all valid code (markets_engine.py, markets_hub.py, kb_ingest.py, collectors/eia_petroleum_spot.py, runtime_paths.py, scripts/, web/, deploy/, tests/_scratch.py, tests/test_*.py), push quant-hub-build to origin, and merge to main.
+Bash
+mkdir -p ~/.config/joey-secrets
+mv /home/joey/Projects/henry_hub_atomic_agents/artifacts/mcp_credentials.json ~/.config/joey-secrets/mcp_credentials.json
+chmod 600 ~/.config/joey-secrets/mcp_credentials.json
+rm -f '/home/joey/Projects/henry_hub_atomic_agents/artifacts/.~lock.Ultimate_Goal.md.odt#'
+
+cd /home/joey/Projects/henry_hub_atomic_agents
+.venv/bin/python -m pytest -v
+git add -A
+git status --short
+git commit -m "Add read-only markets visual hub, monochrome UI, petroleum collector, and progressive KB"
+git push -u origin quant-hub-build
+Phase 2 — Make markets.joeysvault.app & ngl.joeysvault.app Live + Link From joeysvault.app
+Stop the ad-hoc :8095 process (kill 3846400), install markets_hub.service as a persistent systemd service, and enable it.
+Route markets.joeysvault.app and ngl.joeysvault.app to 127.0.0.1:8095 in /etc/cloudflared/config.yml and Cloudflare DNS, validate, and restart cloudflared.
+Add links to https://markets.joeysvault.app and https://ngl.joeysvault.app in /home/joey/joeysvault-site/src/pages/www.html and projects.html, then commit and push to origin/main (triggering Cloudflare Workers Builds).
+Bash
+# 1. Replace ad-hoc uvicorn :8095 with systemd markets_hub.service
+kill 3846400 2>/dev/null || true
+sudo tee /etc/systemd/system/markets_hub.service > /dev/null <<'EOF'
+[Unit]
+Description=NGL & Henry Hub Read-Only Visual Intelligence Hub (127.0.0.1:8095)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=joey
+WorkingDirectory=/home/joey/Projects/henry_hub_atomic_agents
+Environment=DB_PATH=/home/joey/Projects/henry_hub_atomic_agents/henry_hub_pit.db
+Environment=PATH=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/joey/Projects/henry_hub_atomic_agents/.venv/bin/uvicorn markets_hub:app --host 127.0.0.1 --port 8095 --no-server-header
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now markets_hub
+
+# 2. Provision Cloudflare DNS & Tunnel ingress for markets.joeysvault.app + ngl.joeysvault.app
+cloudflared --origincert /home/joey/.cloudflared/cert.pem tunnel route dns dell-secret-tunnel markets.joeysvault.app
+cloudflared --origincert /home/joey/.cloudflared/cert.pem tunnel route dns dell-secret-tunnel ngl.joeysvault.app
+
+sudo python3 - <<'PY'
+from pathlib import Path
+p = Path("/etc/cloudflared/config.yml")
+txt = p.read_text()
+for host in ("ngl.joeysvault.app", "markets.joeysvault.app"):
+    if host not in txt:
+        txt = txt.replace("ingress:\n", f"ingress:\n  - hostname: {host}\n    service: http://127.0.0.1:8095\n", 1)
+p.write_text(txt)
+PY
+
+sudo cloudflared --config /etc/cloudflared/config.yml tunnel ingress validate
+sudo systemctl restart cloudflared
+
+# 3. Verify both public URLs return HTTP 200
+curl -sS -I https://markets.joeysvault.app | head -n 5
+curl -sS https://ngl.joeysvault.app/api/state.json | head -c 300; echo
+Phase 3 — Verify POST /backtest Queue Dispatch Live (curl vs Error 1010)
+Run with curl (which is not blocked by Cloudflare Bot Fight 1010) and confirm the Worker enqueues and /experiments records the new run:
+Bash
+cd /home/joey/Projects/henry_hub_atomic_agents && npx wrangler deploy
+(
+  set -a
+  . /home/joey/Projects/henry_hub_atomic_agents/.env
+  set +a
+  curl -sS -w "\nHTTP_CODE=%{http_code}\n" \
+    -X POST "https://quant-gateway.joe-metz-psu.workers.dev/backtest" \
+    -H "Authorization: Bearer $MOBILE_COMMAND_SECRET" \
+    -H "Content-Type: application/json" \
+    -d '{"model":"hdd_anomaly","horizon_days":5,"cost_bps":10,"n_decisions":250}'
+)
+sleep 12
+curl -sS "http://127.0.0.1:8090/experiments?limit=3"
+Phase 4 — Build ngl-term.py (Section 12.7)
+Create /home/joey/Projects/henry_hub_atomic_agents/ngl-term.py using rich==15.0.0 (already installed in .venv):
+Fetches https://ngl.joeysvault.app/api/state.json?product=...&timeframe=... (with --local flag for http://127.0.0.1:8095/api/state.json).
+Renders web/data/na_basemap.json (states + coast_and_borders + geo.nodes + geo.flows) onto a 2×4 sub-pixel Unicode Braille (U+2800–U+28FF) wireframe canvas.
+Displays panels for: Top Seasonal & Technical Summary (50/200-DMA, Bollinger squeeze, triangle breakout, RSI/MACD divergence), Fibonacci Retracement Levels, Pricing & Production Elements, Live Regional Flows & Pipeline Alerts, and Source Availability Transparency.
+Commit ngl-term.py + unit tests to Git.
+Phase 5 — Complete Arch 1 (49 -> 81+ Agents, Edge Collectors & Daily Git Snapshots)
+Add verified keyless collectors for the remaining free sources we already proved return HTTP 200:
+collectors/eia_coal_bulk.py: COAL.zip -> Agent_Coal_PRB_SpotPrice, Agent_Coal_CAPP_SpotPrice, Agent_Coal_Rail_TransportRate (+3 agents).
+collectors/eia_ng_supply_lng.py: NG.zip -> Agent_Demand_PowerBurn + monthly LNG terminal exports (SabinePass, CorpusChristi, Freeport, Cameron, CalcasieuPass, CovePoint, ElbaIsland, Plaquemines) (+9 agents).
+collectors/ebb_flows.py: Live EBB parsers for TC_GTN_EBB (Kingsgate, Emerson) and Cheniere (SabinePass, CorpusChristi), plus NGL purity/stocks from PET.zip / EIA_API_KEY (Mont Belvieu Ethane, Normal Butane, Isobutane, Natural Gasoline, Conway).
+Document any paid-only feeds (NGI cash, CME M5–M12) or pull via authorized credentials/EIA API v2.
+Edge Collection (Sec. 3.1): Add scheduled edge-fetch jobs in a Cloudflare Worker that fetch public CSV/JSON/HTML payloads at the edge and POST raw payloads + headers + timestamps via Access service tokens to a new /ingest/payload endpoint on command_hub.py.
+Daily Git Data Audit (Sec. 3.5): Add scripts/daily_snapshot.py + systemd timer to export snapshots/YYYY-MM-DD/manifest.json (per-agent row counts, latest available_timestamp, SHA-256 checksums, LEADERBOARD.md) and commit/push daily to jmpsu/henry_hub_atomic_agents.
+Phase 6 — Prove Arch 2, Arch 3 & Arch 4 End-to-End
+Arch 2 Live PR + Webhook: Wire collectors/run_all.py failure handling -> selfheal.diagnose() -> propose_repair() -> validate_proposal() -> pytest -> open_pull_request(dry_run=False) on an isolated selfheal/<agent> branch, and add an HMAC-verified /webhook/github handler in worker.js that triggers /ingest after human merge.
+Arch 3 Unstructured Corpus + Live Issues: Add noaa_cpc_6_10_day, noaa_cpc_8_14_day, pipeline critical notices, and FERC RSS/HTML ingestion into kb_ingest.py, and run alerts.publish_memo(..., dry_run=False) on validated out-of-sample hypotheses so real alpha-hypothesis Issues exist on GitHub.
+Arch 4 Cross-Domain Alpha: Add multi-feature models (storage_deviation + hdd_anomaly + wti_propane_ratio + shale_prod + vector_regime_score) to backtest.py / experiments.py and dispatch parameter sweeps via quant-backtest-jobs until a model achieves statistically significant Bonferroni-corrected out-of-sample promotion in LEADERBOARD.md.
