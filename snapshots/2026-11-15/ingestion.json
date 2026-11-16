@@ -484,74 +484,74 @@
   },
   "Agent_Prod_Appalachia": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Prod_Bakken": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Prod_DJBasin": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Prod_EagleFord": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Prod_Haynesville": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Prod_Permian": {
    "extraction_versions": {
-    "steo_production/1": 321
+    "steo_production/1": 322
    },
    "max_vintages_per_target": 1,
    "provenance": {
-    "measured": 321
+    "measured": 322
    },
    "quality_status": {
-    "source_estimate_latest_vintage_release_rule_assumed": 321
+    "source_estimate_latest_vintage_release_rule_assumed": 322
    }
   },
   "Agent_Storage_East": {
@@ -673,6 +673,6 @@
    }
   }
  },
- "as_of": "2026-11-15T14:33:13Z",
+ "as_of": "2026-11-15T22:43:13Z",
  "schema": "pit-snapshot/1"
 }

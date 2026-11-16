@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-14T02:16:43Z",
+ "generated_at": "2026-11-15T20:16:17Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
  "requirements": 422,
  "totals": {
-  "passed": 328,
-  "failed": 0,
-  "blocked": 94,
+  "passed": 299,
+  "failed": 50,
+  "blocked": 73,
   "unverified": 0
  },
  "checks": {
@@ -14,29 +14,27 @@
    "evidence": "/execute 403, /ingest 403",
    "desc": "quant.joeysvault.app refuses requests without an Access service token",
    "blocked_by": null,
-   "seconds": 4.8,
+   "seconds": 1.8,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agent_unit": {
    "status": "passed",
-   "evidence": "31 passed in 2.17s",
+   "evidence": "31 passed in 2.39s",
    "desc": "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off",
    "blocked_by": null,
-   "seconds": 2.4,
+   "seconds": 2.6,
    "block_category": null,
    "block_reason": null
   },
   "agents_live_run": {
    "status": "passed",
-   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synthesis': 16}; embedding ok calls 62",
+   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 209, 'data_quality': 4, 'synthesis': 24}; embedding ok calls 100",
    "desc": "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_scheduled": {
    "status": "passed",
@@ -45,28 +43,25 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_share_knowledge": {
    "status": "passed",
-   "evidence": "22 cross-agent message reads {'data_quality': 1, 'pipeline_event': 1}; 21 findings, 13 linked to source/data evidence, 15 finding->finding links (later runs build on earlier findings); 21 mirrored in Chroma",
+   "evidence": "25 cross-agent message reads {'anomaly': 1, 'data_quality': 1, 'incident': 1, 'pipeline_event': 1}; 40 findings, 29 linked to source/data evidence, 32 finding->finding links (later runs build on earlier findings); 40 mirrored in Chroma",
    "desc": "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "alert_delivery": {
    "status": "passed",
    "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[data-quality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre']",
    "desc": "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues",
    "blocked_by": null,
-   "seconds": 1.2,
+   "seconds": 1.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "architecture_doc": {
    "status": "passed",
@@ -75,48 +70,43 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "audit_gists": {
    "status": "passed",
    "evidence": "5 recent hub gists",
    "desc": "audit gists are created for /execute calls (gh authenticated, recent gist present)",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "backtest_unit": {
    "status": "passed",
-   "evidence": "11 passed in 0.43s",
+   "evidence": "11 passed in 0.45s",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
    "seconds": 0.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "branch_protection": {
    "status": "blocked",
-   "evidence": "{\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://d",
+   "evidence": "{\"message\":\"Branch not protected\",\"documentation_url\":\"https://docs.github.com/rest/branches/branch-protection#get-branc",
    "desc": "main is protected on GitHub",
    "blocked_by": "owner decision (GitHub settings)",
    "seconds": 0.3,
    "block_category": "platform_limit",
-   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo",
-   "carried_over": true
+   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
   },
   "branch_pushed": {
    "status": "passed",
    "evidence": "## quant-hub-build...origin/quant-hub-build",
    "desc": "local HEAD is pushed to origin",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_freshness": {
    "status": "passed",
@@ -125,8 +115,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_schedule": {
    "status": "passed",
@@ -135,8 +124,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collectors_run": {
    "status": "passed",
@@ -153,58 +141,52 @@
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
    "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds",
-   "carried_over": true
+   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds"
   },
   "db_integrity": {
    "status": "passed",
    "evidence": "ok",
    "desc": "SQLite integrity_check returns ok",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "edge_collection": {
    "status": "passed",
-   "evidence": "edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage']",
+   "evidence": "edge sources with successful runs: ['cpc_cooling', 'cpc_heating', 'eia_hh_spot', 'eia_propane', 'eia_storage', 'eia_wti', 'rggi']",
    "desc": "Cloudflare Workers fetch source data at the edge and forward payload + fetch metadata through Access",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "edge_ingest_unit": {
    "status": "passed",
-   "evidence": "3 passed in 0.63s",
+   "evidence": "3 passed in 0.74s",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 0.9,
+   "seconds": 1.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "env_locked": {
-   "status": "passed",
-   "evidence": "mode 0o600; ignored True; tracked secret files: none",
+   "status": "failed",
+   "evidence": "mode 0o600; ignored True; tracked secret files: artifacts/NGL  technical audit latest version output\nartifacts/NGL  technical audit latest version output v1\nartifacts/NGL  technical audit latest version output v2",
    "desc": ".env is mode 600 and git-ignored; no secrets tracked",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 0.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "execute_sandbox_tests": {
    "status": "passed",
-   "evidence": "11 passed in 0.18s",
+   "evidence": "11 passed in 0.21s",
    "desc": "/execute SQL sandbox, as_of normalisation, scenario arithmetic, thesis sign check",
    "blocked_by": null,
    "seconds": 0.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiment_endpoint": {
    "status": "passed",
@@ -213,8 +195,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiments_recorded": {
    "status": "passed",
@@ -223,47 +204,43 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "full_test_suite": {
    "status": "passed",
-   "evidence": "175 passed in 26.58s",
+   "evidence": "175 passed in 26.33s",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 26.9,
+   "seconds": 26.7,
    "block_category": null,
    "block_reason": null
   },
   "gatekeeper": {
    "status": "passed",
-   "evidence": "3 passed in 0.09s",
+   "evidence": "3 passed in 0.11s",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hub_health": {
    "status": "passed",
-   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":245}",
+   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":302,\"version\":\"1.0.1\",\"release_version\":\"1.0.1\",\"release_commit\":\"aa11",
    "desc": "privileged hub answers locally on 127.0.0.1:8090",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_evaluated_live": {
    "status": "passed",
-   "evidence": "finding verdicts {'evaluated': 2, 'rejected': 6, 'superseded': 3, 'valid': 7}; evaluated_by edges 2; memos 1",
+   "evidence": "finding verdicts {'evaluated': 6, 'rejected': 6, 'superseded': 3, 'valid': 11}; evaluated_by edges 6; memos 5",
    "desc": "an agent hypothesis was evaluated by the PIT walk-forward backtester and a complete 5.4 memo was persisted",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_memo": {
    "status": "passed",
@@ -272,8 +249,7 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "indicators": {
    "status": "passed",
@@ -282,48 +258,43 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "kb_chunking": {
    "status": "passed",
-   "evidence": "tests 2 passed in 0.15s; 17 part_of edges in the production library",
+   "evidence": "tests 2 passed in 0.20s; 26 part_of edges in the production library",
    "desc": "long source documents are chunked so their whole text is embedded, with part_of edges",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer": {
    "status": "passed",
-   "evidence": "/knowledge 200; graph 245 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=6; tests 7 passed in 0.37s",
+   "evidence": "/knowledge 200; graph 301 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=4; tests 7 passed in 0.39s",
    "desc": "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer_browser": {
    "status": "passed",
-   "evidence": "251 nodes, 340 edges, 22 agent findings drawn, console errors=0",
+   "evidence": "306 nodes, 456 edges, 41 agent findings drawn, console errors=0",
    "desc": "the /knowledge page renders the interactive graph in headless Chrome with no console errors",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_library": {
    "status": "passed",
-   "evidence": "245 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 2, 'evidence_for': 38, 'part_of': 17, 'previous_in_series': 185, 'same_period': 24, 'semantic_neighbor': 234}, 0 missing PIT metadata",
+   "evidence": "301 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 6, 'evidence_for': 74, 'part_of': 26, 'previous_in_series': 234, 'same_period': 43, 'semantic_neighbor': 286}, 0 missing PIT metadata",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_search_pit": {
    "status": "passed",
@@ -332,8 +303,7 @@
    "blocked_by": null,
    "seconds": 0.8,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "leaderboard_versioned": {
    "status": "passed",
@@ -342,18 +312,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "main_site_link": {
    "status": "blocked",
    "evidence": "HTTP 200, link present=False",
    "desc": "https://joeysvault.app links to markets.joeysvault.app",
    "blocked_by": "deploy after the public routes serve",
-   "seconds": 2.2,
+   "seconds": 0.7,
    "block_category": "owner_action",
-   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)",
-   "carried_over": true
+   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)"
   },
   "markets_local": {
    "status": "passed",
@@ -362,8 +330,7 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "multi_feature_experiments": {
    "status": "passed",
@@ -372,8 +339,7 @@
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ngl_term": {
    "status": "passed",
@@ -382,8 +348,7 @@
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
@@ -392,28 +357,25 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "observations_reference_payloads": {
    "status": "passed",
-   "evidence": "92844/92844 measured rows reference an archived payload",
+   "evidence": "92900/92900 measured rows reference an archived payload",
    "desc": "measured rows from collectors cite an archived raw payload",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_live_integration": {
    "status": "passed",
-   "evidence": "4 passed in 23.67s",
+   "evidence": "4 passed in 23.66s",
    "desc": "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run",
    "blocked_by": null,
    "seconds": 23.9,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_models": {
    "status": "passed",
@@ -422,8 +384,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_only_local": {
    "status": "passed",
@@ -432,18 +393,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "pit_tests": {
    "status": "passed",
-   "evidence": "23 passed in 0.96s",
+   "evidence": "23 passed in 1.04s",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 1.1,
+   "seconds": 1.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "promotion_gate": {
    "status": "passed",
@@ -452,8 +411,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "provenance_labels": {
    "status": "passed",
@@ -462,48 +420,43 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "public_markets": {
-   "status": "blocked",
-   "evidence": "markets.joeysvault.app 404, ngl.joeysvault.app 404",
+   "status": "passed",
+   "evidence": "markets.joeysvault.app 200, ngl.joeysvault.app 200",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 4.4,
-   "block_category": "owner_action",
-   "block_reason": "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh",
-   "carried_over": true
+   "seconds": 1.7,
+   "block_category": null,
+   "block_reason": null
   },
   "queue_dispatch": {
-   "status": "passed",
-   "evidence": "│ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1        ",
+   "status": "failed",
+   "evidence": " this is a bug, please open an issue at: \u001b[4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose\u001b[0m\n\n\n🪵  Logs were written to \"/home/joey/.wrangler/logs/wrangler-2026-11-15_20-15-37_130.log\"\n",
    "desc": "Cloudflare Queue producer/consumer bound on the Worker",
    "blocked_by": null,
-   "seconds": 1.4,
+   "seconds": 2.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "raw_payloads_verified": {
    "status": "passed",
-   "evidence": "179/179 verified",
+   "evidence": "256/256 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 1.0,
+   "seconds": 1.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "research_log_live": {
    "status": "passed",
    "evidence": "5\tOPEN\tAlpha hypothesis: [REJECTED] Rising US shale gas output (3-month change, six basins) pre\talpha-hypothesis\t2026-11",
    "desc": "alpha memos are published with gh issue create",
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
-   "seconds": 0.4,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "roster_81": {
    "status": "passed",
@@ -512,18 +465,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "roster_all_collected": {
    "status": "blocked",
    "evidence": "50/81 with real data; missing 31: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, ECMWF_00z_HDD_Day10, ECMWF_00z_HDD_Day11, ECMWF_00z_HDD_Day12, ECMWF_00z_HDD_Day13, ECMWF_00z_HDD_Day14, ECMWF_00z_HDD_Day15",
    "desc": "every roster agent has real (non-seed) data",
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
-   "seconds": 1.8,
+   "seconds": 1.7,
    "block_category": "external_data",
-   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed",
-   "carried_over": true
+   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
   },
   "schema_16_columns": {
    "status": "passed",
@@ -532,18 +483,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_live_ollama": {
    "status": "passed",
    "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 7.0,
+   "seconds": 6.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_pr_live": {
    "status": "passed",
@@ -552,8 +501,7 @@
    "blocked_by": null,
    "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_unit": {
    "status": "passed",
@@ -562,58 +510,52 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "snapshots_versioned": {
    "status": "passed",
-   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14']; scheduled=True",
+   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True",
    "desc": "deterministic snapshot manifests are exported daily and tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "state_schema_contract": {
    "status": "passed",
-   "evidence": "13 passed in 0.24s",
+   "evidence": "13 passed in 0.28s",
    "desc": "state.json carries every section the UI and terminal render, with explicit provenance",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "unstructured_sources": {
    "status": "passed",
-   "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 19, 'pipeline_notice': 91}",
+   "evidence": "documents {'noaa_discussion': 3, 'pipeline_notice': 409}; indexed in knowledge library {'noaa_discussion': 29, 'pipeline_notice': 117}",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "web_ui_browser": {
    "status": "passed",
    "evidence": "18 map nodes, panels=True, console errors=0",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 1.4,
+   "seconds": 1.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "webhook_recovery": {
    "status": "passed",
-   "evidence": "GitHub deliveries accepted after signature check: 3 of 3; reruns verified+ok=2, forged refused=1",
+   "evidence": "GitHub deliveries accepted after signature check: 6 of 6; reruns verified+ok=2, forged refused=1",
    "desc": "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "worker_gateway_e2e": {
    "status": "passed",
@@ -898,7 +840,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-4a0ec542",
@@ -912,7 +854,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-79b4fa66",
@@ -925,7 +867,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-8e92a39d",
@@ -938,7 +880,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-9b7d461a",
@@ -1042,7 +984,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-64ac65b8",
@@ -3126,7 +3068,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-935d4351",
@@ -3139,7 +3081,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-145227b9",
@@ -3152,7 +3094,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-79761076",
@@ -3165,7 +3107,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-6eb6b2fb",
@@ -3178,7 +3120,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-eee2811d",
@@ -3191,7 +3133,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-8d00578a",
@@ -3204,7 +3146,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-ad5bf78c",
@@ -3217,7 +3159,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-c491e8d0",
@@ -3230,7 +3172,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-9c71df28",
@@ -3243,7 +3185,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-c7db39af",
@@ -3256,7 +3198,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-94f23cad",
@@ -3269,7 +3211,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-360db41e",
@@ -3282,7 +3224,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-2ac160e8",
@@ -3295,7 +3237,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-30a88cfd",
@@ -3308,7 +3250,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-95616166",
@@ -3321,7 +3263,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.2-d4023761",
@@ -3334,7 +3276,7 @@
     "experiment_endpoint",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.2-0a994e96",
@@ -3348,7 +3290,7 @@
     "experiments_recorded",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.3-8c3316a3",
@@ -4592,10 +4534,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-8df61f90",
@@ -4612,10 +4551,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-976918fe",
@@ -4632,10 +4568,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-725b75a3",
@@ -4652,10 +4585,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-414f2111",
@@ -4672,10 +4602,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-b7b57c6c",
@@ -4692,10 +4619,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-4268a48c",
@@ -4712,10 +4636,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-b6c9a07c",
@@ -4732,10 +4653,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-356a1f16",
@@ -4752,10 +4670,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-e0ad558a",
@@ -4772,10 +4687,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-88b7bc11",
@@ -4792,10 +4704,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-e43422f7",
@@ -4812,10 +4721,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-ed3fcfb1",
@@ -4832,10 +4738,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-27bd6ebc",
@@ -4852,10 +4755,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-20b70032",
@@ -4872,10 +4772,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-520b6109",
@@ -4892,10 +4789,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-9adaa64a",
@@ -4912,10 +4806,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R9-f108de6c",
@@ -5219,7 +5110,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-319a765e",
@@ -5236,7 +5127,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-e22e92b1",
@@ -5250,7 +5141,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-6ec4b921",
@@ -5264,7 +5155,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-7dfd4af1",
@@ -5278,7 +5169,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-a93f59cd",
@@ -5292,7 +5183,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R10-cf8a2b74",
@@ -5470,10 +5361,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-3dba0e7d",
@@ -5488,10 +5376,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-466788d5",
@@ -5506,10 +5391,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-dd8d6fa7",
@@ -5580,10 +5462,7 @@
     "collector_schedule",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R11-2228150e",
@@ -6646,7 +6525,7 @@
   }
  ],
  "blocked_by_cause": {
-  "external_data": 88,
+  "external_data": 67,
   "platform_limit": 2,
   "owner_action": 4
  }
