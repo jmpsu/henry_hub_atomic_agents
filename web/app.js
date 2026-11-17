@@ -714,7 +714,7 @@
       cites.nodes.slice(0, 12).forEach((n, i) => { const b = el("button", { type: "button", class: "chat-node-btn" }, [el("span", { text: `N${i + 1} ${n.title.slice(0, 46)}` }), el("span", { class: "role", text: `${(n.domain_role || "").replace(/_/g, " ")}${n.hop ? " · hop " + n.hop : ""}` })]);
         b.addEventListener("click", () => focusNode(n.id)); nb.append(b); });
       if (!cites.nodes.length) nb.append(el("div", { class: "dim", text: "none retrieved at this cutoff" }));
-      cites.docs.slice(0, 6).forEach((d, i) => db.append(el("div", { class: "chat-doc" }, [el("b", { text: `D${i + 1} ${d.title}` }), el("div", { text: `${d.path || ""} · ${(d.domain_role || "").replace(/_/g, " ")} · sim ${d.similarity}` }), el("div", { text: "“" + d.snippet.slice(0, 140) + "…”" })])));
+      cites.docs.slice(0, 6).forEach((d, i) => db.append(el("div", { class: "chat-doc" }, [el("b", { text: `D${i + 1} ${d.title}` }), el("div", { text: `${d.path || ""} · ${(d.domain_role || "").replace(/_/g, " ")}${d.alignment ? " · " + d.alignment : ""} · sim ${d.similarity}` }), el("div", { text: "“" + d.snippet.slice(0, 140) + "…”" })])));
       if (!cites.docs.length) db.append(el("div", { class: "dim", text: "no document cleared the similarity threshold at this cutoff" }));
     }
     function renderFacts(facts) {

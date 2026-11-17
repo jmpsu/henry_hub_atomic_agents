@@ -23,6 +23,7 @@ import numpy as np
 
 import fundamentals as fu
 import kb_ingest
+import emi_alignment
 import knowledge_roles as kr
 import literature_kb as lk
 
@@ -210,6 +211,7 @@ def retrieve(kb, lit, embedder, message: str, cutoff: str, r: dict) -> dict:
                         path = lit.execute("SELECT path FROM lit_docs WHERE doc_id=?", (h["doc_id"],)).fetchone()
                         docs[h["doc_id"]] = {"doc_id": h["doc_id"], "chunk_id": h["chunk_id"], "title": h["title"], "path": path[0] if path else None, "kind": h["kind"],
                                              "similarity": h["similarity"], "snippet": " ".join(h["text"].split())[:260], "query": q, "topic": topic, "domain_role": kr.role_of_lit(lit, h["doc_id"]),
+                                             "alignment": (emi_alignment.alignment_of(lit, h["doc_id"]) or {}).get("label"),
                                              "available_timestamp": h["available_timestamp"]}
             except Exception:  # noqa: BLE001
                 break
