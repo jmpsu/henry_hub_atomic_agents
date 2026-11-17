@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 _ROOT = Path(__file__).resolve().parent.parent
 
 

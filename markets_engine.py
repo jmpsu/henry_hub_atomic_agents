@@ -12,6 +12,7 @@ import json
 import math
 import os
 import sqlite3
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -404,6 +405,26 @@ def _roster() -> list:
         return []
 
 
+def _roster_meta() -> dict:
+    """agent_id -> {series, source}: what each roster agent measures and where it is meant to come from (agents_roster.json)."""
+    try:
+        return {a["agent_id"]: {"series": a.get("series"), "source": a.get("source")} for a in json.loads((BASE_DIR / "agents_roster.json").read_text())}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+_EXPLAIN: dict | None = None
+
+
+def explain() -> dict:
+    """Definitions and formulas for every figure (metric_docs.build), built once; parameters come from this module's own signatures."""
+    global _EXPLAIN
+    if _EXPLAIN is None:
+        import metric_docs
+        _EXPLAIN = metric_docs.build(sys.modules[__name__])
+    return _EXPLAIN
+
+
 def active_product(default: str = "propane") -> str:
     """The product the pricing run last marked active (first line of active_product.txt), else the default."""
     try:
@@ -474,6 +495,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                      "available_timestamp": full[-1][2], "change_1d": vals[-1] - prev, "change_1d_pct": (vals[-1] / prev - 1) * 100 if prev else None,
                      "change_5d": vals[-1] - wk, "change_5d_pct": (vals[-1] / wk - 1) * 100 if wk else None,
                      "window_high": max(vv), "window_low": min(vv),
+                     "agent_id": meta["agent_id"], **{k: (latest.get(meta["agent_id"]) or {}).get(k) for k in ("source_id", "retrieved_timestamp", "quality_status", "raw_payload_hash")},
                      "pct_of_wti": wti_ratio(vals[-1], wti[-1][1]) if (wti and meta["unit"] == "cents/gal") else None}
             state["series"] = {"status": "measured", "dates": vd, "values": vv}
             state["technicals"] = {
@@ -568,16 +590,19 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         agents = roster + sorted(a for a in latest if a not in set(roster))
         needed = {meta["agent_id"], WTI_AGENT} | {a for _, _, ag in DRIVER_GROUPS for a in ag}
         sources = []
+        rmeta = _roster_meta()
         for a in agents:
             r = latest.get(a)
             if r:
-                sources.append({**{k: r[k] for k in ("agent_id", "source_id", "latest_target_timestamp", "available_timestamp", "retrieved_timestamp",
+                sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
+                                **{k: r[k] for k in ("agent_id", "source_id", "latest_target_timestamp", "available_timestamp", "retrieved_timestamp",
                                                      "quality_status", "raw_payload_hash", "provenance")},
                                 "status": "pending_collector" if r["provenance"] == "unverified_seed" else "collected",
                                 "raw_payload_archived": bool(r["raw_payload_hash"]) and r["raw_payload_hash"] in payload_hashes,
                                 "age_days": _age_days(r["available_timestamp"], cutoff), "in_roster": a in set(roster), "contributes": a in needed})
             else:
-                sources.append({"agent_id": a, "source_id": None, "latest_target_timestamp": None, "available_timestamp": None, "retrieved_timestamp": None,
+                sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
+                                "agent_id": a, "source_id": None, "latest_target_timestamp": None, "available_timestamp": None, "retrieved_timestamp": None,
                                 "quality_status": None, "raw_payload_hash": None, "provenance": None, "status": "pending_collector",
                                 "raw_payload_archived": False, "age_days": None, "in_roster": True, "contributes": a in needed})
         collected = [s for s in sources if s["in_roster"] and s["status"] == "collected"]
@@ -653,7 +678,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                "active_product": product, "default_product": active_product(), "product": {"id": product, **meta},
                "timeframe": {"id": timeframe, **tf}, "products": products, "timeframes": [{"id": k, **v} for k, v in TIMEFRAMES.items()],
                "price": price, **state, "curves": curves, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
-               "knowledge": knowledge or {"status": "unavailable"},
+               "knowledge": knowledge or {"status": "unavailable"}, "explain": explain(),
                "platform": {"roster_agents": len(roster), "roster_agents_collected": len(collected), "agents_with_data": len(latest), **stats,
                             "provenance_legend": {"measured": "published by the source and stored unchanged", "extracted_estimate": "derived here from measured rows",
                                                   "unverified_seed": "old demo row, excluded from every calculation", PENDING: "no collector yet; no value shown"}}}
