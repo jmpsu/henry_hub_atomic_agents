@@ -190,6 +190,8 @@ def test_classification_covers_m1_to_m7_and_no_element_claims_to_move_a_price(tm
     assert all(e["price_path"]["used_in_price"] is False and "O6" in blk["price_note"] for e in blk["elements"])
     m2 = next(e for e in blk["elements"] if e["id"] == "M2")
     assert "Excluded from the LNG liquefaction" in m2["scope_rule"] and m2["scope_verified"] is True
+    assert all(e["frequency"] and e["collector_status"] and "raw_payload_hashes" in e and "feeds_today" in e for e in blk["elements"])
+    assert [i["id"] for i in blk["forward_price_inputs"]][:1] == ["P1"] and {d["group"] for d in blk["disposition"]} == {"demand", "crude_and_carbon"}
     m1 = next(e for e in blk["elements"] if e["id"] == "M1")
     assert m1["agents_collected"] == 1 and m1["headline"]["value"] == 28.0 and m1["status"] == "measured"
     m5 = next(e for e in blk["elements"] if e["id"] == "M5")
@@ -235,3 +237,21 @@ def test_m7_is_the_net_of_canadian_imports_and_mexican_exports():
     ga = {"border_flows": list(latest)}
     m7 = fu.build(latest, ga, {}, None, fm.build(None, None, None, "2026-11-17T12:00:00Z"), "2026-11-17T12:00:00Z")["elements"][6]
     assert m7["headline"]["value"] == pytest.approx(30.0) and m7["headline"]["imports_canada_bcf"] == 150.0 and m7["headline"]["exports_mexico_bcf"] == 120.0
+
+
+def test_kb_declares_the_requirement_edges_without_claiming_measured_causation(tmp_path):
+    import kb_ingest as kb
+    db = _db()
+    kb.ingest(db, embedder=lambda t: [1.0, 0.0, 0.0], now="2026-11-17T12:00:00Z")
+    c = sqlite3.connect(db)
+    edges = {(t,) for (t,) in c.execute("SELECT type FROM kb_edges")}
+    for t in ("feeds_supply", "feeds_rescomm_demand", "feeds_inventory_balance", "calibrated_by", "modifies_dry_gas_supply", "feeds_net_exports"):
+        assert (t,) in edges
+    assert c.execute("SELECT COUNT(*) FROM kb_edges WHERE type IN ('feeds_supply','feeds_rescomm_demand','feeds_inventory_balance','modifies_dry_gas_supply','feeds_net_exports')").fetchone()[0] == 5
+    cal = c.execute("SELECT a.title, b.title FROM kb_edges e JOIN kb_nodes a ON a.id=e.src JOIN kb_nodes b ON b.id=e.dst WHERE e.type='calibrated_by'").fetchone()
+    assert cal[0].startswith("M4") and cal[1].startswith("M6")
+    fpm = c.execute("SELECT document FROM kb_nodes WHERE title='Forward_Pricing_Model'").fetchone()[0]
+    assert "DECLARED" in fpm and "none of them changes a price today" in fpm.replace("so none of them", "none of them") or "changes a price today" in fpm
+    kb.ingest(db, embedder=lambda t: [1.0, 0.0, 0.0], now="2026-11-17T13:00:00Z")           # a re-ingest keeps them (rebuild_edges only recomputes derived types)
+    assert sqlite3.connect(db).execute("SELECT COUNT(*) FROM kb_edges WHERE type='feeds_supply'").fetchone()[0] == 1
+    assert "no calculation consumes" in kb.EDGE_LEGEND["feeds_supply"]

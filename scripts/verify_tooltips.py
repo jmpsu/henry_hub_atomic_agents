@@ -147,6 +147,7 @@ def main() -> int:
         hover("forward curve point M5", "document.querySelectorAll('#fwd-chart .mk-hit')[4]", ["M5", "delivery 2027", "Symbol", "Available (PIT)", "Quality"], "tip_forward_point")
         hover("forward curve regime tag", "document.querySelector('#fwd-tags .tag')", ["SEASONAL", "not read as contango"], "tip_regime")
         hover("fibonacci level", "document.querySelectorAll('.fib-bar .lab')[2]", ["Fibonacci", "Swing high", "Nearest level"], "tip_fib")
+        c.js("(() => { document.querySelector('details.under').open = true; return 1; })()")                        # the underlying series are collapsed by default
         hover("driver row (pending LNG)", "document.querySelector('.drv-row.pend')", ["Intended source", "Status"], "tip_driver_pending")
         hover("LNG export row (monthly, EIA)", "[...document.querySelectorAll('.drv-row')].find(r => /LNGExports SabinePass/.test(r.innerText))", ["MMcf", "EIA", "Available (PIT)", "month"], "tip_lng_export")
         hover("border flow row (inferred mapping)", "[...document.querySelectorAll('.drv-row')].find(r => /RioGrande ToMexico/.test(r.innerText))", ["INFERRED", "Rio Grande"], None)
@@ -156,18 +157,23 @@ def main() -> int:
         hover("LNG forward point M1", "document.querySelector('#lng-chart .mk-hit')", ["FOB cost", "Calculation", "Henry Hub futures", "Data lineage"], "tip_lng_point")
         check("LNG panel states where k and L come from", bool(c.js("(() => { const t = document.getElementById('lng-chart').parentElement.innerText; return /k \\(HH multiplier\\)/.test(t) && /L \\(liquefaction fee\\)/.test(t) && /assumption|knowledge library/.test(t); })()")))
         def shot(section_js, path):
+            c.js("(() => { NGLTip.hide(); return 1; })()")
             time.sleep(0.5)
             rect = c.js("(() => { const e = " + section_js + "; e.scrollIntoView({block: 'start'}); const b = e.getBoundingClientRect(); return [b.left + scrollX, b.top + scrollY, b.width, b.height]; })()")
-            time.sleep(0.5)
+            c.send("Input.dispatchMouseEvent", type="mouseMoved", x=1, y=1)              # the scroll puts a stationary pointer over a card, which would re-open a tooltip
+            time.sleep(0.4)
+            c.js("(() => { NGLTip.hide(); return 1; })()")
+            time.sleep(0.4)
             png = c.send("Page.captureScreenshot", format="png", clip={"x": rect[0] - 4, "y": rect[1] - 4, "width": rect[2] + 8, "height": rect[3] + 8, "scale": 2}, captureBeyondViewport=True)["data"]
             Path(path).parent.mkdir(parents=True, exist_ok=True)
             Path(path).write_bytes(base64.b64decode(png))
         if a.lng_shot:
             shot("document.getElementById('lng-chart').closest('section')", a.lng_shot)
-        check("seven fundamental elements are shown, five direct and two separate modules", bool(c.js("(() => { const cs = [...document.querySelectorAll('#fundamentals .fund-card')]; return cs.length === 7 && cs.filter((x) => x.querySelector('.chip.dir')).length === 5 && cs.filter((x) => x.querySelector('.chip.mod')).length === 2; })()")))
-        hover("fundamental M4 (LNG feedgas module)", "[...document.querySelectorAll('#fundamentals .fund-card')][3]", ["Classification", "calculated separately", "Blocked inputs", "F2", "Moves a forward price here?"], "tip_fund_m4")
-        hover("fundamental M5 (frac module)", "[...document.querySelectorAll('#fundamentals .fund-card')][4]", ["Classification", "Agent_NGL_MontBelvieu_Ethane", "Agent_Gas_Waha_Spot"], "tip_fund_m5")
-        hover("fundamental M2 (weather, strict scope)", "[...document.querySelectorAll('#fundamentals .fund-card')][1]", ["Excluded from the LNG liquefaction"], "tip_fund_m2")
+        check("forward-price inputs block lists what sets the prices (HH futures, k and L, TTF/FX, shipping)", bool(c.js("(() => document.querySelectorAll('#fundamentals .fund-grid')[0].querySelectorAll('.fund-card').length >= 4)()")))
+        check("seven fundamental elements are shown, five direct and two separate modules", bool(c.js("(() => { const cs = [...document.querySelectorAll('#fundamentals .fund-grid')[1].querySelectorAll('.fund-card')]; return cs.length === 7 && cs.filter((x) => x.querySelector('.chip.dir')).length === 5 && cs.filter((x) => x.querySelector('.chip.mod')).length === 2; })()")))
+        hover("fundamental M4 (LNG feedgas module)", "[...document.querySelectorAll('#fundamentals .fund-grid')[1].querySelectorAll('.fund-card')][3]", ["Classification", "calculated separately", "Blocked inputs", "F2", "Moves a forward price here?"], "tip_fund_m4")
+        hover("fundamental M5 (frac module)", "[...document.querySelectorAll('#fundamentals .fund-grid')[1].querySelectorAll('.fund-card')][4]", ["Classification", "Agent_NGL_MontBelvieu_Ethane", "Agent_Gas_Waha_Spot"], "tip_fund_m5")
+        hover("fundamental M2 (weather, strict scope)", "[...document.querySelectorAll('#fundamentals .fund-grid')[1].querySelectorAll('.fund-card')][1]", ["Excluded from the LNG liquefaction"], "tip_fund_m2")
         if a.fund_shot:
             shot("document.getElementById('fundamentals')", a.fund_shot)
         hover("source table row", "document.querySelector('#sources tbody tr')", ["Agent", "Available (PIT)"], None)

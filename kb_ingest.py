@@ -239,9 +239,29 @@ def build_objects(conn, weeks: int = 12, months: int = 12) -> list:
                    + (f"Scope rule: {e['scope_rule']}. " if e["scope_rule"] else "") + f"Graph link: {e['graph_link']}. It does not set the Henry Hub forward curve or the LNG forward price.")
             out.append(_obj("fundamentals", f"element_{e['id']}", "definition", f"{e['id']} {e['label']} ({'module' if e['mode'] == fundamentals.SEPARATE else 'direct input'})", doc, [],
                             fundamentals.DEFINED, "fundamentals_classification", "", provenance="source_document"))
+        out.append(_obj("fundamentals", "forward_pricing_model", "definition", "Forward_Pricing_Model",
+                        "The forward prices on this page: the Henry Hub forward curve is a delayed NYMEX futures quote, and the LNG forward is derived from it as k x Henry Hub + L, "
+                        "with a TTF netback beside it. The relations from the seven fundamental elements into this node are DECLARED by the requirement; "
+                        "no code consumes those inputs yet, so none of them changes a price today.", [], fundamentals.DEFINED, "fundamentals_classification", "", provenance="source_document"))
     except Exception:  # noqa: BLE001
         pass
     return out
+
+
+# N1: relation names from the requirement. Stored as non-derived edge types (rebuild_edges keeps them); they are declarations, not measured causation.
+DECLARED_EDGES = [("M1", "feeds_supply", None), ("M2", "feeds_rescomm_demand", None), ("M3", "feeds_inventory_balance", None), ("M4", "calibrated_by", "M6"),
+                  ("M5", "modifies_dry_gas_supply", None), ("M7", "feeds_net_exports", None)]
+
+
+def declare_edges(conn) -> int:
+    n = 0
+    fpm = node_id("fundamentals", "forward_pricing_model:definition")
+    for src, typ, dst in DECLARED_EDGES:
+        a, b = node_id("fundamentals", f"element_{src}:definition"), (node_id("fundamentals", f"element_{dst}:definition") if dst else fpm)
+        if conn.execute("SELECT COUNT(*) FROM kb_nodes WHERE id IN (?,?)", (a, b)).fetchone()[0] == 2:
+            conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (a, b, typ, None))
+            n += 1
+    return n
 
 
 def embed(text: str, client: httpx.Client | None = None) -> list:
@@ -300,6 +320,7 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
                 for parent in [p.strip() for p in str(meta.get("linked_nodes") or "").split(",") if p.strip() and p.strip() != "root"]:
                     conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (parent, nid, "builds_on", None))
         edges = rebuild_edges(conn)
+        edges["declared_requirement_edges"] = declare_edges(conn)
         conn.commit()
         total = conn.execute("SELECT COUNT(*) FROM kb_nodes").fetchone()[0]
         return {"objects_built": len(objs), "new": new, "changed": changed, "mirrored_theses": mirrored, "nodes_total": total, **edges}
@@ -384,7 +405,8 @@ def graph(conn, as_of_epoch: int, limit: int = 300, domain: str | None = None) -
 EDGE_LEGEND = {"previous_in_series": "prior object of the same series", "same_period": "different domains, same period (co-occurrence, not causation)",
                "builds_on": "thesis generated with the linked node in context", "semantic_neighbor": "nearest earlier object by embedding similarity (not causation)",
                "evidence_for": "knowledge an agent cited when it produced the finding", "evaluated_by": "hypothesis tested by a PIT walk-forward backtest",
-               "part_of": "a chunk of a longer source document (parent-child)"}
+               "part_of": "a chunk of a longer source document (parent-child)",
+               **{t: "relation declared by the requirement; no calculation consumes this input yet (not measured causation)" for _s, t, _d in DECLARED_EDGES}}
 
 
 def _finding_status(conn) -> dict:

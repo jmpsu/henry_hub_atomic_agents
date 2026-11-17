@@ -391,6 +391,18 @@
   function renderFundamentals(s) {
     const box = clear($("fundamentals")), f = s.fundamentals;
     if (!f) return;
+    box.append(el("div", { class: "fund-sub", text: "What actually sets the forward prices on this page" }));
+    const pg = el("div", { class: "fund-grid" });
+    for (const p of f.forward_price_inputs) {
+      const card = el("div", { class: "fund-card" + (p.status === "pending_collector" ? " pend" : "") }, [
+        el("div", { class: "fund-hd" }, [el("b", { text: p.id }), el("span", { text: p.label }), el("span", { class: "chip " + (p.market_derived ? "dir" : "mod"), text: p.market_derived ? "market quote" : "assumption" })]),
+        el("div", { class: "fund-val", text: p.value || (p.n != null ? `${p.n} points` : p.status) }), el("div", { class: "dim", text: `sets ${p.sets}` }), el("div", { class: "dim", text: p.provenance })]);
+      pg.append(card);
+      T("fundamental_element", card, () => ({ title: `${p.id} · ${p.label}`, value: p.value || (p.n != null ? `${p.n} points` : p.status), badge: badgeOf(p.status === "pending_collector" ? "pending_collector" : p.market_derived ? "measured" : "extracted_estimate"),
+        what: `Sets ${p.sets}.`, formula: null, params: {}, read: null, sections: [{ h: "Basis", rows: [["Provenance", p.provenance], ["Latest date", p.date], ["Market-derived?", p.market_derived ? "yes: a delayed, unofficial quote" : "no: a labelled assumption"]] }] }), "fwdin_" + p.id);
+    }
+    box.append(pg);
+    box.append(el("div", { class: "fund-sub", text: "The seven fundamental elements: context, not price inputs" }));
     box.append(el("div", { class: "fund-note dim", text: f.price_note }));
     const grid = el("div", { class: "fund-grid" });
     for (const e of f.elements) {
@@ -407,7 +419,10 @@
       T("fundamental_element", card, () => ({ title: `${e.id} · ${e.label}`, value: `${val}${h && h.p10 != null ? ` (p10 ${fv(h.p10, 2)} · p90 ${fv(h.p90, 2)})` : ""}`, badge, what: e.role, formula: null, params: {}, read: null,
         sections: [{ h: "Classification", rows: [["Class", sep ? "calculated separately (orthogonal module)" : "direct ingested input"], ["Method", e.method], ["Source", e.source], ["Scope rule", e.scope_rule],
           ["Graph link", e.graph_link], ["Moves a forward price here?", "no: " + (e.price_path.reason || "").slice(0, 160), "dim"]] },
-          { h: "Inputs", rows: [["Agents collected", `${e.agents_collected} of ${e.agents_total}`], ["Newest input available (PIT)", e.age_days == null ? null : `${e.age_days} days ago`], ["Observation", h && h.date]] },
+          { h: "Inputs", rows: [["Current value", val], ["Frequency", e.frequency], ["Collector", e.collector_status], ["Agents", `${e.agents_collected} of ${e.agents_total}`],
+            ["Newest input (PIT)", e.age_days == null ? null : `${e.age_days} days ago`], ["Observation", h && h.date],
+            ...(e.raw_payload_hashes.length ? e.raw_payload_hashes.map((x) => ["Payload hash", x.hash.slice(0, 16) + "… " + short(x.agent), "hash"]) : [["Payload hash", e.id === "M4" ? "none: computed (inputs: M6)" : null]])] },
+          { h: "Calculations it feeds today", rows: [["Display / derived", e.feeds_today.length ? e.feeds_today.join("; ") : "none"], ["Forward price", "none (checklist O6)", "dim"]] },
           { h: "Blocked inputs (exact blocker · activating step)", rows: e.blocked.map((b) => [b.id ? `${b.id} ${b.input}` : b.input, `${b.reason} → ${b.activate}`, "warn"]) }] }), "fund_" + e.id);
     }
     box.append(grid);
@@ -415,12 +430,14 @@
   /* ---------- drivers and sources ---------- */
   function renderDrivers(s) {
     const box = clear($("drivers"));
+    const disp = Object.fromEntries(((s.fundamentals && s.fundamentals.disposition) || []).map((d) => [d.group, d]));
     for (const g of s.drivers) {
       const units = new Set(g.items.filter((i) => i.value != null).map((i) => i.unit)), max = d3.max(g.items, (i) => (i.value != null ? Math.abs(i.value) : 0)) || 1;
       const h3 = el("h3", { text: g.label });
       const gdoc = ({ lng_exports: "lng_exports", border_flows: "border_flows", lng: "flow_meters" })[g.group];
       if (gdoc) T(gdoc, h3, { title: g.label }, "grp_" + g.group);
       const card = el("div", { class: "drv" }, h3);
+      if (disp[g.group]) card.append(el("div", { class: "warn", style: "font-size:11px;padding-bottom:4px", text: `not one of the 7 elements · ${disp[g.group].decision}: ${disp[g.group].reason}` }));
       for (const i of g.items) {
         const pend = i.value == null;
         const row = el("div", { class: "drv-row" + (pend ? " pend" : "") }, [

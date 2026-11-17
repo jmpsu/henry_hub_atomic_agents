@@ -10,26 +10,26 @@ from datetime import datetime, timezone
 DIRECT, SEPARATE = "direct_ingested_input", "calculated_separately"
 DEFINED = "2026-11-17T00:00:00Z"        # when the classification below was adopted (used as the knowledge-graph node availability)
 ELEMENTS = [
-    {"id": "M1", "key": "production", "label": "Shale gas production by basin", "mode": DIRECT, "method": "Direct use (with lag: the latest published month is held, not extrapolated)",
+    {"id": "M1", "frequency": "monthly (EIA STEO)", "feeds_today": ["derived.shale_production_total_bcfd (display only)"], "node": "Shale_Production_Basin", "key": "production", "label": "Shale gas production by basin", "mode": DIRECT, "method": "Direct use (with lag: the latest published month is held, not extrapolated)",
      "source": "EIA DPR / STEO (Bcf/d, monthly average)", "role": "Structural supply baseline by basin (Appalachia, Permian, Haynesville)",
      "scope_rule": "", "graph_link": "Links basin supply nodes to regional basis and pipeline bottlenecks"},
-    {"id": "M2", "key": "weather", "label": "Weather (CONUS population-weighted HDD/CDD)", "mode": DIRECT, "method": "Direct use (strict scope)",
+    {"id": "M2", "frequency": "daily actuals; 15-day ensemble", "feeds_today": ["derived.hdd_anomaly (display and a weather alert)"], "node": "CONUS_Weather_HDD_CDD", "key": "weather", "label": "Weather (CONUS population-weighted HDD/CDD)", "mode": DIRECT, "method": "Direct use (strict scope)",
      "source": "NOAA/CPC (daily actuals + 15-day ensemble)", "role": "Residential/commercial demand only",
      "scope_rule": "Excluded from the LNG liquefaction capacity equations (enforced in lng_feedgas.assert_inputs)", "graph_link": "Explains short-term storage draws/injections and Henry Hub prompt spikes"},
-    {"id": "M3", "key": "storage", "label": "Working gas in storage by region", "mode": DIRECT, "method": "Direct use",
+    {"id": "M3", "frequency": "weekly (EIA, Thursdays)", "feeds_today": ["derived.storage_total_bcf (display only)"], "node": "Regional_Working_Gas_Storage", "key": "storage", "label": "Working gas in storage by region", "mode": DIRECT, "method": "Direct use",
      "source": "EIA Weekly Natural Gas Storage Report (Bcf by 5 regions)", "role": "Core inventory-to-normal deficit/surplus curve driver",
      "scope_rule": "", "graph_link": "Links regional storage nodes (South Central salt/nonsalt) to seasonal spreads"},
-    {"id": "M4", "key": "lng", "label": "LNG feedgas (daily meters, no collector yet)", "mode": SEPARATE, "method": "Calculated separately (bootstrapped proxy), module lng_feedgas.py",
+    {"id": "M4", "frequency": "daily estimate from a monthly anchor", "feeds_today": ["modules.lng_feedgas (display only)"], "node": "LNG_Feedgas_Bootstrapped", "key": "lng", "label": "LNG feedgas (daily meters, no collector yet)", "mode": SEPARATE, "method": "Calculated separately (bootstrapped proxy), module lng_feedgas.py",
      "source": "Physical EBB scrapes + AIS draft + ERCOT power + METAR ambient temp (only EIA monthly exports and METAR are available)",
      "role": "Demand sink input with propagated confidence intervals (10th/50th/90th pct)", "scope_rule": "No price, basis, charter-rate or demand-weather input (F0/F11/F12)",
      "graph_link": "Explains real-time terminal utilization while flagging pending collector status"},
-    {"id": "M5", "key": "fractionation", "label": "Fractionation / rejection economics", "mode": SEPARATE, "method": "Calculated separately (independent spread), module frac_module.py",
+    {"id": "M5", "frequency": "daily (needs an ethane price)", "feeds_today": ["modules.frac and curves.frac_spread (display only; both pending the ethane price)"], "node": "Fractionation_Rejection_Econ", "key": "fractionation", "label": "Fractionation / rejection economics", "mode": SEPARATE, "method": "Calculated separately (independent spread), module frac_module.py",
      "source": "Mont Belvieu purity NGL prices vs Henry Hub BTU parity (cents/gal vs $/MMBtu)", "role": "Computes ethane rejection/recovery volume (Bcf/d added/removed from dry gas)",
      "scope_rule": "Only the net dry-gas delta (Bcf/d) may leave the module (B4)", "graph_link": "Connects NGL visual intelligence (Mont Belvieu vs Conway, frac spread) to dry gas supply"},
-    {"id": "M6", "key": "lng_exports", "label": "LNG exports by terminal (EIA, monthly)", "mode": DIRECT, "method": "Direct use (calibration anchor)",
+    {"id": "M6", "frequency": "monthly (EIA, about 2-month lag)", "feeds_today": ["calibration anchor of M4 (lng_feedgas.py)"], "node": "EIA_Monthly_LNG_Exports", "key": "lng_exports", "label": "LNG exports by terminal (EIA, monthly)", "mode": DIRECT, "method": "Direct use (calibration anchor)",
      "source": "EIA Natural Gas Monthly (Bcf/month per terminal)", "role": "Ground-truth anchor to calibrate and re-zero the daily bootstrapped feedgas model",
      "scope_rule": "", "graph_link": "Historical terminal capacity utilization and verified monthly provenance"},
-    {"id": "M7", "key": "border_flows", "label": "Pipeline volumes at border points (EIA, monthly)", "mode": DIRECT, "method": "Direct use",
+    {"id": "M7", "frequency": "monthly (EIA, about 2-month lag)", "feeds_today": [], "node": "EIA_Border_Pipeline_Volumes", "key": "border_flows", "label": "Pipeline volumes at border points (EIA, monthly)", "mode": DIRECT, "method": "Direct use",
      "source": "EIA Monthly (Bcf/month US-Mexico and US-Canada net flows)", "role": "Net cross-border structural demand/supply offset (e.g., Permian-to-Mexico exports)",
      "scope_rule": "", "graph_link": "Explains regional flow balances in South Central and Midwest/Northeast hubs"},
 ]
@@ -68,7 +68,13 @@ def _sum_group(latest: dict, agents: list) -> tuple[float | None, str | None, in
     return sum(r["value"] for r in rows), max(r["latest_target_timestamp"] for r in rows)[:10], len(rows)
 
 
-def build(latest: dict, group_agents: dict, derived: dict, feedgas: dict | None, frac: dict, cutoff: str, price_path_note: str = "") -> dict:
+def _hashes(latest: dict, agents: list, limit: int = 4) -> list:
+    rows = sorted((latest[a] for a in agents if a in latest and latest[a].get("raw_payload_hash")), key=lambda r: r["available_timestamp"], reverse=True)[:limit]
+    return [{"agent": r["agent_id"], "hash": r["raw_payload_hash"]} for r in rows]
+
+
+def build(latest: dict, group_agents: dict, derived: dict, feedgas: dict | None, frac: dict, cutoff: str, price_path_note: str = "",
+          forward_inputs: list | None = None, disposition: list | None = None) -> dict:
     """latest: engine rows keyed by agent; group_agents: {group key: [agent ids]}; derived: engine `derived`; feedgas: lng_feedgas.estimate-like dict or None; frac: frac_module.build()."""
     items = []
     for e in ELEMENTS:
@@ -114,8 +120,11 @@ def build(latest: dict, group_agents: dict, derived: dict, feedgas: dict | None,
                                   "imports_canada_bcf": inn / 1000.0, "exports_mexico_bcf": out / 1000.0, "provenance": "measured"}
         it.setdefault("headline", None)
         it["age_days"] = _age(newest, cutoff)
+        it["raw_payload_hashes"] = _hashes(latest, agents)
+        it["collector_status"] = ("bootstrapped proxy (no meter collector; computed from EIA monthly exports)" if e["id"] == "M4" and it["status"] == "estimate"
+                                  else "pending collector" if it["status"] == "pending_collector" else "active collector")
         it["price_path"] = {"used_in_price": False, "reason": price_path_note}
         items.append(it)
     return {"elements": items, "direct": [i["id"] for i in items if i["mode"] == DIRECT], "separate": [i["id"] for i in items if i["mode"] == SEPARATE],
-            "price_note": price_path_note,
+            "price_note": price_path_note, "forward_price_inputs": forward_inputs or [], "disposition": disposition or [],
             "legend": {DIRECT: "ingested as published, only aligned to the point-in-time cutoff", SEPARATE: "computed in its own isolated module before the pricing engine; only its output crosses over"}}

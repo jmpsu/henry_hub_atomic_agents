@@ -80,8 +80,8 @@ def test_node_detail_search_summary_are_version_aware(db):
 
 def test_current_table_holds_latest_and_archive_holds_superseded(db):
     c = sqlite3.connect(db)
-    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain<>'fundamentals'").fetchone()[0] == 1          # the 7 G5 element-definition nodes are a separate class
-    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain='fundamentals'").fetchone()[0] == 7
+    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain<>'fundamentals'").fetchone()[0] == 1          # the 7 G5 element-definition nodes + Forward_Pricing_Model are a separate class
+    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain='fundamentals'").fetchone()[0] == 8
     assert c.execute("SELECT available_timestamp FROM kb_node_versions").fetchall() == [(V1,)]
 
 

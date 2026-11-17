@@ -26,9 +26,9 @@ Created 2026-11-17 from the user's pasted requirement messages plus the LNG spec
 | ID | Requirement | I | T | P | Notes |
 |---|---|---|---|---|---|
 | G1 | "Currently no LNG forward price on markets.joeysvault.app - that needs to be address both in the calculation pipeline and then also on the top level site." (two parts: calculation pipeline AND the top-level site) | ◐ | ◐ | ☐ | See section 3. Pipeline code written (uncommitted); site panel written, not yet browser-checked or deployed. |
-| G2 | "The Production & fundamental elements behind the calculation section should be what ACTUALLY IS USED TO INFLUENCE THE FORWARD PRICE OF THE COMMODITIES BEING LOOKED AT ON THIS PAGE." | ☐ | ☐ | ☐ | Not started. See section 4. |
-| G3 | "Do not stop until you have some working form of populating these elements of the final output" (the elements listed in section 4, rows E1-E8) | ☐ | ☐ | ☐ | Not started beyond the existing EIA monthly series. |
-| G4 | Reconstruct missing LNG feedgas flows for 8 terminals from physical/operational/mass-balance proxies without contaminating the forward price model (section 5). | ☐ | ☐ | ☐ | Not started. Existing: EIA monthly exports only. |
+| G2 | "The Production & fundamental elements behind the calculation section should be what ACTUALLY IS USED TO INFLUENCE THE FORWARD PRICE OF THE COMMODITIES BEING LOOKED AT ON THIS PAGE." | ◐ | ◐ | ☐ | Not started. See section 4. |
+| G3 | "Do not stop until you have some working form of populating these elements of the final output" (the elements listed in section 4, rows E1-E8) | ◐ | ◐ | ☐ | Not started beyond the existing EIA monthly series. |
+| G4 | Reconstruct missing LNG feedgas flows for 8 terminals from physical/operational/mass-balance proxies without contaminating the forward price model (section 5). | ◐ | ◐ | ☐ | Not started. Existing: EIA monthly exports only. |
 | G5 | Classify and integrate the 7 fundamental elements as Direct Ingested Inputs vs Separately Calculated Orthogonal Modules, with graph nodes, tooltips and Ollama context (section 6). | ◐ | ◐ | ☐ | Not started. |
 | G6 | Ollama-powered RAG and Graph-RAG chat interface on markets.joeysvault.app, in four phases (section 7). | ☐ | ☐ | ☐ | Not started. |
 | G7 | Everything fulfilled, implemented, tested and pushed to the final code location so that a complete test run can be done (section 10). | ☐ | ☐ | ☐ | |
@@ -65,14 +65,14 @@ User's text: the section "should be what ACTUALLY IS USED TO NIFLUENCE THE FORWA
 
 | ID | Element (user's list) | Present state | I | T | P |
 |---|---|---|---|---|---|
-| E1 | Shale gas production by basin ("Bcf/d (monthly average)") | populated (EIA STEO monthly) | ◐ | ◐ | ☐ |
-| E2 | Weather (CONUS population-weighted HDD/CDD) | populated (NOAA CPC, GFS, ECMWF Days 1-14) | ◐ | ◐ | ☐ |
+| E1 | Shale gas production by basin ("Bcf/d (monthly average)") | populated (EIA STEO monthly) | ☑ | ☑ | ☐ |
+| E2 | Weather (CONUS population-weighted HDD/CDD) | populated (NOAA CPC, GFS, ECMWF Days 1-14) | ☑ | ☑ | ☐ |
 | E3 | Working gas in storage by region | populated (EIA weekly) | ◐ | ◐ | ☐ |
-| E4 | LNG feedgas (daily meters, no collector yet) | **pending**, no collector | ☐ | ☐ | ☐ |
-| E5 | Fractionation / rejection economics | ethane **pending**, propane and HH spot present | ☐ | ☐ | ☐ |
-| E6 | LNG exports by terminal (EIA, monthly) | populated (13-series EIA collector, released 1.0.5) | ◐ | ◐ | ☐ |
-| E7 | Pipeline volumes at border points (EIA, monthly) | populated (same collector) | ◐ | ◐ | ☐ |
-| E8 | (For G2) a link, per element, to **what actually influences the forward price** shown on the page (which elements feed which calculation) | not started | ☐ | ☐ | ☐ |
+| E4 | LNG feedgas (daily meters, no collector yet) | **pending**, no collector | ◐ | ◐ | ☐ |
+| E5 | Fractionation / rejection economics | ethane **pending**, propane and HH spot present | ◐ | ◐ | ☐ |
+| E6 | LNG exports by terminal (EIA, monthly) | populated (13-series EIA collector, released 1.0.5) | ☑ | ☑ | ☐ |
+| E7 | Pipeline volumes at border points (EIA, monthly) | populated (same collector) | ☑ | ☑ | ☐ |
+| E8 | (For G2) a link, per element, to **what actually influences the forward price** shown on the page (which elements feed which calculation) | not started | ☑ | ☑ | ☐ |
 
 Marks for E1-E3, E6, E7 are ◐ because data populate but the section does not yet present them as forward-price influences (G2), and E-rows need tests for that presentation.
 
@@ -151,14 +151,14 @@ Note: the existing EIA monthly series are in **MMcf/month** (as published), not 
 
 | ID | Requirement | I | T | P |
 |---|---|---|---|---|
-| N1 | Create explicit first-class nodes in the vector knowledge graph for all 7 elements with directed edges pointing to `Forward_Pricing_Model`. | ☐ | ☐ | ☐ |
-| N1a | `Shale_Production_Basin → [feeds_supply] → Forward_Pricing_Model` | ☐ | ☐ | ☐ |
-| N1b | `CONUS_Weather_HDD_CDD → [feeds_rescomm_demand] → Forward_Pricing_Model` | ☐ | ☐ | ☐ |
-| N1c | `Regional_Working_Gas_Storage → [feeds_inventory_balance] → Forward_Pricing_Model` | ☐ | ☐ | ☐ |
-| N1d | `LNG_Feedgas_Bootstrapped → [calibrated_by] ← EIA_Monthly_LNG_Exports` | ☐ | ☐ | ☐ |
-| N1e | `Fractionation_Rejection_Econ → [modifies_dry_gas_supply] → Forward_Pricing_Model` | ☐ | ☐ | ☐ |
-| N1f | `EIA_Border_Pipeline_Volumes → [feeds_net_exports] → Forward_Pricing_Model` | ☐ | ☐ | ☐ |
-| N2 | Dashboard: attach the dotted-underline hover/pin metadata to **each of the 7 rows** under "Production & fundamental elements behind the calculation" showing **Current Value, Frequency, Collector Status (active vs bootstrapped proxy), Raw Payload Hash**. | ◐ | ◐ | ☐ |
+| N1 | Create explicit first-class nodes in the vector knowledge graph for all 7 elements with directed edges pointing to `Forward_Pricing_Model`. | ☑ | ☑ | ☐ |
+| N1a | `Shale_Production_Basin → [feeds_supply] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
+| N1b | `CONUS_Weather_HDD_CDD → [feeds_rescomm_demand] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
+| N1c | `Regional_Working_Gas_Storage → [feeds_inventory_balance] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
+| N1d | `LNG_Feedgas_Bootstrapped → [calibrated_by] ← EIA_Monthly_LNG_Exports` | ☑ | ☑ | ☐ |
+| N1e | `Fractionation_Rejection_Econ → [modifies_dry_gas_supply] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
+| N1f | `EIA_Border_Pipeline_Volumes → [feeds_net_exports] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
+| N2 | Dashboard: attach the dotted-underline hover/pin metadata to **each of the 7 rows** under "Production & fundamental elements behind the calculation" showing **Current Value, Frequency, Collector Status (active vs bootstrapped proxy), Raw Payload Hash**. | ☑ | ☑ | ☐ |
 | N3 | When a user asks Ollama how the forward curve is built, Ollama retrieves **all 7 graph nodes**, **cites the exact PDFs/methodologies in `/home/joey/Projects/energy_market_intelligence`** governing each formula, and explicitly distinguishes **direct EIA/NOAA actuals** from **bootstrapped LNG feedgas** and **calculated ethane rejection**. | ☐ | ☐ | ☐ |
 
 Existing tooltips (release 1.0.5) already show source, available (PIT) time, quality and payload hash for driver rows; "frequency" and "active vs bootstrapped proxy" are not yet shown. Hence N2 ◐.
@@ -262,7 +262,7 @@ User's message: "Missing from docs/GOAL_CHECKLIST.md" (8 items). Recorded as the
 
 | ID | Missing item (user's words) | Evidence the user gave | What I verified | I | T | P |
 |---|---|---|---|---|---|---|
-| AD1 | **The Demand and Crude-and-carbon groups.** "The live section has two driver groups that aren't among the 7 elements. Nothing says whether they stay, move or go, and G2 (the section shows only what influences the forward price) depends on that." Requirement: decide and record the disposition of each group (stay / move / go) and reflect it in the section. | `markets_complete.txt` lines 221-227 (`Demand` / `Demand Industrial` / `Demand PowerBurn`) and 252-256 (`Crude and carbon` / `Crude WTI Spot` / `Power CO2 AllowancePrice`) | File not found (O14). Live payload confirms both groups: Demand = Demand_Industrial, Demand_ResComm, Demand_PowerBurn; Crude and carbon = Crude_WTI_Spot, Power_CO2_AllowancePrice. In the engine, **WTI feeds a calculation** (`ngl_to_wti_pct`); the three Demand agents and CO2 appear only in the display groups. | ☐ | ☐ | ☐ |
+| AD1 | **The Demand and Crude-and-carbon groups.** "The live section has two driver groups that aren't among the 7 elements. Nothing says whether they stay, move or go, and G2 (the section shows only what influences the forward price) depends on that." Requirement: decide and record the disposition of each group (stay / move / go) and reflect it in the section. | `markets_complete.txt` lines 221-227 (`Demand` / `Demand Industrial` / `Demand PowerBurn`) and 252-256 (`Crude and carbon` / `Crude WTI Spot` / `Power CO2 AllowancePrice`) | File not found (O14). Live payload confirms both groups: Demand = Demand_Industrial, Demand_ResComm, Demand_PowerBurn; Crude and carbon = Crude_WTI_Spot, Power_CO2_AllowancePrice. In the engine, **WTI feeds a calculation** (`ngl_to_wti_pct`); the three Demand agents and CO2 appear only in the display groups. | ☑ | ☑ | ☐ |
 | AD2 | **No Waha price collector.** "B2 needs Waha, and there's no collector or open item for it." Requirement: a Waha price collector, or a recorded blocker with the exact reason. | Pasted text: `regional gas hub prices (Henry Hub / Waha)`; "the 19 uncollected sources list has no Waha agent." | Confirmed: `Waha` appears nowhere in tracked code, roster or config, and the 19 uncollected-source rows in the earlier gaps report contain no Waha agent. | ☑ | ☑ | ☐ |
 | AD3 | **T&F cost has no value.** "B2 and B3 use it, but there's no named constant or open item." Requirement: a named, labelled constant for the transportation-and-fractionation cost (or a recorded open item stating the missing value). | Pasted text: `When Ethane_Value < (Gas_Hub_Price + T&F_Cost)` | Confirmed: no `T&F` / transport-and-frac constant exists in the repo. No value is given anywhere in the user's text. | ☑ | ☑ | ☐ |
 | AD4 | **The cited references aren't recorded** (needed so N3 and V1 have sources to cite). | Pasted lines 95, 96, 111 | Recorded below (table AD4-refs). | ◐ | n/a | ☐ |
@@ -383,3 +383,12 @@ Written by the implementation run of docs/IMPLEMENT_GOAL_CHECKLIST.md. Each entr
 - **M3 partial:** only 6 weekly storage values are stored, so no 5-year-normal deficit/surplus can be computed. Activate: backfill via `collectors/eia_storage.py` history.
 - **M7 corrected:** headline is net imports (Canada in minus Mexico out), not a gross sum.
 - **DB checkpoint:** `henry_hub_pit.db.pre-g5.20261117T122058Z` (integrity ok, 108,036 rows). Rollback of this section's data: `DELETE FROM pit_market_data WHERE extraction_version IN ('metar_ambient_v1','lng_feedgas_v1');`
+
+### 2d: G2/E1-E8, AD1, N1, N2 implemented 2026-11-17 (N3 is delivered with the chat in 2e)
+
+- **G2:** the section now opens with **what actually sets the forward prices** (P1 Henry Hub futures M1-M12, P2 k and L with their source, P3 TTF and EUR/USD, P4 shipping and regas), each tagged *market quote* or *assumption*; the seven elements follow, explicitly labelled *context, not price inputs*. Marked partial (◐) because of **O6**: no fundamentals-to-price model exists, so no element can honestly be shown as moving a price. Building one is a modelling decision for the user; the declared graph relations (N1) are ready for it.
+- **E8:** every element lists the calculations it feeds today (`feeds_today`, e.g. M2 -> `derived.hdd_anomaly`, display and alert) and states `Forward price: none (checklist O6)`.
+- **AD1 disposition (recorded in the payload and shown on the page):** **Demand** group = *move* (not one of the seven; feeds no calculation; residential/commercial demand enters through weather M2); **Crude and carbon** = *move* (WTI feeds the NGL-to-WTI relative-value ratio, not a gas forward price; CO2 allowance feeds nothing). Both are kept as underlying series inside a collapsed "Underlying series" block outside the fundamentals section.
+- **N1/N1a-f:** 8 first-class graph nodes in `kb_nodes` (domain `fundamentals`: M1-M7 definitions + `Forward_Pricing_Model`), embedded with nomic-embed-text, and the six named edges (`feeds_supply`, `feeds_rescomm_demand`, `feeds_inventory_balance`, `calibrated_by` (M4 -> M6), `modifies_dry_gas_supply`, `feeds_net_exports`) stored as non-derived edge types that survive `rebuild_edges`. The edge legend and the `Forward_Pricing_Model` node text say they are **declared by the requirement, not measured causation, and no calculation consumes them yet**. Live ingest: 8 new nodes, 6 declared edges. Checkpoint `henry_hub_pit.db.pre-kbnodes.20261117T122728Z`.
+- **N2:** hover/pin tooltip on each of the 7 rows shows Current value, Frequency, Collector status (active collector / bootstrapped proxy / pending collector), Raw payload hash(es), the calculations it feeds and its blockers. Verified in headless Chrome (45/45); screenshot `docs/poc/fundamentals.png`.
+- **N3 not yet done:** it needs the chat/Ollama retrieval (G6, section 2e); it will retrieve all 7 nodes and cite the PDFs under `/home/joey/Projects/energy_market_intelligence`.

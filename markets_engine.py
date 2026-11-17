@@ -609,7 +609,24 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         # ---- G5: the seven fundamental elements (direct inputs vs separately calculated modules). Nothing here is fed into any price (O6) and the block says so.
         frac_mod = frac_module.build(latest.get(frac_module.ETHANE_AGENT), latest.get(frac_module.HH_AGENT), latest.get(frac_module.WAHA_AGENT), cutoff)
         feedgas_mod = lng_feedgas.load(cutoff)
-        fundamentals_block = fundamentals.build(latest, {g: ag for g, _, ag in DRIVER_GROUPS}, derived, feedgas_mod, frac_mod, cutoff, FUNDAMENTALS_PRICE_NOTE)
+        lp, ln = lng.get("points") or [], lng.get("netback") or {}
+        forward_inputs = [
+            {"id": "P1", "label": "Henry Hub NYMEX futures, M1-M12", "sets": "the Henry Hub forward curve; the LNG FOB cost is k x this price", "n": len(fwd), "date": fwd[0]["date"] if fwd else None,
+             "provenance": "measured (delayed, unofficial quote)", "status": "measured" if fwd else PENDING, "market_derived": True},
+            {"id": "P2", "label": "LNG FOB cost parameters k and L", "sets": "the LNG forward cost (k x HH + L)", "status": "estimate", "market_derived": False,
+             "value": f"k {lng['parameters']['k_hh_multiplier']['value']:g} ({lng['parameters']['k_hh_multiplier']['source']}) · L {lng['parameters']['liquefaction_usd_mmbtu']['value']:g} USD/MMBtu ({lng['parameters']['liquefaction_usd_mmbtu']['source']})",
+             "provenance": "labelled assumption unless a verbatim library quote passed the O13-R checks"} if lng.get("parameters") else None,
+            {"id": "P3", "label": "TTF monthly futures and EUR/USD", "sets": "the TTF netback beside the LNG cost", "n": ln.get("points_with_netback"), "status": ln.get("status", PENDING), "market_derived": True,
+             "provenance": "measured (delayed, unofficial quote); quotes older than the age limit are refused"},
+            {"id": "P4", "label": "Shipping and regasification", "sets": "the TTF netback", "status": "estimate", "market_derived": False,
+             "value": f"shipping {lng.get('assumptions', {}).get('shipping', {}).get('value')} + regas {lng.get('assumptions', {}).get('regas', {}).get('value')} USD/MMBtu", "provenance": "labelled assumptions"},
+        ]
+        disposition = [
+            {"group": "demand", "decision": "move", "reason": "Not one of the seven elements and it feeds no calculation on the page (res/comm demand enters through weather, M2). Kept as an underlying series, outside the fundamentals section."},
+            {"group": "crude_and_carbon", "decision": "move", "reason": "WTI feeds the NGL-to-WTI ratio, which is relative value, not a gas forward price; CO2 allowance feeds nothing. Kept as underlying series, outside the fundamentals section."},
+        ]
+        fundamentals_block = fundamentals.build(latest, {g: ag for g, _, ag in DRIVER_GROUPS}, derived, feedgas_mod, frac_mod, cutoff, FUNDAMENTALS_PRICE_NOTE,
+                                                [x for x in forward_inputs if x], disposition)
 
         # ---- source availability (every roster agent, then extras)
         roster = _roster()
