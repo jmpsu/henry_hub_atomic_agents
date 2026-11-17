@@ -7,6 +7,8 @@ RANGES = {  # agent_id prefix -> (min, max, unit)
     "Agent_Crude_": (-50.0, 300.0, "USD/bbl"),
     "Agent_NGL_": (0.0, 600.0, "cents/gal"),
     "Agent_Prod_": (0.0, 60.0, "Bcf/d"),
+    "Agent_LNGExports_": (0.0, 300_000.0, "MMcf/month"),   # EIA monthly terminal exports (largest terminal ~120k); distinct from the daily Agent_LNG_*_Flow agents
+    "Agent_BorderFlow_": (0.0, 300_000.0, "MMcf/month"),   # EIA monthly border-point pipeline volumes
     "Agent_Demand_PowerBurn": (0.0, 20_000_000.0, "MWh/day"),   # checked before the Bcf/d demand family
     "Agent_Demand_": (0.0, 80.0, "Bcf/d"),
     "Agent_ECMWF_": (0.0, 80.0, "approx HDD"),

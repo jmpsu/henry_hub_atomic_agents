@@ -1,0 +1,27 @@
+# Missing data review (2026-11-17)
+
+Reviewed: three browser prints of ngl.joeysvault.app taken 09:08-09:11Z (`NGL Visual Intelligence*.pdf`, the Seasonal / Intraday / Multi-year views of Henry Hub) and the live `/api/market` payload.
+Tags: **E** executed and observed, **S** read in source. Nothing below is simulated; where no real source exists the cell stays blank.
+
+| # | What the page showed as missing or stale | Finding (evidence) | Action | Status |
+|---|---|---|---|---|
+| 1 | LNG feedgas: all 8 terminals "pending" | The roster defines **daily feedgas nominations (Dth/d)** from per-pipeline EBBs. No keyless source exists for that (S: roster). EIA publishes **monthly LNG exports by terminal**, all 8 present through 2026-08 (E: `NG.zip`, `..._Y<terminal>-Z00_MMCF.M`) | New collector `collectors/eia_ng_flows.py` (13 series, 1,284 rows loaded). Separate agents `Agent_LNGExports_*`, raw MMcf/month, **not** written into the daily agents, so tooltips and units cannot contradict each other. New panel "LNG exports by terminal", map labels show the values | **Filled (monthly exports).** Daily feedgas stays **blocked** |
+| 2 | Pipeline border meters: Kingsgate, Emerson, Waddington, NET Mexico, Valley Crossing, "0 of 13 meters" | EIA publishes border-point pipeline volumes. Eastport/Kingsgate, Noyes/Emerson, Waddington are the named crossings (E). EIA has no NET Mexico or Valley Crossing series | Agents `Agent_BorderFlow_*` from the same collector. NET Mexico -> Rio Grande TX and Valley Crossing -> Brownsville TX are the **nearest published crossings and are labelled INFERRED** in the roster text and the tooltip | **Filled (monthly)**; 2 of 5 mappings inferred. The "0 of 13" daily-meter count is unchanged and the alert now says monthly volumes are separate |
+| 3 | Ethane (C2), normal butane (nC4), isobutane (iC4), natural gasoline (C5+) "pending"; Conway propane; Mont Belvieu - Conway; frac spread | EIA's petroleum database has **no price series** for these products: 11,272 series mention ethane/butane/natural gasoline/isobutane/Conway/pentane and **0 are prices** (all stocks, production, volumes) (E: PET.zip search). EIA spot has only Mont Belvieu propane | None possible from free official data. Left pending, never estimated | **BLOCKED.** Needs a licensed feed (OPIS, Argus, NGI). The roster ids and the engine already accept them: a collector writing `Agent_NGL_MontBelvieu_Ethane` etc. in cents/gal fills the panels with no UI change |
+| 4 | ECMWF HDD stale (last 2026-11-16); service ended `failed`; agent finding "Collector ecmwf_hdd: code_error" | AWS S3 bucket answered **503 SlowDown** (E); ECMWF's own mirror and Google's mirror served the same files (E). The collector had one host, no retry, and reported any non-200 as "no run found" | `collectors/ecmwf_hdd.py` v2: mirrors (ecmwf.int, Google, AWS), retry on 5xx/429/timeout, 404 vs service-error distinguished, per-day tolerance, skips days already stored | **Fixed.** Fresh 2026-11-17 00z run collected |
+| 5 | ECMWF Day 10-15 "pending collector" | The documented limit "HRES ends at step 240" is stale: the open-data HRES run now reaches **step 360** (E: HEAD on 246..360 = 200, 366/372 = 404). Day n needs steps 24n-12..24n+6 | Days 10-14 added with the identical method (14 days stored). `tests/test_ecmwf_hdd.py` updated from the old limit to the verified one | **Days 10-14 filled.** **Day 15 blocked**: step 366 does not exist; a 3-sample mean would drop the coldest sample and bias HDD low |
+| 6 | HH cash index (midpoint/high/low/volume) pending | Source is the NGI Daily Gas Price Index, a paid product (S: roster) | None | **BLOCKED** (paid). The free EIA spot series is used elsewhere and is labelled as such |
+| 7 | Henry Hub, WTI and propane price date **2026-11-11** | **Not a pipeline defect.** EIA's own files end at 2026-11-11, last modified Thu 2026-11-12 (E: HH 3.00, WTI 89.62, propane 1.061). The collector found 0 new rows | None. The next EIA update is expected around 2026-11-19 | **Source limit** |
+| 8 | Intraday view labelled "NO INTRADAY FEED" | All three timeframes use daily closes; there is no intraday spot series (S: `TIMEFRAMES`) | None; futures quotes are a different series and are not substituted | **Limitation (unchanged)** |
+
+## Things verified as correct, not gaps
+- 58 of 81 roster agents were collected before this work; the remaining pending ones were exactly the 15 above (4 HH cash, 5 border flows, 6 ECMWF) plus the daily LNG feedgas, NGL and Conway items.
+- Storage (week ending 2026-11-06) and RGGI (2026-09-09, quarterly auction) dates match their publishers' cadence.
+
+## New data written (E, 2026-11-17)
+- `eia_ng_flows`: 13 series, 1,284 rows (2015-01 .. 2026-08), unit MMcf/month, source `eia_ng_bulk`, PIT rule: month M is available at the end of month M+2 16:00Z (same rule as `eia_ng_monthly`); on later runs a changed value is stored as a new vintage at retrieval time.
+- `ecmwf_hdd` v2: 14 rows for the 2026-11-17 00z run (Day 1-14); available = the GRIB's Last-Modified.
+- Checkpoint taken first: `henry_hub_pit.db.pre-flows.20261117T093452Z` (git-ignored). Rollback: `DELETE FROM pit_market_data WHERE extraction_version IN ('eia_ng_flows/1','ecmwf_hdd/2');`
+
+## Tests and checks
+`tests/test_eia_ng_flows.py` (5), `tests/test_flows_payload.py` (5), `tests/test_ecmwf_hdd.py` (+5), `tests/test_metric_docs.py` (docs match the code, no dead docs), roster-count test updated 81 -> 94. Full suite 224 passed. `scripts/verify_tooltips.py`: 37 browser checks including the new panels.

@@ -49,14 +49,14 @@ GEO_NODES = [  # id, label, kind, lat, lon, agent (driver shown at the node, if 
     ("CNW", "Conway KS", "ngl_hub", 38.37, -97.64, CONWAY_AGENT),
     ("HHB", "Henry Hub LA", "gas_hub", 29.96, -92.04, "Agent_HH_Spot_EIA"),
     ("CSH", "Cushing OK", "crude_hub", 35.98, -96.77, WTI_AGENT),
-    ("SAB", "Sabine Pass LNG", "lng", 29.73, -93.87, "Agent_LNG_SabinePass_Flow"),
-    ("CRP", "Corpus Christi LNG", "lng", 27.88, -97.27, "Agent_LNG_CorpusChristi_Flow"),
-    ("FPT", "Freeport LNG", "lng", 28.94, -95.31, "Agent_LNG_Freeport_Flow"),
-    ("CAM", "Cameron LNG", "lng", 30.04, -93.33, "Agent_LNG_Cameron_Flow"),
-    ("CCP", "Calcasieu Pass LNG", "lng", 29.77, -93.34, "Agent_LNG_CalcasieuPass_Flow"),
-    ("PLQ", "Plaquemines LNG", "lng", 29.60, -89.90, "Agent_LNG_Plaquemines_Flow"),
-    ("ELB", "Elba Island LNG", "lng", 32.09, -81.00, "Agent_LNG_ElbaIsland_Flow"),
-    ("CVP", "Cove Point LNG", "lng", 38.39, -76.41, "Agent_LNG_CovePoint_Flow"),
+    ("SAB", "Sabine Pass LNG", "lng", 29.73, -93.87, "Agent_LNGExports_SabinePass"),
+    ("CRP", "Corpus Christi LNG", "lng", 27.88, -97.27, "Agent_LNGExports_CorpusChristi"),
+    ("FPT", "Freeport LNG", "lng", 28.94, -95.31, "Agent_LNGExports_Freeport"),
+    ("CAM", "Cameron LNG", "lng", 30.04, -93.33, "Agent_LNGExports_Cameron"),
+    ("CCP", "Calcasieu Pass LNG", "lng", 29.77, -93.34, "Agent_LNGExports_CalcasieuPass"),
+    ("PLQ", "Plaquemines LNG", "lng", 29.60, -89.90, "Agent_LNGExports_Plaquemines"),
+    ("ELB", "Elba Island LNG", "lng", 32.09, -81.00, "Agent_LNGExports_ElbaIsland"),
+    ("CVP", "Cove Point LNG", "lng", 38.39, -76.41, "Agent_LNGExports_CovePoint"),
     ("PRM", "Permian Basin", "basin", 31.80, -102.40, "Agent_Prod_Permian"),
     ("APP", "Appalachia Basin", "basin", 40.50, -79.50, "Agent_Prod_Appalachia"),
     ("HYN", "Haynesville Basin", "basin", 32.30, -93.70, "Agent_Prod_Haynesville"),
@@ -81,10 +81,14 @@ DRIVER_GROUPS = [
     ("storage", "Working gas in storage by region", ["Agent_Storage_East", "Agent_Storage_Midwest", "Agent_Storage_Mountain", "Agent_Storage_Pacific",
                                                      "Agent_Storage_SouthCentral_Salt", "Agent_Storage_SouthCentral_NonSalt"]),
     ("demand", "Demand", ["Agent_Demand_Industrial", "Agent_Demand_ResComm", "Agent_Demand_PowerBurn"]),
-    ("lng", "LNG feedgas", ["Agent_LNG_SabinePass_Flow", "Agent_LNG_CorpusChristi_Flow", "Agent_LNG_Freeport_Flow", "Agent_LNG_Cameron_Flow",
+    ("lng", "LNG feedgas (daily meters, no collector yet)", ["Agent_LNG_SabinePass_Flow", "Agent_LNG_CorpusChristi_Flow", "Agent_LNG_Freeport_Flow", "Agent_LNG_Cameron_Flow",
                             "Agent_LNG_CalcasieuPass_Flow", "Agent_LNG_CovePoint_Flow", "Agent_LNG_ElbaIsland_Flow", "Agent_LNG_Plaquemines_Flow"]),
     ("fractionation", "Fractionation / rejection economics", ["Agent_NGL_MontBelvieu_Ethane", "Agent_NGL_MontBelvieu_Propane", "Agent_HH_Spot_EIA"]),
     ("crude_and_carbon", "Crude and carbon", [WTI_AGENT, "Agent_Power_CO2_AllowancePrice"]),
+    ("lng_exports", "LNG exports by terminal (EIA, monthly)", ["Agent_LNGExports_SabinePass", "Agent_LNGExports_CorpusChristi", "Agent_LNGExports_Freeport", "Agent_LNGExports_Cameron",
+                                                              "Agent_LNGExports_CalcasieuPass", "Agent_LNGExports_CovePoint", "Agent_LNGExports_ElbaIsland", "Agent_LNGExports_Plaquemines"]),
+    ("border_flows", "Pipeline volumes at border points (EIA, monthly)", ["Agent_BorderFlow_Eastport_FromCanada", "Agent_BorderFlow_Noyes_FromCanada", "Agent_BorderFlow_Waddington_FromCanada",
+                                                                        "Agent_BorderFlow_RioGrande_ToMexico", "Agent_BorderFlow_Brownsville_ToMexico"]),
 ]
 
 
@@ -617,7 +621,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         flow_agents = [a for a in roster if a.startswith("Agent_Flow_") or (a.startswith("Agent_LNG_") and a.endswith("_Flow"))]
         flows_ok = [a for a in flow_agents if a in latest and latest[a]["provenance"] == "measured"]
         geo = {"nodes": nodes, "flows": [{"from": a, "to": b, "kind": k, "schematic": True, "value": None, "status": PENDING} for a, b, k in GEO_FLOWS],
-               "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. No pipeline-flow collector exists yet.",
+               "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. LNG terminal labels show the latest monthly exports (EIA); there is no daily pipeline-flow collector yet.",
                "flow_agents_collected": len(flows_ok), "flow_agents_total": len(flow_agents)}
 
         # ---- pipeline critical notices (source documents, PIT: posted at or before the cutoff)
@@ -657,12 +661,12 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                     alerts.append({"level": "info", "kind": "technical", "text": f"{meta['label']}: {c['type'].replace('_', ' ')} on {c['date']}."})
         if derived["hdd_anomaly"]["value"] is not None and abs(derived["hdd_anomaly"]["value"]) >= 5:
             alerts.append({"level": "info", "kind": "weather", "text": f"CONUS HDD {derived['hdd_anomaly']['value']:+.1f} vs 30-yr normal on {derived['hdd_anomaly']['date']}."})
-        alerts.append({"level": "gap", "kind": "coverage", "text": f"Pipeline and LNG flow volumes: {len(flows_ok)} of {len(flow_agents)} meters collected. "
+        alerts.append({"level": "gap", "kind": "coverage", "text": f"Daily pipeline and LNG meters: {len(flows_ok)} of {len(flow_agents)} collected (monthly EIA volumes for terminals and border points are shown separately). "
                        f"Critical notices: {notices['last_7_days']} in the last 7 days from {len(per)} pipelines."})
         def max_age(agent):  # expected cadence: daily series 10 days, monthly 75, quarterly auctions 130, static normals never
             if agent == "Agent_Weather_30YrNormal_HDD":
                 return None
-            if agent.startswith(("Agent_Prod_", "Agent_Demand_")):
+            if agent.startswith(("Agent_Prod_", "Agent_Demand_", "Agent_LNGExports_", "Agent_BorderFlow_")):
                 return 75
             return 130 if agent.startswith("Agent_Power_CO2") else 10
         stale = [s for s in sources if s["status"] == "collected" and s["contributes"] and max_age(s["agent_id"]) is not None

@@ -35,7 +35,7 @@
     const r = state && state.sources.find((x) => x.agent_id === agent);
     if (!r) return { h: "Data lineage", rows: [["Agent", agent], ["Roster", "not in the platform roster, so no intended source is assigned", "dim"]] };
     if (r.status !== "collected") return { h: "Why there is no value", rows: [["Agent", r.agent_id], ["Series", r.series], ["Intended source", r.intended_source], ["Status", "no collector writes this series yet", "warn"], ["Simulated?", "never: the cell stays blank until real data arrives", "dim"]] };
-    return { h: "Data lineage", rows: [["Agent", r.agent_id], ["Series", r.series], ["Source", r.source_id], ["Observation date", r.latest_target_timestamp ? r.latest_target_timestamp.slice(0, 10) : null],
+    return { h: "Data lineage", rows: [["Agent", r.agent_id], ["Series", r.series], ["Source", r.source_id], ["Roster source note", r.intended_source], ["Observation date", r.latest_target_timestamp ? r.latest_target_timestamp.slice(0, 10) : null],
       ["Retrieved", fts(r.retrieved_timestamp)], ["Available (PIT)", fts(r.available_timestamp)], ["Quality", (r.quality_status || "").replace(/_/g, " ")], ["Provenance", (r.provenance || "").replace(/_/g, " ")],
       ["Payload", r.raw_payload_hash ? r.raw_payload_hash.slice(0, 16) + "…" + (r.raw_payload_archived ? " · archived" : "") : null, "hash"], ["Age", r.age_days == null ? null : num(r.age_days, 1) + " days"]] };
   }
@@ -347,7 +347,10 @@
     const box = clear($("drivers"));
     for (const g of s.drivers) {
       const units = new Set(g.items.filter((i) => i.value != null).map((i) => i.unit)), max = d3.max(g.items, (i) => (i.value != null ? Math.abs(i.value) : 0)) || 1;
-      const card = el("div", { class: "drv" }, el("h3", { text: g.label }));
+      const h3 = el("h3", { text: g.label });
+      const gdoc = ({ lng_exports: "lng_exports", border_flows: "border_flows", lng: "flow_meters" })[g.group];
+      if (gdoc) T(gdoc, h3, { title: g.label }, "grp_" + g.group);
+      const card = el("div", { class: "drv" }, h3);
       for (const i of g.items) {
         const pend = i.value == null;
         const row = el("div", { class: "drv-row" + (pend ? " pend" : "") }, [
@@ -419,18 +422,19 @@
     map.once("style.load", onReady); map.once("load", onReady);
     if (map.isStyleLoaded()) onReady();
   }
+  const nodeVal = (n, d) => (/MMcf/.test(n.unit || "") ? num(n.value, 0) : num(n.value, n.value >= 100 ? 1 : d));
   function drawMap(s) {
     if (!map || !mapReady) return;
     markers.forEach((m) => m.remove()); markers = [];
     const byId = Object.fromEntries(s.geo.nodes.map((n) => [n.id, n]));
     for (const n of s.geo.nodes) {
       const ok = n.status === "measured", pos = LABEL_POS[n.id] || [1, 0];
-      const lab = el("span", { class: "node-label" }, [n.label + " ", el("em", { text: `[${n.id}]` })].concat(ok ? [" ", el("b", { text: `${num(n.value, n.value >= 100 ? 1 : 2)}` })] : []));
+      const lab = el("span", { class: "node-label" }, [n.label + " ", el("em", { text: `[${n.id}]` })].concat(ok ? [" ", el("b", { text: nodeVal(n, 2) })] : []));
       lab.style.left = pos[0] > 0 ? "16px" : "auto"; if (pos[0] < 0) lab.style.right = "16px"; lab.style.top = `${-7 + pos[1] * 13}px`;
       const dot = el("div", { class: `node-wrap ${ok ? "measured" : "pend"}` },
         [el("i", { class: `node ${n.kind === "basin" ? "basin" : n.kind === "lng" ? "lng" : ""} ${ok ? "measured" : "pend"}` }), lab]);
-      T(ok ? "provenance" : "pending", dot, () => ({ title: `${n.label} [${n.id}]`, value: ok ? `${num(n.value, n.value >= 100 ? 1 : 3)} ${n.unit || ""}` : "no data", badge: badgeOf(ok ? "measured" : "pending_collector"),
-        what: ({ basin: "Production basin. The value is the monthly-average gas production.", lng: "LNG export terminal. The value would be daily feedgas.", ngl_hub: "NGL pricing hub.", hub: "Natural gas pricing hub.", storage: "Storage region." })[n.kind] || "Location on the schematic network map.",
+      T(ok ? "provenance" : "pending", dot, () => ({ title: `${n.label} [${n.id}]`, value: ok ? `${nodeVal(n, 3)} ${n.unit || ""}` : "no data", badge: badgeOf(ok ? "measured" : "pending_collector"),
+        what: ({ basin: "Production basin. The value is the monthly-average gas production.", lng: "LNG export terminal. The value is the latest monthly total exports published by EIA (MMcf per month), not daily feedgas.", ngl_hub: "NGL pricing hub.", gas_hub: "Natural gas pricing hub.", crude_hub: "Crude oil pricing hub." })[n.kind] || "Location on the schematic network map.",
         formula: null, params: {}, read: ok ? "Filled marker = a measured value at this location." : "Hollow marker = no collector yet for this location.",
         sections: [{ h: "Location", rows: [["Kind", n.kind], ["Observation date", n.date]] }, lineage(n.agent_id)], notes: ["Arcs between locations are schematic links, not surveyed pipeline routes."] }), "node_" + n.id);
       markers.push(new maplibregl.Marker({ element: dot }).setLngLat([n.lon, n.lat]).addTo(map));

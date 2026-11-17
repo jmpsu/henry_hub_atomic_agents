@@ -63,12 +63,14 @@ class IngestTests(unittest.TestCase):
         h2 = ingest.archive_payload(self.conn, b"<html>x</html>", "eia", "http://x", 200, "2026-01-08T15:30:00Z")
         self.assertEqual(h, h2)
 
-    def test_roster_has_81_unique_agents(self):
+    def test_roster_has_94_unique_agents(self):
+        """81 original agents + 13 EIA monthly agents (8 LNG terminals, 5 border points) added with their own honest descriptions."""
         roster = json.load(open(ROOT / "agents_roster.json"))
         ids = [r["agent_id"] for r in roster]
-        self.assertEqual(len(ids), 81)
-        self.assertEqual(len(set(ids)), 81)
-        self.assertTrue(all(r["source"] for r in roster))
+        self.assertEqual(len(ids), 94)
+        self.assertEqual(len(set(ids)), 94)
+        self.assertTrue(all(r["source"] and r["series"] for r in roster))
+        self.assertEqual(sum(i.startswith(("Agent_LNGExports_", "Agent_BorderFlow_")) for i in ids), 13)
 
 
 if __name__ == "__main__":
