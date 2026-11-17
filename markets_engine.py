@@ -331,7 +331,7 @@ def latest_rows(conn, as_of: str) -> dict:
     """Newest PIT-eligible row per agent (by target date, then vintage), with its provenance and payload reference.
     Real rows always win: an old demo seed row is only reported for an agent that has nothing else."""
     cols = ("p.agent_id,p.target_timestamp,p.available_timestamp,p.value,p.unit,p.source_id,p.retrieved_timestamp,p.quality_status,"
-            "p.raw_payload_hash,p.provenance,p.geographic_scope")
+            "p.raw_payload_hash,p.provenance,p.geographic_scope,p.series_id,p.published_timestamp")
     seed = "(COALESCE(quality_status,'')='unverified_seed' OR source_id IS NULL OR source_id='')"
     out = {}
     for real in (False, True):  # seeds first, then real rows overwrite them
@@ -344,7 +344,8 @@ def latest_rows(conn, as_of: str) -> dict:
         for r in rows:  # ordered by vintage, so the last one per agent wins
             out[r[0]] = {"agent_id": r[0], "latest_target_timestamp": r[1], "available_timestamp": r[2], "value": r[3], "unit": r[4] or "",
                          "source_id": r[5], "retrieved_timestamp": r[6], "quality_status": r[7], "raw_payload_hash": r[8] or None,
-                         "provenance": (r[9] or "measured") if real else "unverified_seed", "geographic_scope": r[10] or ""}
+                         "provenance": (r[9] or "measured") if real else "unverified_seed", "geographic_scope": r[10] or "",
+                         "series_id": r[11] or "", "published_timestamp": r[12] or ""}
     return out
 
 
@@ -481,7 +482,12 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         for m_ in range(1, 13):
             r = latest.get(f"Agent_HH_M{m_}")
             if r and r["provenance"] == "measured":
-                fwd.append({"contract": f"M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10], "available_timestamp": r["available_timestamp"]})
+                sid = r.get("series_id") or ""
+                dm = sid[sid.rfind("(") + 1:-1] if sid.endswith(")") and "(" in sid else None   # "NGZ26.NYM (2026-12)" -> "2026-12"
+                fwd.append({"contract": f"M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10], "available_timestamp": r["available_timestamp"],
+                            "unit": r["unit"], "series_id": sid, "delivery_month": dm, "source_id": r["source_id"], "quality_status": r["quality_status"],
+                            "published_timestamp": r.get("published_timestamp") or None, "retrieved_timestamp": r["retrieved_timestamp"],
+                            "raw_payload_hash": r["raw_payload_hash"]})
         fwd_dates = {p["date"] for p in fwd}
         fwd_age = _age_days(max(p["available_timestamp"] for p in fwd), cutoff) if fwd else None
         fwd_stale = bool(fwd) and (len(fwd_dates) > 1 or (fwd_age is not None and fwd_age > 10))

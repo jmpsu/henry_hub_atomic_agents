@@ -227,12 +227,12 @@
     const f = c.frac_spread;
     if (f.status !== "measured") pending($("frac-chart"), "PENDING COLLECTOR", [f.note, "Henry Hub: " + num(f.henry_hub_latest, 3) + " $/MMBtu", "Missing: " + f.missing.join(", ")]);
     else { chart($("frac-chart"), { x: f.dates, xFmt: dateFmt(f.dates.length), lines: [{ y: f.ethane_usd_mmbtu, cls: "bold" }, { y: f.henry_hub_usd_mmbtu, cls: "dash" }], bars: { y: f.frac_spread_usd_mmbtu }, hlines: [{ y: 0, label: "recovery above · rejection below", cls: "gold" }] }); legend($("frac-chart"), [["", "ethane $/MMBtu"], ["dash", "Henry Hub"], ["dim", "frac spread (bars)"]]); }
-    const fw = c.forward_curve, ft = clear($("fwd-tags"));
+    const fw = c.forward_curve, ft = clear($("fwd-tags")), pts0 = (f) => f.points || [];
     if (fw.status !== "measured") pending($("fwd-chart"), "PENDING COLLECTOR", ["No futures contracts collected."]);
     else {
-      ft.append(tag(fw.regime, fw.stale ? "" : "on")); if (fw.stale) ft.append(tag("stale · " + fw.as_of_date, "gap"));
+      ft.append(tag(fw.regime, fw.stale ? "" : "on")); if (pts0(fw).some((p) => /unverified/.test(p.quality_status || ""))) ft.append(tag("delayed quotes · unverified", "gap")); if (fw.stale) ft.append(tag("stale · " + fw.as_of_date, "gap"));
       const pts = fw.points;
-      chart($("fwd-chart"), { x: pts.map((p) => p.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v, lines: [{ y: pts.map((p) => p.value), cls: "bold" }], markers: pts.map((p, i) => ({ i, y: p.value, title: `${p.contract} ${p.value} (${p.date})` })) });
+      chart($("fwd-chart"), { x: pts.map((p) => p.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v, lines: [{ y: pts.map((p) => p.value), cls: "bold" }], markers: pts.map((p, i) => ({ i, y: p.value, title: [`${p.contract}${p.delivery_month ? " · delivery " + p.delivery_month : ""}: ${p.value} ${p.unit || ""}`, p.series_id ? `contract ${p.series_id}` : "", `quote date ${p.date}`, p.published_timestamp ? `published ${p.published_timestamp}` : "published: not supplied", `available ${p.available_timestamp}`, `source ${p.source_id || "?"} · ${(p.quality_status || "?").replace(/_/g, " ")}`, p.raw_payload_hash ? `payload ${p.raw_payload_hash.slice(0, 12)}` : ""].filter(Boolean).join("\n") })) });
       below($("fwd-chart"), el("div", { class: "legend-row" }, [el("span", { text: fw.note || `${pts.length} contracts` })]));
     }
   }
