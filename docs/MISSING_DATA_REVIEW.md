@@ -25,3 +25,10 @@ Tags: **E** executed and observed, **S** read in source. Nothing below is simula
 
 ## Tests and checks
 `tests/test_eia_ng_flows.py` (5), `tests/test_flows_payload.py` (5), `tests/test_ecmwf_hdd.py` (+5), `tests/test_metric_docs.py` (docs match the code, no dead docs), roster-count test updated 81 -> 94. Full suite 224 passed. `scripts/verify_tooltips.py`: 37 browser checks including the new panels.
+
+## End-to-end run on 1.0.5 (E, 2026-11-17 09:37-09:42Z, `systemctl --user start hh-collect-cpc.service`)
+- Service exit 0 (state `inactive`, not `failed`). **17 of 17 collectors OK**, including `ecmwf_hdd` (days already stored were skipped, not re-downloaded) and `eia_ng_flows` (0 new rows: idempotent, still exactly 1,284).
+- The snapshot step ran: `snapshots/2026-11-17` written (it had been skipped on the previous run because `ExecStartPost` only runs when `ExecStart` succeeds). 81 agents have rows, 18 roster agents have no real data yet.
+- Agents stage: `kb_ingest` ok, diagnostics, data_quality, repair, notice_analyst, anomaly, synthesis all `ok`; findings 80. `PRAGMA integrity_check` ok; 108,031 PIT rows.
+- Live site (release 1.0.5): roster collected **76 of 94** (was 58 of 81), map nodes with data **17 of 18** (was 9), ECMWF **14 of 15** days with forecasts to 2026-11-30, LNG-exports and border panels populated; `scripts/verify_tooltips.py` against the live domain: 37 of 37 checks.
+- Still open: one failing collector still blocks the snapshot step by design of the unit file (FC-10 in `FORWARD_CURVE_ASSESSMENT.md` is fixed in effect, not in structure). Remaining pending items are the blocked ones in the table above (NGL products, Conway, HH cash, daily LNG/pipeline meters, ECMWF Day 15).
