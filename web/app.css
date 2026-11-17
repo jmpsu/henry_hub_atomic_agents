@@ -96,6 +96,17 @@ tr.active td { color: var(--text); } tr.active td:first-child::before { content:
 .alert.watch .lv { color: var(--gold); }
 .kv { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 0 0 6px; border-bottom: 1px solid var(--hair); margin-bottom: 4px; }
 .kv span:nth-child(odd) { color: var(--dim); }
+.fund { border-bottom: 1px solid var(--hair); }
+.fund-note { padding: 8px 10px; font-size: 12px; }
+.fund-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.fund-card { border-right: 1px solid var(--hair); border-top: 1px solid var(--hair); padding: 8px 10px; display: grid; gap: 3px; align-content: start; }
+.fund-card.pend .fund-val { color: var(--dim); }
+.fund-hd { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.fund-hd b { letter-spacing: .08em; }
+.fund-val { font-size: 18px; }
+.fund-card .chip { margin-left: auto; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--hair); padding: 0 6px; }
+.fund-card .chip.mod { border-style: dashed; }
+.fund-card .warn { color: var(--warn, #d9a441); font-size: 11px; }
 .drivers { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .drv { border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); padding: 8px 10px; }
 .drv h3 { margin: 0 0 6px; font: inherit; font-weight: 400; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; font-size: 11px; }

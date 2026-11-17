@@ -25,7 +25,10 @@ import lng_forward
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_VERSION = "ngl-state/1"
 GAL_PER_BBL = 42.0
-ETHANE_MMBTU_PER_GAL = 0.0665
+import frac_module
+import fundamentals
+import lng_feedgas
+ETHANE_MMBTU_PER_GAL = frac_module.ETHANE_MMBTU_PER_GAL      # single source of truth (spec 0.0664, O4)
 PENDING = "pending_collector"
 
 PRODUCTS = {
@@ -74,6 +77,8 @@ GEO_FLOWS = [
     ("HHB", "SAB", "gas"), ("HHB", "CAM", "gas"), ("HHB", "CCP", "gas"), ("HHB", "PLQ", "gas"), ("MBV", "FPT", "gas_ngl"),
     ("APP", "ELB", "gas"),
 ]
+FUNDAMENTALS_PRICE_NOTE = ("No fundamentals-to-price model exists in this code (checklist O6). The Henry Hub forward curve is a delayed market quote and the LNG forward is derived "
+                           "from it as k x HH + L; none of the seven elements below enters either number. They are shown as the context that moves the market.")
 DRIVER_GROUPS = [
     ("production", "Shale gas production by basin", ["Agent_Prod_Appalachia", "Agent_Prod_Permian", "Agent_Prod_Haynesville",
                                                       "Agent_Prod_EagleFord", "Agent_Prod_Bakken", "Agent_Prod_DJBasin"]),
@@ -570,7 +575,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
             "frac_spread": ({"status": "measured", "dates": [a[0] for a in fr], "ethane_usd_mmbtu": [ethane_usd_mmbtu(a[1]) for a in fr],
                              "henry_hub_usd_mmbtu": [a[2] for a in fr], "frac_spread_usd_mmbtu": [frac_spread(a[1], a[2]) for a in fr],
                              "regime": "RECOVERY" if frac_spread(fr[-1][1], fr[-1][2]) > 0 else "REJECTION"} if len(fr) >= 30 else
-                            {"status": PENDING, "missing": [PRODUCTS["ethane"]["agent_id"]], "formula": "(cents/gal / 100) / 0.0665 - Henry Hub",
+                            {"status": PENDING, "missing": [PRODUCTS["ethane"]["agent_id"]], "formula": "(cents/gal / 100) / 0.0664 - Henry Hub",
                              "henry_hub_latest": hh[-1][1] if hh else None, "note": "Ethane has no collector, so recovery vs rejection cannot be computed."}),
             "forward_curve": {"status": "measured" if fwd else PENDING, "points": fwd, "regime": curve_regime(fwd) if fwd else "UNAVAILABLE", "shape": curve_shape(fwd) if fwd else {},
                               "stale": fwd_stale, "as_of_date": max(fwd_dates) if fwd else None, "age_days": fwd_age,
@@ -600,6 +605,11 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                                          "date": st_ok[0]["latest_target_timestamp"][:10] if st_ok else None, "unit": "Bcf", "provenance": "extracted_estimate"},
                    "shale_production_total_bcfd": {"value": (lambda p: sum(x["value"] for x in p) if len(p) == 6 else None)(
                        [latest[a] for a in DRIVER_GROUPS[0][2] if a in latest]), "unit": "Bcf/d (six roster basins)", "provenance": "extracted_estimate"}}
+
+        # ---- G5: the seven fundamental elements (direct inputs vs separately calculated modules). Nothing here is fed into any price (O6) and the block says so.
+        frac_mod = frac_module.build(latest.get(frac_module.ETHANE_AGENT), latest.get(frac_module.HH_AGENT), latest.get(frac_module.WAHA_AGENT), cutoff)
+        feedgas_mod = lng_feedgas.load(cutoff)
+        fundamentals_block = fundamentals.build(latest, {g: ag for g, _, ag in DRIVER_GROUPS}, derived, feedgas_mod, frac_mod, cutoff, FUNDAMENTALS_PRICE_NOTE)
 
         # ---- source availability (every roster agent, then extras)
         roster = _roster()
@@ -693,7 +703,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         out = {"schema": SCHEMA_VERSION, "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "as_of": cutoff,
                "active_product": product, "default_product": active_product(), "product": {"id": product, **meta},
                "timeframe": {"id": timeframe, **tf}, "products": products, "timeframes": [{"id": k, **v} for k, v in TIMEFRAMES.items()],
-               "price": price, **state, "curves": curves, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
+               "price": price, **state, "curves": curves, "fundamentals": fundamentals_block, "modules": {"lng_feedgas": feedgas_mod, "frac": frac_mod}, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
                "knowledge": knowledge or {"status": "unavailable"}, "explain": explain(),
                "platform": {"roster_agents": len(roster), "roster_agents_collected": len(collected), "agents_with_data": len(latest), **stats,
                             "provenance_legend": {"measured": "published by the source and stored unchanged", "extracted_estimate": "derived here from measured rows",

@@ -80,14 +80,15 @@ def test_node_detail_search_summary_are_version_aware(db):
 
 def test_current_table_holds_latest_and_archive_holds_superseded(db):
     c = sqlite3.connect(db)
-    assert c.execute("SELECT COUNT(*) FROM kb_nodes").fetchone()[0] == 1
+    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain<>'fundamentals'").fetchone()[0] == 1          # the 7 G5 element-definition nodes are a separate class
+    assert c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain='fundamentals'").fetchone()[0] == 7
     assert c.execute("SELECT available_timestamp FROM kb_node_versions").fetchall() == [(V1,)]
 
 
 def test_reingest_without_change_does_not_duplicate_versions(db):
     kb.ingest(db, embedder=EMB, now="2026-01-20T00:00:00Z")
     c = sqlite3.connect(db)
-    assert c.execute("SELECT COUNT(*) FROM kb_node_versions").fetchone()[0] == 1 and c.execute("SELECT COUNT(*) FROM kb_nodes").fetchone()[0] == 1
+    assert c.execute("SELECT COUNT(*) FROM kb_node_versions").fetchone()[0] == 1 and c.execute("SELECT COUNT(*) FROM kb_nodes WHERE domain<>'fundamentals'").fetchone()[0] == 1
 
 
 def test_read_only_db_without_archive_still_reads(tmp_path):

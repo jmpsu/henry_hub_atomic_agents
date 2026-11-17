@@ -60,6 +60,7 @@ def main() -> int:
     ap.add_argument("--shots", default="")
     ap.add_argument("--port", type=int, default=9333)
     ap.add_argument("--lng-shot", default="", help="write a screenshot of the LNG forward panel to this path")
+    ap.add_argument("--fund-shot", default="", help="write a screenshot of the fundamental-elements panel to this path")
     a = ap.parse_args()
     shots = Path(a.shots) if a.shots else None
     if shots:
@@ -154,15 +155,21 @@ def main() -> int:
         check("LNG forward panel is populated (curve markers present)", bool(c.js("(() => { const b = document.getElementById('lng-chart'); return !!b && b.querySelectorAll('.mk-hit').length >= 1; })()")))
         hover("LNG forward point M1", "document.querySelector('#lng-chart .mk-hit')", ["FOB cost", "Calculation", "Henry Hub futures", "Data lineage"], "tip_lng_point")
         check("LNG panel states where k and L come from", bool(c.js("(() => { const t = document.getElementById('lng-chart').parentElement.innerText; return /k \\(HH multiplier\\)/.test(t) && /L \\(liquefaction fee\\)/.test(t) && /assumption|knowledge library/.test(t); })()")))
+        def shot(section_js, path):
+            time.sleep(0.5)
+            rect = c.js("(() => { const e = " + section_js + "; e.scrollIntoView({block: 'start'}); const b = e.getBoundingClientRect(); return [b.left + scrollX, b.top + scrollY, b.width, b.height]; })()")
+            time.sleep(0.5)
+            png = c.send("Page.captureScreenshot", format="png", clip={"x": rect[0] - 4, "y": rect[1] - 4, "width": rect[2] + 8, "height": rect[3] + 8, "scale": 2}, captureBeyondViewport=True)["data"]
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
+            Path(path).write_bytes(base64.b64decode(png))
         if a.lng_shot:
-            r = center("document.getElementById('lng-chart').closest('section')")
-            if r:
-                time.sleep(0.5)
-                rect = c.js("(() => { const e = document.getElementById('lng-chart').closest('section'); e.scrollIntoView({block: 'center'}); const b = e.getBoundingClientRect(); return [b.left + scrollX, b.top + scrollY, b.width, b.height]; })()")
-                time.sleep(0.5)
-                png = c.send("Page.captureScreenshot", format="png", clip={"x": rect[0] - 4, "y": rect[1] - 4, "width": rect[2] + 8, "height": rect[3] + 8, "scale": 2}, captureBeyondViewport=True)["data"]
-                Path(a.lng_shot).parent.mkdir(parents=True, exist_ok=True)
-                Path(a.lng_shot).write_bytes(base64.b64decode(png))
+            shot("document.getElementById('lng-chart').closest('section')", a.lng_shot)
+        check("seven fundamental elements are shown, five direct and two separate modules", bool(c.js("(() => { const cs = [...document.querySelectorAll('#fundamentals .fund-card')]; return cs.length === 7 && cs.filter((x) => x.querySelector('.chip.dir')).length === 5 && cs.filter((x) => x.querySelector('.chip.mod')).length === 2; })()")))
+        hover("fundamental M4 (LNG feedgas module)", "[...document.querySelectorAll('#fundamentals .fund-card')][3]", ["Classification", "calculated separately", "Blocked inputs", "F2", "Moves a forward price here?"], "tip_fund_m4")
+        hover("fundamental M5 (frac module)", "[...document.querySelectorAll('#fundamentals .fund-card')][4]", ["Classification", "Agent_NGL_MontBelvieu_Ethane", "Agent_Gas_Waha_Spot"], "tip_fund_m5")
+        hover("fundamental M2 (weather, strict scope)", "[...document.querySelectorAll('#fundamentals .fund-card')][1]", ["Excluded from the LNG liquefaction"], "tip_fund_m2")
+        if a.fund_shot:
+            shot("document.getElementById('fundamentals')", a.fund_shot)
         hover("source table row", "document.querySelector('#sources tbody tr')", ["Agent", "Available (PIT)"], None)
         hover("source table header", "document.querySelectorAll('#sources thead th')[5]", ["earliest moment", "look-ahead"], None)
         hover("knowledge node", "document.querySelector('#kg .kg-node')", ["Where it came from", "Available (PIT)"], "tip_kg_node")

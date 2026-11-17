@@ -230,6 +230,17 @@ def build_objects(conn, weeks: int = 12, months: int = 12) -> list:
                             "A rejected model is not evidence of a tradable edge.", [c.get("agent", "")], created, "experiments", "", provenance="backtest_result"))
     except sqlite3.OperationalError:
         pass
+    # ---- G5: the seven fundamental elements and how each is classified (graph nodes; the text is the definition, no market value)
+    try:
+        import fundamentals
+        for e in fundamentals.ELEMENTS:
+            kind = "calculated separately in its own isolated module" if e["mode"] == fundamentals.SEPARATE else "a direct ingested input"
+            doc = (f"{e['id']} {e['label']} is {kind}. Method: {e['method']}. Source: {e['source']}. Role: {e['role']}. "
+                   + (f"Scope rule: {e['scope_rule']}. " if e["scope_rule"] else "") + f"Graph link: {e['graph_link']}. It does not set the Henry Hub forward curve or the LNG forward price.")
+            out.append(_obj("fundamentals", f"element_{e['id']}", "definition", f"{e['id']} {e['label']} ({'module' if e['mode'] == fundamentals.SEPARATE else 'direct input'})", doc, [],
+                            fundamentals.DEFINED, "fundamentals_classification", "", provenance="source_document"))
+    except Exception:  # noqa: BLE001
+        pass
     return out
 
 

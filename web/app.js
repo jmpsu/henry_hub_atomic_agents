@@ -387,6 +387,31 @@
     below(box, foot);
   }
 
+  /* ---------- the seven fundamental elements: direct inputs vs separately calculated modules ---------- */
+  function renderFundamentals(s) {
+    const box = clear($("fundamentals")), f = s.fundamentals;
+    if (!f) return;
+    box.append(el("div", { class: "fund-note dim", text: f.price_note }));
+    const grid = el("div", { class: "fund-grid" });
+    for (const e of f.elements) {
+      const h = e.headline, sep = e.mode === "calculated_separately";
+      const val = h && h.value != null ? `${fv(h.value, Math.abs(h.value) >= 100 ? 0 : 2)} ${h.unit || ""}` : "pending";
+      const sub = h ? `${h.label}${h.date ? " · " + h.date : ""}${h.p10 != null ? ` · p10 ${fv(h.p10, 1)} / p90 ${fv(h.p90, 1)}` : ""}` : e.blocked.length ? `${e.blocked.length} blocked input${e.blocked.length > 1 ? "s" : ""}` : "no data yet";
+      const card = el("div", { class: "fund-card" + (h ? "" : " pend") }, [
+        el("div", { class: "fund-hd" }, [el("b", { text: e.id }), el("span", { text: e.label }), el("span", { class: "chip " + (sep ? "mod" : "dir"), text: sep ? "separate module" : "direct input" })]),
+        el("div", { class: "fund-val", text: val }), el("div", { class: "dim", text: sub }), el("div", { class: "dim", text: e.role })]);
+      if (e.blocked.length) card.append(el("div", { class: "warn", text: `blocked: ${e.blocked.map((b) => b.id || b.input).join(", ")}` }));
+      grid.append(card);
+      const prov = h && h.provenance;
+      const badge = !h ? badgeOf("pending_collector") : String(prov).startsWith("bootstrapped") ? { text: "bootstrapped proxy", cls: "estimate" } : badgeOf(prov === "extracted_estimate" ? "extracted_estimate" : "measured");
+      T("fundamental_element", card, () => ({ title: `${e.id} · ${e.label}`, value: `${val}${h && h.p10 != null ? ` (p10 ${fv(h.p10, 2)} · p90 ${fv(h.p90, 2)})` : ""}`, badge, what: e.role, formula: null, params: {}, read: null,
+        sections: [{ h: "Classification", rows: [["Class", sep ? "calculated separately (orthogonal module)" : "direct ingested input"], ["Method", e.method], ["Source", e.source], ["Scope rule", e.scope_rule],
+          ["Graph link", e.graph_link], ["Moves a forward price here?", "no: " + (e.price_path.reason || "").slice(0, 160), "dim"]] },
+          { h: "Inputs", rows: [["Agents collected", `${e.agents_collected} of ${e.agents_total}`], ["Newest input available (PIT)", e.age_days == null ? null : `${e.age_days} days ago`], ["Observation", h && h.date]] },
+          { h: "Blocked inputs (exact blocker · activating step)", rows: e.blocked.map((b) => [b.id ? `${b.id} ${b.input}` : b.input, `${b.reason} → ${b.activate}`, "warn"]) }] }), "fund_" + e.id);
+    }
+    box.append(grid);
+  }
   /* ---------- drivers and sources ---------- */
   function renderDrivers(s) {
     const box = clear($("drivers"));
@@ -590,7 +615,7 @@
     state = s;
     const keep = NGLTip.reset();
     $("asof").textContent = `as of ${s.as_of.replace("T", " ")} · ${s.schema}`;
-    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderDrivers(s); renderSources(s);
+    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderFundamentals(s); renderDrivers(s); renderSources(s);
     initMap(s); drawMap(s);
     if (graph) drawGraph();
     NGLTip.restore(keep);

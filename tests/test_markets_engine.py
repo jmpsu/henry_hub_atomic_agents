@@ -16,8 +16,8 @@ class Maths(unittest.TestCase):
         self.assertAlmostEqual(me.wti_ratio(100.0, 84.0), 50.0)           # $1.00/gal * 42 = $42/bbl = 50% of $84
         self.assertIsNone(me.wti_ratio(100.0, 0.0))
     def test_frac_spread(self):
-        self.assertAlmostEqual(me.ethane_usd_mmbtu(19.95), 3.0)           # 0.1995 $/gal / 0.0665
-        self.assertAlmostEqual(me.frac_spread(19.95, 2.5), 0.5)           # recovery
+        self.assertAlmostEqual(me.ethane_usd_mmbtu(19.92), 3.0)           # 0.1992 $/gal / 0.0664
+        self.assertAlmostEqual(me.frac_spread(19.92, 2.5), 0.5)           # recovery
         self.assertLess(me.frac_spread(13.3, 3.0), 0)                     # 2.0 - 3.0 -> rejection
     def test_bollinger(self):
         flat = me.bollinger([10.0] * 40)

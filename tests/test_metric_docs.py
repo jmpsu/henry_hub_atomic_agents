@@ -33,7 +33,7 @@ def test_parameters_in_docs_equal_the_code_defaults():
     assert d["squeeze"]["params"]["percentile"] == inspect.signature(me.bollinger).parameters["squeeze_pct"].default
     assert d["triangle"]["params"]["lookback"] == inspect.signature(me.triangle_detection).parameters["lookback"].default
     assert d["pct_of_wti"]["params"]["gallons_per_barrel"] == me.GAL_PER_BBL and "42" in d["pct_of_wti"]["formula"]
-    assert d["frac_spread"]["params"]["mmbtu_per_gallon_ethane"] == me.ETHANE_MMBTU_PER_GAL and "0.0665" in d["frac_spread"]["formula"]
+    assert d["frac_spread"]["params"]["mmbtu_per_gallon_ethane"] == me.ETHANE_MMBTU_PER_GAL and "0.0664" in d["frac_spread"]["formula"]
     assert all(f"{r * 100:.1f}%" in d["fib_level"]["what"] for r in me.FIB_RATIOS)
     assert str(inspect.signature(me.curve_regime).parameters["flat_band"].default) in d["regime"]["what"]
 

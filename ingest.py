@@ -60,8 +60,9 @@ def record_observation(conn, *, agent_id, target_timestamp, available_timestamp,
                        revision_timestamp=None, geographic_scope="", series_id="", raw_payload_hash="",
                        extraction_version="", quality_status="unvalidated", provenance="measured") -> bool:
     """Insert one vintage. Returns False if this exact vintage already exists (idempotent re-runs).
-    provenance is one of: measured, extracted_estimate, synthetic_scenario, model_hypothesis."""
-    if provenance not in ("measured", "extracted_estimate", "synthetic_scenario", "model_hypothesis"):
+    provenance is one of: measured, extracted_estimate, synthetic_scenario, model_hypothesis, bootstrapped_physical_proxy
+    (the last is the tag the LNG feedgas model must carry, checklist A4; like every non-'measured' class it is excluded from the measured-only readers)."""
+    if provenance not in ("measured", "extracted_estimate", "synthetic_scenario", "model_hypothesis", "bootstrapped_physical_proxy"):
         raise ValueError("bad provenance")
     if not isinstance(value, (int, float)) or isinstance(value, bool) or value != value:
         raise ValueError("value must be a finite number")

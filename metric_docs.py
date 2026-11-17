@@ -94,6 +94,10 @@ def build(me) -> dict:
                            f"(ethane cents/gal / 100) / {me.ETHANE_MMBTU_PER_GAL} - Henry Hub USD/MMBtu", {"mmbtu_per_gallon_ethane": me.ETHANE_MMBTU_PER_GAL},
                            read="Positive favours recovering ethane from the gas stream; negative favours leaving it in (rejection).",
                            caveat="Withheld until a real Mont Belvieu ethane series exists; it is never estimated."),
+        "fundamental_element": doc("Fundamental element", "One of the seven physical drivers of the natural-gas balance, classified as a direct ingested input (used as published, only aligned to the point-in-time cutoff) or a "
+                                   "separately calculated module (computed in its own isolated step before the pricing engine).",
+                                   read="The headline is the newest value available at the cutoff; blocked inputs list the exact missing feed and the step that would activate it.",
+                                   caveat="None of these elements enters the Henry Hub forward curve or the LNG forward price shown on this page (checklist O6: no fundamentals-to-price model exists); they are context."),
         "hub_spread": doc("Mont Belvieu minus Conway", "Price difference for propane between the Gulf Coast hub and the Midcontinent hub.", "Mont Belvieu cents/gal - Conway cents/gal",
                           caveat="Withheld until a real Conway series exists."),
         # ---- forward curve
