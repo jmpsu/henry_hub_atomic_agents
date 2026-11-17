@@ -104,7 +104,7 @@
   document.addEventListener("focusout", (e) => { if (target(e) && !pinned) hide(); });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") { unpin(); return; }
-    if ((e.key === "Enter" || e.key === " ") && target(e) && !/^(A|BUTTON|INPUT)$/.test(e.target.tagName)) { e.preventDefault(); pin(target(e), null); }
+    if ((e.key === "Enter" || e.key === " ") && target(e) && !nopin.has(target(e)) && !/^(A|BUTTON|INPUT)$/.test(e.target.tagName)) { e.preventDefault(); pin(target(e), null); }
   });
   function pin(el, evt) {
     const s = specOf(el); if (!s) return;
@@ -147,5 +147,5 @@
     if (r.el.scrollIntoView && !pinnedId) r.el.scrollIntoView({ block: "center" });
     pinned = null; pin(r.el, null); return true;
   }
-  window.NGLTip = { bind, hover, reset, restore, specOf, hide: () => hide(true), ids: () => [...reg.keys()], size: () => reg.size, count: () => count, _fill: fill };
+  window.NGLTip = { noPin: (el) => nopin.add(el), bind, hover, reset, restore, specOf, hide: () => hide(true), ids: () => [...reg.keys()], size: () => reg.size, count: () => count, _fill: fill };
 })();

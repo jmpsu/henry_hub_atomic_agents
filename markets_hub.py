@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sqlite3
 import time
 from collections import OrderedDict, deque
@@ -22,6 +23,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 import chat_service
+import derivation
 import kb_ingest
 import literature_kb
 import markets_engine as me
@@ -136,6 +138,50 @@ def agents_activity(limit: int = Query(20, ge=1, le=100)):
 @app.get("/knowledge")
 def knowledge_page():
     return FileResponse(WEB_DIR / "knowledge.html", headers={"Cache-Control": "no-cache"})
+
+
+_METRIC_RE = re.compile(r"^[A-Za-z0-9_.:\-]{1,120}$")
+
+
+@app.get("/api/derivation")
+def derivation_api(metric: str = Query(..., max_length=120), product: str | None = Query(None, max_length=32), timeframe: str = Query("seasonal", max_length=16),
+                   as_of: str | None = Query(None, max_length=40), node: str | None = Query(None, max_length=200), rows_offset: int = Query(0, ge=-1), rows_limit: int = Query(60, ge=1, le=500)):
+    """One level of the derivation tree for a displayed number (docs/DRILLDOWN_SPEC.md). `metric` is a metric id (e.g. rsi14, pct_of_wti, fwd:M3, drv:<agent>);
+    `node` selects any node of that metric's tree (an operand, a leaf, a document); `rows_offset=-1` returns the newest page of a long window. Read-only, point-in-time."""
+    if not _METRIC_RE.match(metric) or (node is not None and not re.match(r"^[A-Za-z0-9_.:\-]{1,200}$", node)):
+        raise HTTPException(status_code=422, detail="bad metric or node id")
+    _cutoff(as_of)
+    t = derivation.Trace(DB_PATH, product, timeframe, as_of)
+    try:
+        try:
+            root = t.metric(metric)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="unknown metric")
+        view = t.view(node or root, rows_offset, rows_limit)
+        if "error" in view:
+            raise HTTPException(status_code=404, detail=view["error"])
+        return {"metric": metric, "root": root, "product": t.product, "timeframe": t.timeframe, "cutoff": t.cutoff, "node": view}
+    finally:
+        t.close()
+
+
+@app.get("/api/raw/{sha}")
+def raw_payload(sha: str):
+    """The archived raw bytes behind a stored row, read-only. Only payloads registered in raw_payloads are served, and only from the archive directory next to the database."""
+    if not re.fullmatch(r"[0-9a-f]{64}", sha):
+        raise HTTPException(status_code=404)
+    conn = _ro()
+    try:
+        r = conn.execute("SELECT archive_path, byte_length FROM raw_payloads WHERE raw_payload_hash=?", (sha,)).fetchone()
+    finally:
+        conn.close()
+    if not r:
+        raise HTTPException(status_code=404)
+    base = Path(DB_PATH).parent.resolve()
+    target = (base / r[0]).resolve()
+    if base / "raw" not in target.parents or not target.is_file() or target.stat().st_size > 5_000_000:
+        raise HTTPException(status_code=404)
+    return FileResponse(target, media_type="text/plain; charset=utf-8", headers={"Content-Disposition": "inline", "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=86400"})
 
 
 class ChatReq(BaseModel):

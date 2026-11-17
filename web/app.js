@@ -45,6 +45,9 @@
       sections: x.sections, notes: [].concat(x.notes || [], d.caveat || []), read: x.read === undefined ? d.read : x.read };
   }
   /* T(id, node, extra, registryId): documented metric `id` shown when `node` is hovered, focused or tapped; extra (object or function) adds live values and lineage */
+  const KVDRILL = { "Frac spread": "frac_spread", "Mont Belvieu − Conway": "hub_spread", "Forward curve": "regime", "Shale gas, six basins": "shale_total", "Working gas in storage": "storage_total",
+    "HDD vs 30-yr normal": "hdd_anomaly", "Live flow meters": "flow_count", "Critical notices, 7 days": "notices_7d", "Force majeure, 30 days": "fm_30d" };
+  const D = (node, metric, o) => (window.NGLDrill ? window.NGLDrill.bind(node, metric, o) : node);          // click opens the derivation of this number (drill.js)
   const T = (id, node, x, tid, opts) => NGLTip.bind(node, () => spec(id, typeof x === "function" ? x() : x), tid || id, opts);
 
   function pending(node, title, lines) {
@@ -94,7 +97,10 @@
     (c.hlines || []).forEach((l) => {
       if (l.y < dom[0] || l.y > dom[1]) return;
       svg.append("line").attr("class", "hl " + (l.cls || "")).attr("x1", m.l).attr("x2", w - m.r).attr("y1", ys(l.y)).attr("y2", ys(l.y));
-      if (l.label) svg.append("text").attr("class", "hl-label " + (l.cls || "")).attr("x", m.l + 3).attr("y", ys(l.y) - 3).text(l.label);
+      if (l.label) {
+        const tl = svg.append("text").attr("class", "hl-label " + (l.cls || "")).attr("x", m.l + 3).attr("y", ys(l.y) - 3).text(l.label);
+        if (l.drill) D(tl.node(), l.drill);
+      }
     });
     (c.lines || []).forEach((l) => {
       const line = d3.line().defined((d) => def(d)).x((d, i) => xs(i)).y((d) => ys(d));
@@ -105,6 +111,7 @@
       svg.append("circle").attr("class", "mk " + (k.cls || "")).attr("cx", xs(k.i)).attr("cy", ys(k.y)).attr("r", k.r || 3.5).style("pointer-events", "none");
       const hit = svg.append("circle").attr("class", "mk-hit").attr("cx", xs(k.i)).attr("cy", ys(k.y)).attr("r", 10).style("fill", "transparent");
       if (k.tipId) T(k.tipId, hit.node(), k.tip, k.tid);
+      if (k.drill) D(hit.node(), k.drill);
     });
     if (c.pick) {
       const vl = svg.append("line").attr("class", "xhair").attr("y1", m.t).attr("y2", h - m.b).style("display", "none");
@@ -141,10 +148,10 @@
     }
     T("provenance", tags.appendChild(tag("measured", "on")), { value: "measured" }, "tag_measured");
     const sm = t.summary;
-    if (sm.bollinger_squeeze) T("squeeze", tags.appendChild(tag("Bollinger squeeze", "gold")), { value: "active", sections: [{ h: "Now", rows: [["Bandwidth", num(sm.bandwidth_pct, 1) + "%"], ["Squeeze threshold", num(t.bollinger.squeeze_threshold_pct, 1) + "%"]] }] }, "tag_squeeze");
-    if (sm.triangle !== "none") T("triangle", tags.appendChild(tag(sm.triangle.replace(/_/g, " "), "gold")), { value: sm.triangle.replace(/_/g, " ") }, "tag_triangle");
-    if (sm.divergence_rsi !== "none") T("divergence_rsi", tags.appendChild(tag(sm.divergence_rsi + " RSI divergence", "gold")), { value: sm.divergence_rsi }, "tag_div_rsi");
-    if (sm.divergence_macd !== "none") T("divergence_macd", tags.appendChild(tag(sm.divergence_macd + " MACD divergence", "gold")), { value: sm.divergence_macd }, "tag_div_macd");
+    if (sm.bollinger_squeeze) T("squeeze", D(tags.appendChild(tag("Bollinger squeeze", "gold")), "squeeze"), { value: "active", sections: [{ h: "Now", rows: [["Bandwidth", num(sm.bandwidth_pct, 1) + "%"], ["Squeeze threshold", num(t.bollinger.squeeze_threshold_pct, 1) + "%"]] }] }, "tag_squeeze");
+    if (sm.triangle !== "none") T("triangle", D(tags.appendChild(tag(sm.triangle.replace(/_/g, " "), "gold")), "tri_pattern"), { value: sm.triangle.replace(/_/g, " ") }, "tag_triangle");
+    if (sm.divergence_rsi !== "none") T("divergence_rsi", D(tags.appendChild(tag(sm.divergence_rsi + " RSI divergence", "gold")), "divergence:rsi"), { value: sm.divergence_rsi }, "tag_div_rsi");
+    if (sm.divergence_macd !== "none") T("divergence_macd", D(tags.appendChild(tag(sm.divergence_macd + " MACD divergence", "gold")), "divergence:macd"), { value: sm.divergence_macd }, "tag_div_macd");
     const x = s.series.dates, n = x.length, fmt = dateFmt(n), pv = (v) => `${fv(v, d)} ${u}`;
     $("price-cap").textContent = `${p.label} (${u}) — ${s.timeframe.note}`;
     const lines = [
@@ -160,7 +167,7 @@
     }
     const fib = t.fibonacci, hl = [];
     if (fib.status === "ok") for (const k of ["23.6%", "38.2%", "50.0%", "61.8%", "78.6%"]) {
-      hl.push({ y: fib.levels[k], label: `${k}  ${num(fib.levels[k], d)}`, cls: ["38.2%", "50.0%", "61.8%"].includes(k) ? "gold" : "", fit: false });
+      hl.push({ drill: "fib:" + (parseFloat(k) / 100).toString(), y: fib.levels[k], label: `${k}  ${num(fib.levels[k], d)}`, cls: ["38.2%", "50.0%", "61.8%"].includes(k) ? "gold" : "", fit: false });
     }
     const sq = t.bollinger.squeeze;
     const px = (i) => ({ title: x[i], value: pv(s.series.values[i]), badge: badgeOf(s.price.provenance), what: "Close for this session, with the indicators as they stood on it.", formula: null, params: {}, read: null,
@@ -171,7 +178,7 @@
       x, xFmt: fmt, lines, hlines: hl, pick: (i) => spec("price", px(i)),
       areas: [{ y0: t.bollinger.lower, y1: t.bollinger.upper }, { y0: t.bollinger.lower.map((v, i) => (sq[i] ? v : null)), y1: t.bollinger.upper.map((v, i) => (sq[i] ? v : null)), cls: "sq" }],
       markers: t.crossovers.map((c, k) => ({ i: x.indexOf(c.date), y: c.price, cls: "gold", tipId: "crossover", tid: "cross_" + k, tip: { title: c.type.replace("_", " "), value: `${c.date} · ${pv(c.price)}` } }))
-        .concat([{ i: n - 1, y: s.series.values[n - 1], r: 3, tipId: "price", tid: "last_point", tip: px(n - 1) }]),
+        .concat([{ i: n - 1, y: s.series.values[n - 1], r: 3, tipId: "price", tid: "last_point", tip: px(n - 1), drill: "price" }]),
     });
     legend($("price-chart"), [["", "price"], ["dash", "50-day"], ["dot", "200-day"], ["dim", "Bollinger 20, 2σ"], ["gold dash", "triangle / Fibonacci"]]);
     chart($("rsi-chart"), { x, xFmt: () => "", lines: [{ y: t.rsi14 }], yDomain: [0, 100], yTicks: 3, hlines: [{ y: 70, label: "70" }, { y: 30, label: "30" }],
@@ -190,7 +197,9 @@
     });
     legend($("seasonal-chart"), [["gold", String(se.current_year)], ["dash", "average"], ["dim", "prior years"]]);
     const lv = clear($("levels"));
-    const cell = (k, v, gold, id, x2, tid) => { const c = el("div", { class: gold ? "gold" : "" }, [el("span", { text: k }), v]); lv.append(c); if (id) T(id, c, x2, tid); return c; };
+    const DRILL = { "Last": "price", "50-day avg": "sma50", "200-day avg": "sma200", "Trend": "trend", "50/200 regime": "ma_regime", "RSI (14)": "rsi14", "MACD hist": "macd_hist", "Bandwidth": "bandwidth",
+      "Triangle": "tri_pattern", "Breakout above": "tri_upper", "Breakdown below": "tri_lower", "RSI divergence": "divergence:rsi", "MACD divergence": "divergence:macd", "Swing high": "fib_high", "Swing low": "fib_low" };
+    const cell = (k, v, gold, id, x2, tid) => { const c = el("div", { class: gold ? "gold" : "" }, [el("span", { text: k }), v]); lv.append(c); if (id) T(id, c, x2, tid); if (DRILL[k]) D(c, DRILL[k]); return c; };
     cell("Last", `${num(sm.last, d)} ${u}`, false, "price", () => ({ value: pv(sm.last), badge: badgeOf(s.price.provenance), sections: [{ h: "Changes", rows: [["1-day", `${signed(s.price.change_1d, d)} (${signed(s.price.change_1d_pct, 2)}%)`], ["5-day", `${signed(s.price.change_5d, d)} (${signed(s.price.change_5d_pct, 2)}%)`], ["Price date", s.price.date], ["Window high / low", `${fv(s.price.window_high, d)} / ${fv(s.price.window_low, d)}`]] }, lineage(p.agent_id)] }), "lvl_price");
     cell("50-day avg", num(sm.sma50, d), false, "sma50", () => ({ value: pv(sm.sma50), sections: [{ h: "Compared with", rows: [["Last", pv(sm.last)], ["200-day average", pv(sm.sma200)]] }] }));
     cell("200-day avg", num(sm.sma200, d), false, "sma200", () => ({ value: pv(sm.sma200), sections: [{ h: "Compared with", rows: [["Last", pv(sm.last)], ["50-day average", pv(sm.sma50)]] }] }));
@@ -205,6 +214,12 @@
     if (tri.pattern !== "none") { cell("Breakout above", num(tri.breakout_above, d), true, "breakout", { value: pv(tri.breakout_above) }, "lvl_breakout"); cell("Breakdown below", num(tri.breakdown_below, d), true, "breakout", { value: pv(tri.breakdown_below) }, "lvl_breakdown"); }
     cell("RSI divergence", sm.divergence_rsi, sm.divergence_rsi !== "none", "divergence_rsi", { value: sm.divergence_rsi });
     cell("MACD divergence", sm.divergence_macd, sm.divergence_macd !== "none", "divergence_macd", { value: sm.divergence_macd });
+    {
+      const gi = (() => { const doy = Math.floor((new Date(x[n - 1]) - new Date(new Date(x[n - 1]).getFullYear(), 0, 0)) / 864e5); let b = 0; g.forEach((v, i) => { if (Math.abs(v - doy) < Math.abs(g[b] - doy)) b = i; }); return b; })();
+      for (const [lab, arr, m] of [["Seasonal avg (this week)", se.band_avg, "seasonal_avg"], ["Seasonal min", se.band_min, "seasonal_min"], ["Seasonal max", se.band_max, "seasonal_max"]]) {
+        const c = el("div", {}, [el("span", { text: lab }), arr[gi] == null ? "—" : num(arr[gi], d)]); lv.append(c); if (arr[gi] != null) D(c, `${m}:${g[gi]}`);
+      }
+    }
     if (fib.status === "ok") {
       cell("Swing high", `${num(fib.swing_high, d)} · ${fib.swing_high_date}`, false, "swing_high", { value: pv(fib.swing_high), sections: [{ h: "Date", rows: [["Swing high", fib.swing_high_date], ["Swing low", `${pv(fib.swing_low)} · ${fib.swing_low_date}`]] }] });
       cell("Swing low", `${num(fib.swing_low, d)} · ${fib.swing_low_date}`, false, "swing_low", { value: pv(fib.swing_low), sections: [{ h: "Date", rows: [["Swing low", fib.swing_low_date], ["Swing high", `${pv(fib.swing_high)} · ${fib.swing_high_date}`]] }] });
@@ -224,6 +239,7 @@
         el("td", { class: "num dim", text: p.pct_of_wti == null ? "—" : num(p.pct_of_wti, 1) + "%" }),
       ]);
       tb.append(tr);
+      if (!pend) { D(tr.children[1], "price", { product: p.id }); if (p.pct_of_wti != null) D(tr.children[2], "pct_of_wti", { product: p.id }); }
       T(pend ? "pending" : "price", tr, () => ({ title: p.label, value: pend ? "pending collector" : `${num(p.latest, dec(p.unit))} ${p.unit}`, badge: pend ? { text: "pending collector", cls: "is-pending" } : { text: "measured", cls: "measured" },
         what: pend ? X("pending").what : `Latest ${p.label} observation (${p.latest_date}). Select the product above to chart it.`,
         formula: !pend && p.pct_of_wti != null ? X("pct_of_wti").formula : null, params: {}, read: null,
@@ -231,15 +247,19 @@
     }
     const wtr = el("tr", {}, [el("td", { text: "WTI crude (Cushing)" }), el("td", { class: "num", text: w.value == null ? "pending" : `${num(w.value, 2)} $/bbl` }), el("td", { class: "num dim", text: "100%" })]);
     tb.append(wtr);
+    if (w.value != null) D(wtr.children[1], "drv:Agent_Crude_WTI_Spot");
     T("wti", wtr, () => ({ value: w.value == null ? "pending" : `${num(w.value, 2)} USD/bbl`, badge: badgeOf(w.value == null ? "pending_collector" : "measured"), sections: [{ h: "Date", rows: [["Price date", w.date]] }, lineage("Agent_Crude_WTI_Spot")] }));
     const th = (t, cls, id) => { const h = el("th", { class: cls, text: t }); if (id) T(id, h, null, "th_" + id); return h; };
     box.append(el("table", {}, [el("thead", {}, el("tr", {}, [el("th", { text: "Product" }), th("Price", "num", "price"), th("% WTI", "num", "pct_of_wti")])), tb]));
     const pr = s.price, c = s.curves, kv = el("div", { class: "kv", style: "padding:6px 10px 6px;margin:0;border:0" });
-    const add = (k, v, id, x, tid) => { const a = el("span", { text: k }), b = el("span", { text: v }); kv.append(a, b); if (id) { T(id, a, x, tid); T(id, b, x, tid); } };
+    const add = (k, v, id, x, tid) => { const a = el("span", { text: k }), b = el("span", { text: v }); kv.append(a, b); if (id) { T(id, a, x, tid); T(id, b, x, tid); } if (KVDRILL[k]) D(b, KVDRILL[k]); };
     const chg = (v, pc) => `${signed(v, dec(pr.unit))} (${signed(pc, 2)}%)`;
+    const addChg = (k, v, pc, mAbs, mPct, id, x) => {
+      const a = el("span", { text: k }), b = el("span", {}, [D(el("span", { text: signed(v, dec(pr.unit)) }), mAbs), " (", D(el("span", { text: signed(pc, 2) }), mPct), "%)"]); kv.append(a, b); T(id, a, x, id + "_k");
+    };
     if (pr.status === "measured") {
-      add("1-day change", chg(pr.change_1d, pr.change_1d_pct), "change_1d", { value: chg(pr.change_1d, pr.change_1d_pct), sections: [{ h: "Inputs", rows: [["Last price", `${num(pr.value, dec(pr.unit))} ${pr.unit}`], ["Price date", pr.date]] }] });
-      add("5-day change", chg(pr.change_5d, pr.change_5d_pct), "change_5d", { value: chg(pr.change_5d, pr.change_5d_pct), sections: [{ h: "Inputs", rows: [["Last price", `${num(pr.value, dec(pr.unit))} ${pr.unit}`], ["Price date", pr.date]] }] });
+      addChg("1-day change", pr.change_1d, pr.change_1d_pct, "change_1d", "change_1d_pct", "change_1d", { value: chg(pr.change_1d, pr.change_1d_pct), sections: [{ h: "Inputs", rows: [["Last price", `${num(pr.value, dec(pr.unit))} ${pr.unit}`], ["Price date", pr.date]] }] });
+      addChg("5-day change", pr.change_5d, pr.change_5d_pct, "change_5d", "change_5d_pct", "change_5d", { value: chg(pr.change_5d, pr.change_5d_pct), sections: [{ h: "Inputs", rows: [["Last price", `${num(pr.value, dec(pr.unit))} ${pr.unit}`], ["Price date", pr.date]] }] });
       add("Price date", pr.date, "price_date", { value: pr.date, sections: [{ h: "Timestamps", rows: [["Observation (target) date", pr.date], ["Retrieved", fts(pr.retrieved_timestamp)], ["Available (PIT)", fts(pr.available_timestamp)]] }, lineage(pr.agent_id)] });
     }
     const f = c.frac_spread, hs = c.hub_spread, fw = c.forward_curve, fl = (a) => (a && a.length ? a[a.length - 1] : null);
@@ -262,22 +282,25 @@
       bar.append(el("div", { class: "seg-line", style: `left:${r}%` }));
       const lab = el("div", { class: "lab" + ([38.2, 50, 61.8].includes(r) ? " gold" : ""), style: `left:${r}%`, text: key });
       bar.append(lab);
+      D(lab, "fib:" + (r / 100).toString());
       T("fib_level", lab, () => ({ title: `Fibonacci ${key}`, value: pu(f.levels[key]), sections: [{ h: "This grid", rows: [["Swing high", `${pu(f.swing_high)} · ${f.swing_high_date}`], ["Swing low", `${pu(f.swing_low)} · ${f.swing_low_date}`], ["Leg", f.leg + "-leg"],
         ["Last price", pu(f.last)], ["Nearest level", f.nearest_level + (key === f.nearest_level ? "  ← this one" : "")]] }] }), "fib_" + key);
     }
     const pos = Math.max(0, Math.min(100, f.retracement_pct ?? 0));
     const mk = el("div", { class: "px", style: `left:${pos}%`, "data-v": num(f.last, d) });
     bar.append(mk);
+    D(mk, "fib_retrace");
     T("fib_marker", mk, () => ({ value: `${num(f.retracement_pct, 1)}% retraced`, sections: [{ h: "Position", rows: [["Last price", pu(f.last)], ["Leg", f.leg + "-leg"], ["Nearest level", f.nearest_level]] }] }));
     const g1 = el("span", { class: "gold", text: `Golden ratio proximity: ${num(f.golden_ratio_distance_pct_of_range, 1)}% of range from 61.8%` });
     const g2 = el("span", { text: `${f.leg}-leg · retraced ${num(f.retracement_pct, 1)}% · nearest ${f.nearest_level}` });
+    D(g1, "fib_golden"); D(g2, "fib_retrace");
     box.append(bar, el("div", { class: "fib-foot" }, [g1, g2]));
     T("golden_ratio", g1, () => ({ value: `${num(f.golden_ratio_distance_pct_of_range, 1)}% of range`, sections: [{ h: "Inputs", rows: [["Level 61.8%", pu(f.levels["61.8%"])], ["Last price", pu(f.last)]] }] }));
     T("fib_marker", g2, () => ({ value: `${num(f.retracement_pct, 1)}% retraced` }), "fib_foot");
   }
   function renderAlerts(s) {
     const box = clear($("alerts")), dv = s.derived, kv = el("div", { class: "kv" });
-    const add = (k, v, id, x, tid) => { const a = el("span", { text: k }), b = el("span", { text: v }); kv.append(a, b); if (id) { T(id, a, x, tid); T(id, b, x, tid); } };
+    const add = (k, v, id, x, tid) => { const a = el("span", { text: k }), b = el("span", { text: v }); kv.append(a, b); if (id) { T(id, a, x, tid); T(id, b, x, tid); } if (KVDRILL[k]) D(b, KVDRILL[k]); };
     const group = (g) => { const gr = s.drivers.find((x) => x.group === g); return gr ? gr.items.map((i) => [short(i.agent_id), i.value == null ? "pending" : `${num(i.value, Math.abs(i.value) >= 100 ? 0 : 2)} ${i.unit || ""}`]) : []; };
     add("Shale gas, six basins", dv.shale_production_total_bcfd.value == null ? "pending" : num(dv.shale_production_total_bcfd.value, 1) + " Bcf/d", "shale_total", () => ({ value: dv.shale_production_total_bcfd.value == null ? "pending" : num(dv.shale_production_total_bcfd.value, 1) + " Bcf/d", badge: badgeOf(dv.shale_production_total_bcfd.provenance), sections: [{ h: "The six basins", rows: group("shale") }] }));
     add("Working gas in storage", dv.storage_total_bcf.value == null ? "pending" : `${num(dv.storage_total_bcf.value, 0)} Bcf · ${dv.storage_total_bcf.date}`, "storage_total", () => ({ value: dv.storage_total_bcf.value == null ? "pending" : `${num(dv.storage_total_bcf.value, 0)} Bcf`, badge: badgeOf(dv.storage_total_bcf.provenance), sections: [{ h: `Regions, week ending ${dv.storage_total_bcf.date || "—"}`, rows: group("storage") }, lineage("Agent_Storage_East")] }));
@@ -326,12 +349,12 @@
     const fw = c.forward_curve, ft = clear($("fwd-tags")), pts0 = (q) => q.points || [];
     if (fw.status !== "measured") { pending($("fwd-chart"), "PENDING COLLECTOR", ["No futures contracts collected."]); pendTip($("fwd-chart"), "pending", { title: "Henry Hub forward curve" }, "pend_fwd"); }
     else {
-      T("regime", ft.appendChild(tag(fw.regime, fw.stale ? "" : "on")), () => ({ value: fw.regime, notes: [fw.shape && fw.shape.basis], sections: [{ h: "Curve", rows: [["Quote date", fw.as_of_date], ["Front spread", fw.shape && fw.shape.front_spread_label ? `${fw.shape.front_spread_label} ${signed(fw.shape.front_spread, 3)}` : null], ["Reversals", fw.shape ? String(fw.shape.reversals) : null]] }] }), "tag_regime");
+      T("regime", D(ft.appendChild(tag(fw.regime, fw.stale ? "" : "on")), "regime"), () => ({ value: fw.regime, notes: [fw.shape && fw.shape.basis], sections: [{ h: "Curve", rows: [["Quote date", fw.as_of_date], ["Front spread", fw.shape && fw.shape.front_spread_label ? `${fw.shape.front_spread_label} ${signed(fw.shape.front_spread, 3)}` : null], ["Reversals", fw.shape ? String(fw.shape.reversals) : null]] }] }), "tag_regime");
       if (pts0(fw).some((q) => /unverified/.test(q.quality_status || ""))) T("quality", ft.appendChild(tag("delayed quotes · unverified", "gap")), { value: "delayed quote, unverified", notes: ["These are delayed, unofficial quotes, not CME settlements."] }, "tag_quality");
       if (fw.stale) T("forward_curve", ft.appendChild(tag("stale · " + fw.as_of_date, "gap")), { value: "stale", notes: [fw.note] }, "tag_stale");
       const pts = fw.points;
       chart($("fwd-chart"), { x: pts.map((q) => q.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v, lines: [{ y: pts.map((q) => q.value), cls: "bold" }],
-        markers: pts.map((q, i) => ({ i, y: q.value, tipId: "fwd_point", tid: "fwd_" + q.contract, tip: {
+        markers: pts.map((q, i) => ({ i, y: q.value, drill: "fwd:" + q.contract, tipId: "fwd_point", tid: "fwd_" + q.contract, tip: {
           title: `${q.contract}${q.delivery_month ? " · delivery " + q.delivery_month : ""}`, value: `${q.value.toFixed(3)} ${q.unit || ""}`, badge: { text: (q.quality_status || "").replace(/_/g, " ") || "quote", cls: /unverified/.test(q.quality_status || "") ? "is-pending" : "measured" },
           sections: [{ h: "Contract", rows: [["Symbol", q.series_id], ["Delivery month", q.delivery_month], ["Quote date", q.date]] },
             { h: "Data lineage", rows: [["Source", q.source_id], ["Published", q.published_timestamp ? fts(q.published_timestamp) : "not supplied by the source"], ["Retrieved", fts(q.retrieved_timestamp)], ["Available (PIT)", fts(q.available_timestamp)], ["Quality", (q.quality_status || "").replace(/_/g, " ")], ["Payload", q.raw_payload_hash ? q.raw_payload_hash.slice(0, 16) + "…" : null, "hash"]] }],
@@ -369,7 +392,7 @@
           ["Quality", (p.hh_quality_status || "").replace(/_/g, " ")], ["Payload", p.hh_raw_payload_hash ? p.hh_raw_payload_hash.slice(0, 16) + "…" : null, "hash"]] }]) });
     chart(box, { x: pts.map((p) => p.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v,
       lines: [{ y: pts.map((p) => p.hh_value), cls: "dash thin" }, { y: pts.map((p) => p.fob_cost), cls: "bold" }, { y: pts.map((p) => (p.netback ? p.netback.value : null)), cls: "gold" }],
-      markers: pts.map((p, i) => ({ i, y: p.fob_cost, tipId: "lng_fwd_point", tid: "lng_" + p.contract, tip: lngTip(p) })).concat(pts.map((p, i) => (p.netback ? { i, y: p.netback.value, cls: "gold", tipId: "lng_netback", tid: "lngnb_" + p.contract, tip: lngTip(p) } : null)).filter(Boolean)) });
+      markers: pts.map((p, i) => ({ i, y: p.fob_cost, drill: "lng_fob:" + p.contract, tipId: "lng_fwd_point", tid: "lng_" + p.contract, tip: lngTip(p) })).concat(pts.map((p, i) => (p.netback ? { i, y: p.netback.value, cls: "gold", drill: "lng_netback:" + p.contract, tipId: "lng_netback", tid: "lngnb_" + p.contract, tip: lngTip(p) } : null)).filter(Boolean)) });
     const lr = el("span", { text: `${pts.length} months · ${lg.formula.replace("FEEDGAS_FACTOR", a.feedgas_factor.value).replace("LIQUEFACTION_FEE", fv(a.liquefaction_fee.value, 2))}` });
     const foot = el("div", { class: "lng-foot" });      // one container: below() replaces the previous caption, so every caption row must live inside this one
     foot.append(el("div", { class: "legend-row" }, [el("span", {}, [el("i", { class: "dash" }), "Henry Hub"]), el("span", {}, [el("i", {}), "FOB cost"]), el("span", {}, [el("i", { class: "gold" }), "TTF netback"]), lr]));
@@ -409,9 +432,11 @@
       const h = e.headline, sep = e.mode === "calculated_separately";
       const val = h && h.value != null ? `${fv(h.value, Math.abs(h.value) >= 100 ? 0 : 2)} ${h.unit || ""}` : "pending";
       const sub = h ? `${h.label}${h.date ? " · " + h.date : ""}${h.p10 != null ? ` · p10 ${fv(h.p10, 1)} / p90 ${fv(h.p90, 1)}` : ""}` : e.blocked.length ? `${e.blocked.length} blocked input${e.blocked.length > 1 ? "s" : ""}` : "no data yet";
+      const fvEl = el("div", { class: "fund-val", text: val }), dm = ({ M1: "shale_total", M2: "hdd_anomaly", M3: "storage_total", M4: "feedgas:p50", M6: "lng_exports_total", M7: "border_net" })[e.id];
+      if (dm) D(fvEl, dm);
       const card = el("div", { class: "fund-card" + (h ? "" : " pend") }, [
         el("div", { class: "fund-hd" }, [el("b", { text: e.id }), el("span", { text: e.label }), el("span", { class: "chip " + (sep ? "mod" : "dir"), text: sep ? "separate module" : "direct input" })]),
-        el("div", { class: "fund-val", text: val }), el("div", { class: "dim", text: sub }), el("div", { class: "dim", text: e.role })]);
+        fvEl, el("div", { class: "dim", text: sub }), el("div", { class: "dim", text: e.role })]);
       if (e.blocked.length) card.append(el("div", { class: "warn", text: `blocked: ${e.blocked.map((b) => b.id || b.input).join(", ")}` }));
       grid.append(card);
       const prov = h && h.provenance;
@@ -446,6 +471,7 @@
           el("span", { class: "val", text: pend ? "pending" : `${num(i.value, Math.abs(i.value) >= 100 ? 0 : 2)}` }),
         ]);
         card.append(row);
+        D(row, "drv:" + i.agent_id);
         const src = s.sources.find((r) => r.agent_id === i.agent_id);
         T(pend ? "pending" : "provenance", row, () => ({ agent: i.agent_id, title: short(i.agent_id), value: pend ? "pending collector" : `${num(i.value, Math.abs(i.value) >= 100 ? 0 : 3)} ${i.unit || ""}`,
           badge: badgeOf(pend ? "pending_collector" : i.provenance), what: (src && src.series) || (pend ? X("pending").what : "A data series collected by the platform."), formula: null, params: {}, read: null,
@@ -518,6 +544,7 @@
       const ok = n.status === "measured", pos = LABEL_POS[n.id] || [1, 0];
       const lab = el("span", { class: "node-label" }, [n.label + " ", el("em", { text: `[${n.id}]` })].concat(ok ? [" ", el("b", { text: nodeVal(n, 2) })] : []));
       lab.style.left = pos[0] > 0 ? "16px" : "auto"; if (pos[0] < 0) lab.style.right = "16px"; lab.style.top = `${-7 + pos[1] * 13}px`;
+      D(lab, "geo:" + n.id);
       const dot = el("div", { class: `node-wrap ${ok ? "measured" : "pend"}` },
         [el("i", { class: `node ${n.kind === "basin" ? "basin" : n.kind === "lng" ? "lng" : ""} ${ok ? "measured" : "pend"}` }), lab]);
       T(ok ? "provenance" : "pending", dot, () => ({ title: `${n.label} [${n.id}]`, value: ok ? `${nodeVal(n, 3)} ${n.unit || ""}` : "no data", badge: badgeOf(ok ? "measured" : "pending_collector"),
@@ -720,6 +747,7 @@
       for (;;) { const { value, done } = await reader.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf("\n\n")) >= 0) { handle(buf.slice(0, i)); buf = buf.slice(i + 2); } }
     }
   }
+  if (window.NGLDrill) window.NGLDrill.setContext(() => ({ product: state && state.active_product, timeframe: state && state.timeframe && state.timeframe.id, as_of: state && state.as_of }));
   initChat();
   load(); loadGraph(); setInterval(load, 60000); setInterval(loadGraph, 300000);
 })();
