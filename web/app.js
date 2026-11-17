@@ -230,10 +230,10 @@
     const fw = c.forward_curve, ft = clear($("fwd-tags")), pts0 = (f) => f.points || [];
     if (fw.status !== "measured") pending($("fwd-chart"), "PENDING COLLECTOR", ["No futures contracts collected."]);
     else {
-      ft.append(tag(fw.regime, fw.stale ? "" : "on")); if (pts0(fw).some((p) => /unverified/.test(p.quality_status || ""))) ft.append(tag("delayed quotes · unverified", "gap")); if (fw.stale) ft.append(tag("stale · " + fw.as_of_date, "gap"));
+      const rg = tag(fw.regime, fw.stale ? "" : "on"); if (fw.shape && fw.shape.basis) rg.title = fw.shape.basis; ft.append(rg); if (pts0(fw).some((p) => /unverified/.test(p.quality_status || ""))) ft.append(tag("delayed quotes · unverified", "gap")); if (fw.stale) ft.append(tag("stale · " + fw.as_of_date, "gap"));
       const pts = fw.points;
       chart($("fwd-chart"), { x: pts.map((p) => p.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v, lines: [{ y: pts.map((p) => p.value), cls: "bold" }], markers: pts.map((p, i) => ({ i, y: p.value, title: [`${p.contract}${p.delivery_month ? " · delivery " + p.delivery_month : ""}: ${p.value} ${p.unit || ""}`, p.series_id ? `contract ${p.series_id}` : "", `quote date ${p.date}`, p.published_timestamp ? `published ${p.published_timestamp}` : "published: not supplied", `available ${p.available_timestamp}`, `source ${p.source_id || "?"} · ${(p.quality_status || "?").replace(/_/g, " ")}`, p.raw_payload_hash ? `payload ${p.raw_payload_hash.slice(0, 12)}` : ""].filter(Boolean).join("\n") })) });
-      below($("fwd-chart"), el("div", { class: "legend-row" }, [el("span", { text: fw.note || `${pts.length} contracts` })]));
+      below($("fwd-chart"), el("div", { class: "legend-row" }, [el("span", { text: fw.note || (fw.shape && fw.shape.peak ? `${pts.length} contracts · peak ${fw.shape.peak.contract} ${fw.shape.peak.delivery_month || ""} ${fw.shape.peak.value.toFixed(3)} · trough ${fw.shape.trough.contract} ${fw.shape.trough.delivery_month || ""} ${fw.shape.trough.value.toFixed(3)} · ${fw.shape.front_spread_label} ${fw.shape.front_spread >= 0 ? "+" : ""}${fw.shape.front_spread.toFixed(3)}` : `${pts.length} contracts`), title: fw.shape && fw.shape.basis ? fw.shape.basis : "" })]));
     }
   }
 

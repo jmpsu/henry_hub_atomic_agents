@@ -268,12 +268,42 @@ def rsi_macd_divergence(values) -> dict:
     return {"rsi": _divergence(values, rsi(values)), "macd": _divergence(values, macd(values)["line"])}
 
 
+def _turns(values: list, flat_band: float) -> int:
+    """Number of direction reversals between consecutive contracts, ignoring moves within flat_band."""
+    moves = [(1 if b - a > flat_band else -1 if b - a < -flat_band else 0) for a, b in zip(values, values[1:])]
+    nz = [m for m in moves if m]
+    return sum(1 for a, b in zip(nz, nz[1:]) if a != b)
+
+
 def curve_regime(points: list, flat_band: float = 0.05) -> str:
-    """Contango when the back of the curve is above the front by more than flat_band, backwardation when below."""
+    """SEASONAL when a curve of 6+ contracts reverses direction at least twice (M12 minus M1 is then not a like-for-like slope: it compares
+    different calendar months, e.g. December with November). Otherwise contango when the back is above the front by more than flat_band,
+    backwardation when below."""
     if len(points) < 2:
         return "UNAVAILABLE"
+    if len(points) >= 6 and _turns([p["value"] for p in points], flat_band) >= 2:
+        return "SEASONAL"
     slope = points[-1]["value"] - points[0]["value"]
     return "CONTANGO" if slope > flat_band else "BACKWARDATION" if slope < -flat_band else "FLAT"
+
+
+def curve_shape(points: list, flat_band: float = 0.05) -> dict:
+    """Deterministic structural facts behind the regime label, every number computed from the points (nothing generated)."""
+    if len(points) < 2:
+        return {}
+    vals = [p["value"] for p in points]
+    hi, lo = max(points, key=lambda p: p["value"]), min(points, key=lambda p: p["value"])
+    ref = lambda p: {"contract": p["contract"], "delivery_month": p.get("delivery_month"), "value": p["value"]}  # noqa: E731
+    out = {"front_spread": round(vals[1] - vals[0], 4), "front_spread_label": f'{points[1]["contract"]} minus {points[0]["contract"]}',
+           "last_minus_first": round(vals[-1] - vals[0], 4), "reversals": _turns(vals, flat_band), "peak": ref(hi), "trough": ref(lo)}
+    regime = curve_regime(points, flat_band)
+    if regime == "SEASONAL":
+        out["basis"] = (f'Seasonal: the curve reverses direction {out["reversals"]} times (peak {hi["contract"]} {hi.get("delivery_month") or ""} {hi["value"]:.3f}, '
+                        f'trough {lo["contract"]} {lo.get("delivery_month") or ""} {lo["value"]:.3f}), so {points[-1]["contract"]} minus {points[0]["contract"]} '
+                        f'({out["last_minus_first"]:+.3f}) compares different calendar months and is not read as contango or backwardation.')
+    else:
+        out["basis"] = f'{regime.title()}: {points[-1]["contract"]} minus {points[0]["contract"]} = {out["last_minus_first"]:+.3f} (band {flat_band}).'
+    return out
 
 
 def seasonal_overlay(dates, values, as_of_year: int, years_back: int = 5, step: int = 7) -> dict:
@@ -504,7 +534,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                              "regime": "RECOVERY" if frac_spread(fr[-1][1], fr[-1][2]) > 0 else "REJECTION"} if len(fr) >= 30 else
                             {"status": PENDING, "missing": [PRODUCTS["ethane"]["agent_id"]], "formula": "(cents/gal / 100) / 0.0665 - Henry Hub",
                              "henry_hub_latest": hh[-1][1] if hh else None, "note": "Ethane has no collector, so recovery vs rejection cannot be computed."}),
-            "forward_curve": {"status": "measured" if fwd else PENDING, "points": fwd, "regime": curve_regime(fwd) if fwd else "UNAVAILABLE",
+            "forward_curve": {"status": "measured" if fwd else PENDING, "points": fwd, "regime": curve_regime(fwd) if fwd else "UNAVAILABLE", "shape": curve_shape(fwd) if fwd else {},
                               "stale": fwd_stale, "as_of_date": max(fwd_dates) if fwd else None, "age_days": fwd_age,
                               "missing": [f"Agent_HH_M{m_}" for m_ in range(1, 13) if f"Agent_HH_M{m_}" not in {('Agent_HH_' + p['contract']) for p in fwd}],
                               "note": "EIA stopped publishing its NYMEX contract 1-4 series on 2024-04-05; M5-M12 have no collector." if fwd_stale else ""},

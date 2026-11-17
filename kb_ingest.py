@@ -49,6 +49,31 @@ def ensure(conn) -> None:
         provenance TEXT, doc_hash TEXT, created TEXT, embedding BLOB)""")
     conn.execute("CREATE TABLE IF NOT EXISTS kb_edges(src TEXT, dst TEXT, type TEXT, weight REAL, PRIMARY KEY(src, dst, type))")
     conn.execute("CREATE INDEX IF NOT EXISTS kb_nodes_epoch ON kb_nodes(available_epoch)")
+    # Superseded versions of a node (additive; kb_nodes keeps the current one). Same 16 columns so the two can be UNIONed.
+    conn.execute("""CREATE TABLE IF NOT EXISTS kb_node_versions(id TEXT, domain TEXT, series_key TEXT, period TEXT, title TEXT, document TEXT,
+        source_id TEXT, agent_ids TEXT, available_timestamp TEXT, available_epoch INTEGER, published_timestamp TEXT, raw_payload_hash TEXT,
+        provenance TEXT, doc_hash TEXT, created TEXT, embedding BLOB, PRIMARY KEY(id, available_epoch))""")
+    conn.execute("""CREATE VIEW IF NOT EXISTS kb_nodes_all AS
+        SELECT id,domain,series_key,period,title,document,source_id,agent_ids,available_timestamp,available_epoch,published_timestamp,raw_payload_hash,provenance,doc_hash,created,embedding FROM kb_nodes
+        UNION ALL
+        SELECT id,domain,series_key,period,title,document,source_id,agent_ids,available_timestamp,available_epoch,published_timestamp,raw_payload_hash,provenance,doc_hash,created,embedding FROM kb_node_versions""")
+
+
+def _archive(conn, nid: str, new_epoch: int) -> None:
+    """Before kb_nodes[nid] is replaced by a later-available revision, keep the outgoing version so as_of queries between the two
+    vintages still see what was known then. A rewrite at the same or an earlier availability is not a new vintage and is not archived."""
+    conn.execute("INSERT OR IGNORE INTO kb_node_versions SELECT * FROM kb_nodes WHERE id=? AND available_epoch<?", (nid, new_epoch))
+
+
+def _src(conn) -> str:
+    """kb_nodes_all when the archive exists, else plain kb_nodes (read-only DBs written before the archive existed)."""
+    return "kb_nodes_all" if conn.execute("SELECT 1 FROM sqlite_master WHERE name='kb_nodes_all'").fetchone() else "kb_nodes"
+
+
+def _asof(src: str, alias: str = "n") -> str:
+    """Predicate: the version of each node that was the latest available at :t (never one made available after :t)."""
+    return (f"{alias}.available_epoch<=:t AND {alias}.available_epoch=(SELECT MAX(w.available_epoch) FROM {src} w "
+            f"WHERE w.id={alias}.id AND w.available_epoch<=:t)")
 
 
 def epoch(ts: str) -> int:
@@ -232,6 +257,7 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
             if known.get(o["id"]) == dh:
                 continue
             vec = np.asarray(embedder(o["title"] + ". " + o["document"]), dtype=np.float32)
+            _archive(conn, o["id"], o["available_epoch"])
             conn.execute("INSERT OR REPLACE INTO kb_nodes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (o["id"], o["domain"], o["series_key"], o["period"], o["title"], o["document"], o["source_id"], o["agent_ids"], o["available_timestamp"],
                           o["available_epoch"], o["published_timestamp"], o["raw_payload_hash"], o["provenance"], dh, now, vec.tobytes()))
@@ -254,6 +280,7 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
                     continue
                 dh = hashlib.sha256((doc or "").encode()).hexdigest()
                 if known.get(nid) != dh:
+                    _archive(conn, nid, int(meta.get("available_epoch") or epoch(meta["available_timestamp"])))
                     conn.execute("INSERT OR REPLACE INTO kb_nodes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                                  (nid, "alpha_synthesis", "execute_thesis", meta["available_timestamp"][:10], (doc or "")[:90], doc or "", "quant_hub_execute", "",
                                   meta["available_timestamp"], int(meta.get("available_epoch") or epoch(meta["available_timestamp"])), meta["available_timestamp"], "",
@@ -319,14 +346,15 @@ def rebuild_edges(conn) -> dict:
 
 # ----------------------------------------------------------------------------- read side (used by the public service, read-only)
 def graph(conn, as_of_epoch: int, limit: int = 300, domain: str | None = None) -> dict:
-    q = ("SELECT id,domain,series_key,period,title,document,source_id,agent_ids,available_timestamp,published_timestamp,raw_payload_hash,provenance "
-         "FROM kb_nodes WHERE available_epoch<=?")
-    args: list = [as_of_epoch]
-    if domain:
-        q += " AND domain=?"
-        args.append(domain)
     try:
-        rows = conn.execute(q + " ORDER BY available_epoch DESC LIMIT ?", args + [limit]).fetchall()
+        src = _src(conn)
+        q = ("SELECT n.id,n.domain,n.series_key,n.period,n.title,n.document,n.source_id,n.agent_ids,n.available_timestamp,n.published_timestamp,n.raw_payload_hash,n.provenance "
+             f"FROM {src} n WHERE {_asof(src)}")
+        args: dict = {"t": as_of_epoch, "lim": limit}
+        if domain:
+            q += " AND n.domain=:dom"
+            args["dom"] = domain
+        rows = conn.execute(q + " ORDER BY n.available_epoch DESC LIMIT :lim", args).fetchall()
     except sqlite3.OperationalError:
         return {"total_nodes": 0, "nodes": [], "links": [], "domains": {}}
     keys = ("id", "domain", "series_key", "period", "title", "document", "source_id", "agent_ids", "available_timestamp", "published_timestamp",
@@ -338,7 +366,7 @@ def graph(conn, as_of_epoch: int, limit: int = 300, domain: str | None = None) -
             n["status"] = status[n["id"]][0]
     ids = {n["id"] for n in nodes}
     links = [{"source": s, "target": d, "type": t, "weight": w} for s, d, t, w in conn.execute("SELECT src,dst,type,weight FROM kb_edges") if s in ids and d in ids]
-    doms = dict(conn.execute("SELECT domain, COUNT(*) FROM kb_nodes WHERE available_epoch<=? GROUP BY domain", (as_of_epoch,)).fetchall())
+    doms = dict(conn.execute(f"SELECT n.domain, COUNT(*) FROM {src} n WHERE {_asof(src)} GROUP BY n.domain", {"t": as_of_epoch}).fetchall())
     return {"total_nodes": sum(doms.values()), "nodes": nodes, "links": links, "domains": doms, "edge_legend": EDGE_LEGEND}
 
 
@@ -359,7 +387,8 @@ def node_detail(conn, node_id: str, as_of_epoch: int) -> dict | None:
     """One knowledge object with its edges, verdict, source payload metadata and (for notices) the agent extraction, all PIT."""
     keys = ("id", "domain", "series_key", "period", "title", "document", "source_id", "agent_ids", "available_timestamp", "available_epoch",
             "published_timestamp", "raw_payload_hash", "provenance", "doc_hash", "created")
-    r = conn.execute(f"SELECT {','.join(keys)} FROM kb_nodes WHERE id=? AND available_epoch<=?", (node_id, as_of_epoch)).fetchone()
+    src = _src(conn)
+    r = conn.execute(f"SELECT {','.join('n.' + k for k in keys)} FROM {src} n WHERE n.id=:id AND {_asof(src)}", {"id": node_id, "t": as_of_epoch}).fetchone()
     if not r:
         return None
     n = dict(zip(keys, r))
@@ -368,7 +397,7 @@ def node_detail(conn, node_id: str, as_of_epoch: int) -> dict | None:
     edges = []
     for s, d, t, w in conn.execute("SELECT src, dst, type, weight FROM kb_edges WHERE src=? OR dst=?", (node_id, node_id)):
         other = d if s == node_id else s
-        o = conn.execute("SELECT title, domain, available_timestamp FROM kb_nodes WHERE id=? AND available_epoch<=?", (other, as_of_epoch)).fetchone()
+        o = conn.execute(f"SELECT n.title, n.domain, n.available_timestamp FROM {src} n WHERE n.id=:id AND {_asof(src)}", {"id": other, "t": as_of_epoch}).fetchone()
         if o:
             edges.append({"direction": "out" if s == node_id else "in", "type": t, "weight": w, "id": other, "title": o[0], "domain": o[1],
                           "available_timestamp": o[2]})
@@ -441,8 +470,9 @@ def _short_summary(s):
 def search(conn, query_vec, as_of_epoch: int, limit: int = 8) -> list:
     """Cosine similarity over nodes with available_epoch <= as_of_epoch only."""
     try:
-        rows = conn.execute("SELECT id,domain,title,document,available_timestamp,source_id,raw_payload_hash,provenance,embedding FROM kb_nodes "
-                            "WHERE available_epoch<=? AND embedding IS NOT NULL", (as_of_epoch,)).fetchall()
+        src = _src(conn)
+        rows = conn.execute("SELECT n.id,n.domain,n.title,n.document,n.available_timestamp,n.source_id,n.raw_payload_hash,n.provenance,n.embedding "
+                            f"FROM {src} n WHERE {_asof(src)} AND n.embedding IS NOT NULL", {"t": as_of_epoch}).fetchall()
     except sqlite3.OperationalError:
         return []
     if not rows:
@@ -459,9 +489,10 @@ def search(conn, query_vec, as_of_epoch: int, limit: int = 8) -> list:
 
 def summary(conn, as_of_epoch: int) -> dict:
     try:
-        doms = dict(conn.execute("SELECT domain, COUNT(*) FROM kb_nodes WHERE available_epoch<=? GROUP BY domain", (as_of_epoch,)).fetchall())
+        src = _src(conn)
+        doms = dict(conn.execute(f"SELECT n.domain, COUNT(*) FROM {src} n WHERE {_asof(src)} GROUP BY n.domain", {"t": as_of_epoch}).fetchall())
         edges = conn.execute("SELECT COUNT(*) FROM kb_edges").fetchone()[0]
-        latest = conn.execute("SELECT title, available_timestamp, domain FROM kb_nodes WHERE available_epoch<=? ORDER BY available_epoch DESC LIMIT 5", (as_of_epoch,)).fetchall()
+        latest = conn.execute(f"SELECT n.title, n.available_timestamp, n.domain FROM {src} n WHERE {_asof(src)} ORDER BY n.available_epoch DESC LIMIT 5", {"t": as_of_epoch}).fetchall()
     except sqlite3.OperationalError:
         return {"status": "empty", "nodes": 0, "edges": 0, "domains": {}, "latest": []}
     return {"status": "ok" if doms else "empty", "nodes": sum(doms.values()), "edges": edges, "domains": doms,

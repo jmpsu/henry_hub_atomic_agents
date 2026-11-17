@@ -27,3 +27,6 @@ dist/
 artifacts/NGL  technical audit latest version output
 artifacts/NGL  technical audit latest version output v1
 artifacts/NGL  technical audit latest version output v2
+
+# Local DB checkpoints taken before state-changing operations
+henry_hub_pit.db.pre-*
