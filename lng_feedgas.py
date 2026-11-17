@@ -196,18 +196,23 @@ def load(cutoff: str, path: Path = OUT_FILE) -> dict | None:
     return doc if doc.get("available_timestamp", "9999") <= cutoff and doc.get("as_of", "9999") <= cutoff else None
 
 
-def run(db_path: str, as_of: str | None = None, out_path: Path = OUT_FILE) -> dict:
+def run_conn(conn, as_of: str | None = None, out_path: Path = OUT_FILE) -> dict:
+    """Estimate, store the three series and write the point-in-time JSON, using an already-open (writable) connection (the scheduled pipeline's)."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    est = estimate(conn, as_of or now)
+    est["rows_written"] = store(conn, est, now)
+    est["available_timestamp"] = now
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(est, indent=2))
+    tmp.replace(out_path)
+    return est
+
+
+def run(db_path: str, as_of: str | None = None, out_path: Path = OUT_FILE) -> dict:
     conn = sqlite3.connect(db_path, timeout=30)
     try:
-        est = estimate(conn, as_of or now)
-        est["rows_written"] = store(conn, est, now)
-        est["available_timestamp"] = now
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = out_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(est, indent=2))
-        tmp.replace(out_path)
-        return est
+        return run_conn(conn, as_of, out_path)
     finally:
         conn.close()
 

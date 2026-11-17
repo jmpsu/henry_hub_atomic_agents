@@ -255,3 +255,18 @@ def test_kb_declares_the_requirement_edges_without_claiming_measured_causation(t
     kb.ingest(db, embedder=lambda t: [1.0, 0.0, 0.0], now="2026-11-17T13:00:00Z")           # a re-ingest keeps them (rebuild_edges only recomputes derived types)
     assert sqlite3.connect(db).execute("SELECT COUNT(*) FROM kb_edges WHERE type='feeds_supply'").fetchone()[0] == 1
     assert "no calculation consumes" in kb.EDGE_LEGEND["feeds_supply"]
+
+
+def test_the_feedgas_model_runs_inside_the_scheduled_pipeline_after_its_anchor_collector(tmp_path, monkeypatch):
+    from collectors import run_all
+    names = run_all.names()
+    assert "lng_feedgas_model" in names and names.index("eia_ng_flows") < names.index("lng_feedgas_model")
+    db = _seed_exports(_db(), months=40)
+    monkeypatch.setattr(lg, "OUT_FILE", tmp_path / "f.json")
+    c = sqlite3.connect(db)
+    est = lg.run_conn(c, "2026-06-15T00:00:00Z", tmp_path / "f.json")
+    assert est["status"] == "estimate" and est["rows_written"] == 3 and (tmp_path / "f.json").exists()
+    assert c.execute("SELECT COUNT(*) FROM pit_market_data WHERE agent_id LIKE 'Agent_LNGFeedgas_%'").fetchone()[0] == 3
+    empty = sqlite3.connect(_db())
+    out = lg.run_conn(empty, "2026-06-15T00:00:00Z", tmp_path / "g.json")
+    assert out["status"] == "pending_collector" and out["rows_written"] == 0

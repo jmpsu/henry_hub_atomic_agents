@@ -33,6 +33,15 @@ def selector_agents() -> dict:
     return {a: f"{v['n_fixtures']} fixtures ok" for a, v in out.items()}
 
 
+def _feedgas_model(conn) -> list:
+    """Module A (LNG feedgas p10/p50/p90): a model run, not a collector. It reads only the EIA monthly exports stored by eia_ng_flows (above) and is skipped, with the reason, when they are absent."""
+    import lng_feedgas
+    est = lng_feedgas.run_conn(conn)
+    if est["status"] != "estimate":
+        return [{"agent": "Agent_LNGFeedgas_*", "observations_new": 0, "error": est.get("reason", "no estimate")}]
+    return [{"agent": "Agent_LNGFeedgas_*", "observations_new": est["rows_written"], "p10": est["p10"], "p50": est["p50"], "p90": est["p90"], "anchor_month": est["anchor_month"]}]
+
+
 def jobs(conn) -> list:
     now = datetime.now(timezone.utc)
     out = [("cpc_heating", lambda: cpc_degree_days.collect(conn, "Heating", now.year)),
@@ -54,6 +63,7 @@ def jobs(conn) -> list:
            ("hh_forward_yahoo", lambda: hh_forward_yahoo.collect(conn)),
            ("ttf_forward_yahoo", lambda: ttf_forward_yahoo.collect(conn)),
            ("metar_ambient", lambda: metar_ambient.collect(conn)),
+           ("lng_feedgas_model", lambda: _feedgas_model(conn)),
            ("selfheal_demo", selector_agents)]
     if now.month == 1:  # year-end observations and late-December revisions live in the prior-year file
         out += [("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
