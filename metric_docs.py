@@ -9,6 +9,9 @@ from __future__ import annotations
 import inspect
 from typing import Callable
 
+import lng_config as lc
+import lng_forward as lf
+
 
 def _d(fn: Callable, name: str):
     return inspect.signature(fn).parameters[name].default
@@ -100,6 +103,19 @@ def build(me) -> dict:
         "regime": doc("Curve regime", f"How the curve is classified. SEASONAL: a curve of 6+ contracts that reverses direction at least twice (moves under {band} are ignored), so the last minus the first compares different calendar months. Otherwise CONTANGO if the back is above the front by more than {band}, BACKWARDATION if below, FLAT if within.",
                       f"SEASONAL if reversals >= 2 (6+ contracts); else sign of (last - first) beyond {band}", {"flat_band": band}),
         "fwd_point": doc("Futures contract", "One monthly NYMEX contract on the forward curve.", read="Hover shows the contract symbol, delivery month and where the quote came from."),
+        # ---- LNG (all numbers below come from lng_config, the single place for assumptions)
+        "lng_forward": doc("LNG forward cost curve (US Gulf FOB)", "An estimate of what it costs to deliver LNG free-on-board from the U.S. Gulf Coast for each of the next 12 months, built from the Henry Hub futures curve plus a liquefaction fee.",
+                           f"FOB cost = {lc.FEEDGAS_FACTOR:g} x Henry Hub futures + {lc.LIQUEFACTION_FEE_USD_MMBTU:g} (USD/MMBtu)", {"feedgas_factor": lc.FEEDGAS_FACTOR, "liquefaction_fee_usd_mmbtu": lc.LIQUEFACTION_FEE_USD_MMBTU},
+                           read="A cost estimate, not a quote and not a price anyone can trade at. Set it against a destination price (the netback) to see the margin.",
+                           caveat="The feed-gas factor and the liquefaction fee default to labelled assumptions set in lng_config.py, not market data. A value from the knowledge library replaces a default only if a verbatim quote stored there contains that number (x100 for a percentage), it lies inside a sanity band, and the parameters file was available at the cutoff; the quote is then shown. No generated text sets a number. The Henry Hub inputs are delayed, unofficial quotes. Provenance: extracted estimate."),
+        "lng_fwd_point": doc("LNG cost for one month", "The LNG cost for one delivery month with every step shown: the Henry Hub contract for that month, the feed-gas cost, the liquefaction fee and the total.",
+                             f"FOB cost = {lc.FEEDGAS_FACTOR:g} x Henry Hub + {lc.LIQUEFACTION_FEE_USD_MMBTU:g}",
+                             read="Under Data lineage is the Henry Hub quote this month is built from: its source, when it was published, and when this system could first use it.",
+                             caveat="A month with no Henry Hub point has no value; nothing is filled in."),
+        "lng_netback": doc("Netback from TTF", "What a cargo sold at the Dutch TTF price nets back to the U.S. Gulf after shipping and regasification, and its margin over the FOB cost.",
+                           lf.NETBACK_FORMULA, {"shipping_usd_mmbtu": lc.SHIPPING_USD_MMBTU, "regas_usd_mmbtu": lc.REGAS_USD_MMBTU, "mmbtu_per_mwh": lc.MMBTU_PER_MWH, "max_quote_age_days": lc.MAX_QUOTE_AGE_DAYS},
+                           read="Margin = netback minus FOB cost. A month is shown only when its TTF quote and the EUR/USD quote were both available at the cutoff and traded within the age limit.",
+                           caveat="TTF and EUR/USD are delayed, unofficial quotes. Shipping and regasification are labelled assumptions, and deferred TTF months can go days without trading, in which case no netback is shown. JKM has no free futures source, so it is pending a collector, never estimated."),
         # ---- fundamentals
         "shale_total": doc("Shale gas, six basins", "Sum of the monthly-average production of the six roster basins (Appalachia, Permian, Haynesville, Eagle Ford, Bakken, DJ).", "sum of the six basin series (Bcf/d)",
                            caveat="Shown only when all six are present; it is a sum of six basins, not total U.S. production."),

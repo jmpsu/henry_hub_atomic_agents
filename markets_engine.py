@@ -20,6 +20,8 @@ from typing import Any
 
 import numpy as np
 
+import lng_forward
+
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_VERSION = "ngl-state/1"
 GAL_PER_BBL = 42.0
@@ -547,7 +549,17 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         fwd_dates = {p["date"] for p in fwd}
         fwd_age = _age_days(max(p["available_timestamp"] for p in fwd), cutoff) if fwd else None
         fwd_stale = bool(fwd) and (len(fwd_dates) > 1 or (fwd_age is not None and fwd_age > 10))
+        def _q(agent):  # a collected quote as lng_forward expects it (None if absent at this cutoff)
+            r = latest.get(agent)
+            if not r or r.get("provenance") != "measured":
+                return None
+            return {"value": r["value"], "published_timestamp": r.get("published_timestamp") or None, "available_timestamp": r["available_timestamp"],
+                    "latest_target_timestamp": r["latest_target_timestamp"], "series_id": r.get("series_id"), "quality_status": r["quality_status"], "raw_payload_hash": r["raw_payload_hash"]}
+        ttf_agents = {p["delivery_month"]: "Agent_TTF_" + p["delivery_month"].replace("-", "_") for p in fwd if p.get("delivery_month")}
+        import lng_evidence
+        lng = lng_forward.build(fwd, {m: _q(a) for m, a in ttf_agents.items() if _q(a)}, _q("Agent_FX_EURUSD"), cutoff, lng_evidence.validated(lng_evidence.load(cutoff)))
         curves = {
+            "lng_forward": lng,
             "ngl_to_wti_pct": {"formula": "(cents/gal / 100 * 42) / WTI_usd_bbl * 100", "wti": {"status": "measured" if wti else PENDING,
                                "value": wti[-1][1] if wti else None, "date": wti[-1][0] if wti else None, "unit": "USD/bbl"},
                                "propane": pct_curve("propane"), "normal_butane": pct_curve("normal_butane"), "natural_gasoline": pct_curve("natural_gasoline")},
@@ -592,7 +604,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         # ---- source availability (every roster agent, then extras)
         roster = _roster()
         agents = roster + sorted(a for a in latest if a not in set(roster))
-        needed = {meta["agent_id"], WTI_AGENT} | {a for _, _, ag in DRIVER_GROUPS for a in ag}
+        needed = {meta["agent_id"], WTI_AGENT, "Agent_FX_EURUSD"} | set(ttf_agents.values()) | {a for _, _, ag in DRIVER_GROUPS for a in ag}
         sources = []
         rmeta = _roster_meta()
         for a in agents:

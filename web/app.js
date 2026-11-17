@@ -342,6 +342,51 @@
     }
   }
 
+  /* ---------- LNG forward cost curve: every number below comes from the API (curves.lng_forward); nothing is computed here ---------- */
+  function renderLng(s) {
+    const lg = (s.curves || {}).lng_forward, box = $("lng-chart"), tg = clear($("lng-tags"));
+    if (!lg || !box) return;
+    if (lg.status !== "estimate") {
+      pending(box, "PENDING COLLECTOR", [lg.note || "", "Missing: " + (lg.missing || []).join(", ")]);
+      if (box.firstChild) T("lng_forward", box.firstChild, { value: "pending", badge: { text: "pending collector", cls: "is-pending" }, notes: [lg.note] }, "pend_lng");
+      return;
+    }
+    const pts = lg.points, a = lg.assumptions, nb = lg.netback, f3 = (v) => fv(v, 3);
+    T("lng_forward", tg.appendChild(tag("estimate", "gold")), { value: "extracted estimate", badge: badgeOf("extracted_estimate") }, "tag_lng_estimate");
+    T("lng_forward", tg.appendChild(tag(`${a.feedgas_factor.value} × HH + ${fv(a.liquefaction_fee.value, 2)}`, "")), () => ({ title: "Assumptions behind this curve", value: `${a.feedgas_factor.value} × HH + ${fv(a.liquefaction_fee.value, 2)}`,
+      sections: [{ h: "Set in lng_config.py: assumptions, not market data", rows: Object.values(a).map((x) => [`${x.text} (${x.kind})`, `${x.value} ${x.unit}`]) }] }), "tag_lng_assume");
+    T("lng_netback", tg.appendChild(tag(nb.points_with_netback ? `TTF netback ${nb.points_with_netback}/${pts.length}` : "netback: pending JKM/TTF", nb.points_with_netback ? "on" : "gap")), () => ({
+      value: nb.points_with_netback ? `${nb.points_with_netback} of ${pts.length} months` : "pending", badge: badgeOf(nb.points_with_netback ? "extracted_estimate" : "pending_collector"), notes: [nb.ttf, nb.fx, nb.jkm],
+      sections: Object.keys(nb.reasons || {}).length ? [{ h: "Months without a netback", rows: Object.entries(nb.reasons) }] : [] }), "tag_lng_netback");
+    const lngTip = (p) => ({ title: `${p.contract}${p.delivery_month ? " · delivery " + p.delivery_month : ""}`, value: `${f3(p.fob_cost)} USD/MMBtu FOB cost`, badge: badgeOf("extracted_estimate"),
+      sections: [{ h: "Calculation", rows: [["Henry Hub futures (same month)", `${f3(p.hh_value)} USD/MMBtu`], [`× feed gas factor (${a.feedgas_factor.kind})`, String(a.feedgas_factor.value)], ["= feed gas cost", `${f3(p.feedgas_cost)} USD/MMBtu`],
+        [`+ liquefaction fee (${a.liquefaction_fee.kind})`, `${f3(p.liquefaction_fee)} USD/MMBtu`], ["= FOB cost", `${f3(p.fob_cost)} USD/MMBtu`]] }]
+        .concat(p.netback ? [{ h: "Netback from TTF (same month)", rows: [["TTF quote", `${fv(p.netback.ttf_eur_mwh, 2)} EUR/MWh`], ["× EUR/USD", fv(p.netback.eurusd, 4)], ["= TTF in USD/MMBtu", f3(p.netback.ttf_usd_mmbtu)],
+          [`− shipping (${a.shipping.kind})`, f3(a.shipping.value)], [`− regasification (${a.regas.kind})`, f3(a.regas.value)], ["= netback", `${f3(p.netback.value)} USD/MMBtu`], ["Margin over FOB cost", `${f3(p.netback.margin_vs_fob_cost)} USD/MMBtu`],
+          ["TTF last trade", fts(p.netback.ttf_published_timestamp)], ["TTF quote available (PIT)", fts(p.netback.ttf_available_timestamp)], ["EUR/USD published", fts(p.netback.fx_published_timestamp)]] }]
+          : [{ h: "Netback", rows: [["Not shown", p.netback_note || "no fresh TTF quote", "warn"]] }])
+        .concat([{ h: "Data lineage: the Henry Hub quote", rows: [["Contract", p.hh_series_id], ["Source", p.hh_source_id], ["Published", p.hh_published_timestamp ? fts(p.hh_published_timestamp) : "not supplied by the source"], ["Available (PIT)", fts(p.hh_available_timestamp)],
+          ["Quality", (p.hh_quality_status || "").replace(/_/g, " ")], ["Payload", p.hh_raw_payload_hash ? p.hh_raw_payload_hash.slice(0, 16) + "…" : null, "hash"]] }]) });
+    chart(box, { x: pts.map((p) => p.contract), xTicks: pts.map((_, i) => i), xFmt: (v) => v,
+      lines: [{ y: pts.map((p) => p.hh_value), cls: "dash thin" }, { y: pts.map((p) => p.fob_cost), cls: "bold" }, { y: pts.map((p) => (p.netback ? p.netback.value : null)), cls: "gold" }],
+      markers: pts.map((p, i) => ({ i, y: p.fob_cost, tipId: "lng_fwd_point", tid: "lng_" + p.contract, tip: lngTip(p) })).concat(pts.map((p, i) => (p.netback ? { i, y: p.netback.value, cls: "gold", tipId: "lng_netback", tid: "lngnb_" + p.contract, tip: lngTip(p) } : null)).filter(Boolean)) });
+    const lr = el("span", { text: `${pts.length} months · ${lg.formula.replace("FEEDGAS_FACTOR", a.feedgas_factor.value).replace("LIQUEFACTION_FEE", fv(a.liquefaction_fee.value, 2))}` });
+    const foot = el("div", { class: "lng-foot" });      // one container: below() replaces the previous caption, so every caption row must live inside this one
+    foot.append(el("div", { class: "legend-row" }, [el("span", {}, [el("i", { class: "dash" }), "Henry Hub"]), el("span", {}, [el("i", {}), "FOB cost"]), el("span", {}, [el("i", { class: "gold" }), "TTF netback"]), lr]));
+    T("lng_forward", lr, () => ({ value: lg.formula }), "lng_legend");
+    const prm = lg.parameters || {}, plabel = { k_hh_multiplier: "k (HH multiplier)", liquefaction_usd_mmbtu: "L (liquefaction fee)" };
+    for (const [key, p] of Object.entries(prm)) {
+      const lib = p.source === "library";
+      const row = el("div", { class: "legend-row" }, [el("span", { text: `${plabel[key] || key} = ${fv(p.value, 4)} ${p.unit || ""} · ` }), el("span", { class: lib ? "" : "dim", text: lib ? `knowledge library: “${p.quote}”` : `assumption (${p.reason || "default"})` })]);
+      foot.append(row);
+      T("lng_forward", row, () => ({ title: plabel[key] || key, value: `${fv(p.value, 4)} ${p.unit || ""}`, badge: badgeOf(lib ? "extracted_estimate" : "pending_collector"),
+        notes: lib ? ["Taken from a verbatim quote stored in the knowledge library; the number appears in the quote and passed the sanity band."] : [`Labelled default assumption: ${p.reason || ""}`],
+        sections: lib ? [{ h: "Where it came from", rows: [["Document", p.title], ["Chunk", p.chunk_id, "hash"], ["Similarity", p.similarity == null ? null : String(p.similarity)], ["Document available (PIT)", fts(p.doc_available_timestamp)], ["Prompt", p.prompt_version], ["Quote", p.quote]] }] : [] }), "lngp_" + key);
+    }
+    if ((lg.context || []).length) foot.append(el("div", { class: "legend-row dim" }, [el("span", { text: "Related knowledge (context only, never changes a number): " + lg.context.slice(0, 4).map((n) => n.title).join(" · ") })]));
+    below(box, foot);
+  }
+
   /* ---------- drivers and sources ---------- */
   function renderDrivers(s) {
     const box = clear($("drivers"));
@@ -545,7 +590,7 @@
     state = s;
     const keep = NGLTip.reset();
     $("asof").textContent = `as of ${s.as_of.replace("T", " ")} · ${s.schema}`;
-    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderDrivers(s); renderSources(s);
+    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderDrivers(s); renderSources(s);
     initMap(s); drawMap(s);
     if (graph) drawGraph();
     NGLTip.restore(keep);
@@ -564,6 +609,6 @@
   $("host-title").textContent = (location.hostname || "ngl.joeysvault.app").toUpperCase();
   $("src-all").addEventListener("change", () => state && renderSources(state));
   $("kg-form").addEventListener("submit", search);
-  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (state) { renderHero(state); renderCurves(state); } drawGraph(); }, 200); });
+  let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (state) { renderHero(state); renderCurves(state); renderLng(state); } drawGraph(); }, 200); });
   load(); loadGraph(); setInterval(load, 60000); setInterval(loadGraph, 300000);
 })();

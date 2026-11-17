@@ -59,6 +59,7 @@ def main() -> int:
     ap.add_argument("base")
     ap.add_argument("--shots", default="")
     ap.add_argument("--port", type=int, default=9333)
+    ap.add_argument("--lng-shot", default="", help="write a screenshot of the LNG forward panel to this path")
     a = ap.parse_args()
     shots = Path(a.shots) if a.shots else None
     if shots:
@@ -150,6 +151,18 @@ def main() -> int:
         hover("border flow row (inferred mapping)", "[...document.querySelectorAll('.drv-row')].find(r => /RioGrande ToMexico/.test(r.innerText))", ["INFERRED", "Rio Grande"], None)
         check("LNG exports and border panels are populated", bool(c.js("(() => { const t = document.getElementById('drivers').innerText; return /LNG EXPORTS BY TERMINAL/i.test(t) && /PIPELINE VOLUMES AT BORDER/i.test(t) && /118,889|118889/.test(t); })()")))
         check("map terminal labels show monthly exports", bool(c.js("[...document.querySelectorAll('.node-label')].some(l => /Sabine Pass/.test(l.innerText) && /118,889/.test(l.innerText))")) or True)
+        check("LNG forward panel is populated (curve markers present)", bool(c.js("(() => { const b = document.getElementById('lng-chart'); return !!b && b.querySelectorAll('.mk-hit').length >= 1; })()")))
+        hover("LNG forward point M1", "document.querySelector('#lng-chart .mk-hit')", ["FOB cost", "Calculation", "Henry Hub futures", "Data lineage"], "tip_lng_point")
+        check("LNG panel states where k and L come from", bool(c.js("(() => { const t = document.getElementById('lng-chart').parentElement.innerText; return /k \\(HH multiplier\\)/.test(t) && /L \\(liquefaction fee\\)/.test(t) && /assumption|knowledge library/.test(t); })()")))
+        if a.lng_shot:
+            r = center("document.getElementById('lng-chart').closest('section')")
+            if r:
+                time.sleep(0.5)
+                rect = c.js("(() => { const e = document.getElementById('lng-chart').closest('section'); e.scrollIntoView({block: 'center'}); const b = e.getBoundingClientRect(); return [b.left + scrollX, b.top + scrollY, b.width, b.height]; })()")
+                time.sleep(0.5)
+                png = c.send("Page.captureScreenshot", format="png", clip={"x": rect[0] - 4, "y": rect[1] - 4, "width": rect[2] + 8, "height": rect[3] + 8, "scale": 2}, captureBeyondViewport=True)["data"]
+                Path(a.lng_shot).parent.mkdir(parents=True, exist_ok=True)
+                Path(a.lng_shot).write_bytes(base64.b64decode(png))
         hover("source table row", "document.querySelector('#sources tbody tr')", ["Agent", "Available (PIT)"], None)
         hover("source table header", "document.querySelectorAll('#sources thead th')[5]", ["earliest moment", "look-ahead"], None)
         hover("knowledge node", "document.querySelector('#kg .kg-node')", ["Where it came from", "Available (PIT)"], "tip_kg_node")
