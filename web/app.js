@@ -41,7 +41,7 @@
   }
   function spec(id, x) {
     const d = X(id); x = x || {};
-    return { title: x.title || d.title, badge: x.badge, value: x.value, what: x.what || d.what, formula: x.formula === undefined ? d.formula : x.formula, params: x.params || d.params,
+    return { ask: { metric: id, agent: x.agent || null, title: x.title || d.title }, title: x.title || d.title, badge: x.badge, value: x.value, what: x.what || d.what, formula: x.formula === undefined ? d.formula : x.formula, params: x.params || d.params,
       sections: x.sections, notes: [].concat(x.notes || [], d.caveat || []), read: x.read === undefined ? d.read : x.read };
   }
   /* T(id, node, extra, registryId): documented metric `id` shown when `node` is hovered, focused or tapped; extra (object or function) adds live values and lineage */
@@ -416,7 +416,7 @@
       grid.append(card);
       const prov = h && h.provenance;
       const badge = !h ? badgeOf("pending_collector") : String(prov).startsWith("bootstrapped") ? { text: "bootstrapped proxy", cls: "estimate" } : badgeOf(prov === "extracted_estimate" ? "extracted_estimate" : "measured");
-      T("fundamental_element", card, () => ({ title: `${e.id} · ${e.label}`, value: `${val}${h && h.p10 != null ? ` (p10 ${fv(h.p10, 2)} · p90 ${fv(h.p90, 2)})` : ""}`, badge, what: e.role, formula: null, params: {}, read: null,
+      T("fundamental_element", card, () => ({ agent: (e.agents || [])[0], title: `${e.id} · ${e.label}`, value: `${val}${h && h.p10 != null ? ` (p10 ${fv(h.p10, 2)} · p90 ${fv(h.p90, 2)})` : ""}`, badge, what: e.role, formula: null, params: {}, read: null,
         sections: [{ h: "Classification", rows: [["Class", sep ? "calculated separately (orthogonal module)" : "direct ingested input"], ["Method", e.method], ["Source", e.source], ["Scope rule", e.scope_rule],
           ["Graph link", e.graph_link], ["Moves a forward price here?", "no: " + (e.price_path.reason || "").slice(0, 160), "dim"]] },
           { h: "Inputs", rows: [["Current value", val], ["Frequency", e.frequency], ["Collector", e.collector_status], ["Agents", `${e.agents_collected} of ${e.agents_total}`],
@@ -447,7 +447,7 @@
         ]);
         card.append(row);
         const src = s.sources.find((r) => r.agent_id === i.agent_id);
-        T(pend ? "pending" : "provenance", row, () => ({ title: short(i.agent_id), value: pend ? "pending collector" : `${num(i.value, Math.abs(i.value) >= 100 ? 0 : 3)} ${i.unit || ""}`,
+        T(pend ? "pending" : "provenance", row, () => ({ agent: i.agent_id, title: short(i.agent_id), value: pend ? "pending collector" : `${num(i.value, Math.abs(i.value) >= 100 ? 0 : 3)} ${i.unit || ""}`,
           badge: badgeOf(pend ? "pending_collector" : i.provenance), what: (src && src.series) || (pend ? X("pending").what : "A data series collected by the platform."), formula: null, params: {}, read: null,
           sections: [{ h: g.label, rows: pend ? [] : [["Observation date", i.target_date], ["Available (PIT)", fts(i.available_timestamp)]] }, lineage(i.agent_id)] }), "driver_" + i.agent_id);
       }
@@ -652,5 +652,74 @@
   $("src-all").addEventListener("change", () => state && renderSources(state));
   $("kg-form").addEventListener("submit", search);
   let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (state) { renderHero(state); renderCurves(state); renderLng(state); } drawGraph(); }, 200); });
+  /* ---------- command and chat bar ---------- */
+  const QUICK = ["How is the forward curve built?", "Why is Freeport flow unverified?", "How does the ethane frac spread affect Henry Hub?", "What is Corpus Christi feedgas right now?"];
+  async function focusNode(id) {                                     // cite-to-highlight: select the node in the knowledge library, pulse it and bring it into view
+    if (!graph || !graph.nodes.find((n) => n.id === id)) { try { graph = await (await fetch("/api/knowledge-graph?limit=600")).json(); drawGraph(); } catch (e) { return; } }
+    kgHits = new Set([id]); selectNode(id); markGraph();
+    const c = d3.selectAll(".kg-node").filter((d) => d.id === id).node();
+    $("kg-h").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (c) { c.classList.add("pulse"); setTimeout(() => c.classList.remove("pulse"), 3200); }
+  }
+  function initChat() {
+    const bar = $("chatbar"), ans = $("chat-answer"), q = $("chat-q");
+    const open = (v) => { bar.dataset.open = v ? "true" : "false"; $("chat-toggle").setAttribute("aria-expanded", String(v)); $("chat-toggle").innerHTML = v ? "&#9652;" : "&#9662;"; };
+    $("chat-toggle").addEventListener("click", () => open(bar.dataset.open !== "true"));
+    QUICK.forEach((t) => { const b = el("button", { type: "button", text: t }); b.addEventListener("click", () => { q.value = t; ask(t); }); $("chat-chips").append(b); });
+    $("chat-form").addEventListener("submit", (ev) => { ev.preventDefault(); if (q.value.trim().length > 1) ask(q.value.trim()); });
+    window.addEventListener("ngl-ask", (ev) => { const d = ev.detail || {}; q.value = `Explain "${d.title}": how is it calculated, where does the data come from, and what is its collector status?`; ask(q.value, { metric: d.metric, agent: d.agent }); });
+    let cites = { nodes: [], docs: [] };
+    function renderAnswer(text, base) {                              // [F#] [N#] [D#] tags in the text become buttons
+      clear(ans).classList.toggle("baseline", !!base);
+      for (const part of text.split(/(\[[FND]\d+\])/)) {
+        const m = /^\[([FND])(\d+)\]$/.exec(part);
+        if (!m) { ans.append(part); continue; }
+        const i = Number(m[2]) - 1, b = el("button", { type: "button", class: "cite", text: part });
+        if (m[1] === "N" && cites.nodes[i]) b.addEventListener("click", () => focusNode(cites.nodes[i].id));
+        else if (m[1] === "F") b.addEventListener("click", () => { const f = $("fact-" + m[2]); if (f) { f.classList.add("flash"); f.scrollIntoView({ block: "nearest" }); setTimeout(() => f.classList.remove("flash"), 1500); } });
+        else if (m[1] === "D" && cites.docs[i]) b.title = `${cites.docs[i].title} · ${cites.docs[i].path || ""}`;
+        ans.append(b);
+      }
+    }
+    function renderCites(c) {
+      cites = { nodes: c.cited_nodes || [], docs: c.cited_documents || [] };
+      const nb = clear($("chat-nodes")), db = clear($("chat-docs"));
+      cites.nodes.slice(0, 12).forEach((n, i) => { const b = el("button", { type: "button", class: "chat-node-btn" }, [el("span", { text: `N${i + 1} ${n.title.slice(0, 46)}` }), el("span", { class: "role", text: `${(n.domain_role || "").replace(/_/g, " ")}${n.hop ? " · hop " + n.hop : ""}` })]);
+        b.addEventListener("click", () => focusNode(n.id)); nb.append(b); });
+      if (!cites.nodes.length) nb.append(el("div", { class: "dim", text: "none retrieved at this cutoff" }));
+      cites.docs.slice(0, 6).forEach((d, i) => db.append(el("div", { class: "chat-doc" }, [el("b", { text: `D${i + 1} ${d.title}` }), el("div", { text: `${d.path || ""} · ${(d.domain_role || "").replace(/_/g, " ")} · sim ${d.similarity}` }), el("div", { text: "“" + d.snippet.slice(0, 140) + "…”" })])));
+      if (!cites.docs.length) db.append(el("div", { class: "dim", text: "no document cleared the similarity threshold at this cutoff" }));
+    }
+    function renderFacts(facts) {
+      const box = clear($("chat-facts")), det = el("details", {}, [el("summary", { text: `${facts.length} grounding facts from live telemetry` })]);
+      facts.forEach((f) => det.append(el("div", { id: "fact-" + f.id.slice(1), text: `[${f.id}] ${f.text}` })));
+      box.append(det);
+    }
+    async function ask(text, context) {
+      open(true); clear(ans); clear($("chat-facts")); clear($("chat-nodes")); clear($("chat-docs"));
+      $("chat-meta").textContent = "asking…"; const t0 = performance.now(); let streamed = "", baseline = "";
+      let resp;
+      try { resp = await fetch("/api/chat/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, as_of: state && state.as_of, context: context || null }) }); }
+      catch (e) { ans.textContent = "chat unavailable (network)"; return; }
+      if (!resp.ok) { ans.textContent = resp.status === 429 ? "Rate limit reached; try again in a minute." : `chat unavailable (${resp.status})`; return; }
+      const reader = resp.body.getReader(), dec = new TextDecoder(); let buf = "";
+      const handle = (raw) => {
+        const ev = /^event: (\w+)/m.exec(raw), dt = /^data: (.*)$/m.exec(raw); if (!ev || !dt) return;
+        const d = JSON.parse(dt[1]);
+        if (ev[1] === "status") $("chat-meta").textContent = `cutoff ${d.cutoff} · retrieving…`;
+        else if (ev[1] === "context") {
+          if (d.facts) renderFacts(d.facts);
+          if (d.baseline_answer) { baseline = d.baseline_answer; if (!streamed) renderAnswer(baseline, true); }
+          if (d.cited_nodes) renderCites(d);
+        } else if (ev[1] === "token") { streamed += d.t; renderAnswer(streamed, false); }
+        else if (ev[1] === "final") {
+          renderCites(d); renderAnswer(d.answer, d.verdict !== "model answer grounded");
+          $("chat-meta").textContent = `cutoff ${d.cutoff} · ${d.intent} · ${d.verdict}${d.model ? " · " + d.model : ""} · first event ${d.first_event_ms} ms · total ${d.total_ms} ms · client ${Math.round(performance.now() - t0)} ms`;
+        }
+      };
+      for (;;) { const { value, done } = await reader.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i; while ((i = buf.indexOf("\n\n")) >= 0) { handle(buf.slice(0, i)); buf = buf.slice(i + 2); } }
+    }
+  }
+  initChat();
   load(); loadGraph(); setInterval(load, 60000); setInterval(loadGraph, 300000);
 })();

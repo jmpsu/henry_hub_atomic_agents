@@ -43,6 +43,11 @@
     }
     if (spec.read) b.append(mk("p", "tip-read", spec.read));
     for (const n of spec.notes || []) if (n) b.append(mk("p", "tip-note", n));
+    if (spec.ask && pinned) {                                         // click-to-ask: hands the metric id and agent to the chat; the server rebuilds the facts, nothing is trusted from here
+      const bt = mk("button", "tip-ask", "Ask Ollama about this"); bt.type = "button";
+      bt.addEventListener("click", (e) => { e.stopPropagation(); window.dispatchEvent(new CustomEvent("ngl-ask", { detail: spec.ask })); unpin(); });
+      b.append(bt);
+    }
     b.append(mk("div", "tip-ft", pinned ? "pinned · click elsewhere or press Esc to close" : "click to pin · Esc closes"));
   }
   function place(x, y, anchor) {

@@ -81,7 +81,7 @@ def extract_param(name: str, spec: dict, lit_conn, llm, embedder, as_of_epoch: i
     default = {"name": name, "value": spec["default"], "unit": spec["unit"], "source": "assumption",
                "reason": "no verified library sentence stated an acceptable value", "attempts": []}
     try:
-        found = literature_kb.best_quotes(lit_conn, embedder, spec["query"], as_of_epoch, kinds=("paper", "news"), top_n=3)
+        found = literature_kb.best_quotes(lit_conn, embedder, spec["query"], as_of_epoch, kinds=("paper", "news", "research"), top_n=3)
     except Exception as e:  # noqa: BLE001  (library DB missing or Ollama embedder down -> keep the assumption)
         return {**default, "reason": f"library/embedder unavailable: {type(e).__name__}"}
     if found["abstained"]:

@@ -38,6 +38,8 @@ def ensure(conn: sqlite3.Connection) -> None:
     CREATE TABLE IF NOT EXISTS lit_edges(src TEXT, dst TEXT, type TEXT, weight REAL, PRIMARY KEY(src, dst, type));
     CREATE INDEX IF NOT EXISTS lit_chunks_epoch ON lit_chunks(available_epoch);
     """)
+    if "superseded_epoch" not in [r[1] for r in conn.execute("PRAGMA table_info(lit_docs)")]:      # a changed or removed source file supersedes its older document (additive, PIT-safe)
+        conn.execute("ALTER TABLE lit_docs ADD COLUMN superseded_epoch INTEGER")
 
 
 def epoch(ts: str) -> int:
@@ -115,6 +117,9 @@ def search(conn: sqlite3.Connection, qvec, as_of_epoch: int, k: int = 5, kinds: 
     sql = ("SELECT c.chunk_id,c.doc_id,c.ord,c.text,c.embedding,d.title,d.kind,d.available_timestamp FROM lit_chunks c JOIN lit_docs d USING(doc_id) "
            "WHERE c.available_epoch<=? AND c.embedding IS NOT NULL")
     args: list = [as_of_epoch]
+    if "superseded_epoch" in [r[1] for r in conn.execute("PRAGMA table_info(lit_docs)")]:           # a version replaced AFTER as_of was still the current one at as_of
+        sql += " AND (d.superseded_epoch IS NULL OR d.superseded_epoch>?)"
+        args.append(as_of_epoch)
     if kinds:
         sql += f" AND d.kind IN ({','.join('?' * len(kinds))})"
         args += list(kinds)

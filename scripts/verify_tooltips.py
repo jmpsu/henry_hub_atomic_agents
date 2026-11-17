@@ -60,6 +60,7 @@ def main() -> int:
     ap.add_argument("--shots", default="")
     ap.add_argument("--port", type=int, default=9333)
     ap.add_argument("--lng-shot", default="", help="write a screenshot of the LNG forward panel to this path")
+    ap.add_argument("--chat-shot", default="", help="write a screenshot of the open chat drawer to this path")
     ap.add_argument("--fund-shot", default="", help="write a screenshot of the fundamental-elements panel to this path")
     a = ap.parse_args()
     shots = Path(a.shots) if a.shots else None
@@ -176,6 +177,36 @@ def main() -> int:
         hover("fundamental M2 (weather, strict scope)", "[...document.querySelectorAll('#fundamentals .fund-grid')[1].querySelectorAll('.fund-card')][1]", ["Excluded from the LNG liquefaction"], "tip_fund_m2")
         if a.fund_shot:
             shot("document.getElementById('fundamentals')", a.fund_shot)
+        # ---------------------------------------------------------------- command and chat bar (G6 R3.1-R3.5, V3, V5)
+        def wait_js(expr, secs):
+            end = time.time() + secs
+            while time.time() < end:
+                if c.js(expr):
+                    return True
+                time.sleep(0.25)
+            return False
+        check("chat bar is mounted directly beneath the header (R3.1)", bool(c.js("document.querySelector('header.top').nextElementSibling.id === 'chatbar'")))
+        check("chat bar is compact when idle: one input line, chips, drawer closed, charts above the fold (R3.2)", bool(c.js("(() => { const b = document.getElementById('chatbar'), d = document.getElementById('chat-drawer'); const ch = document.getElementById('price-chart') || document.querySelector('.chart'); return b.dataset.open === 'false' && d.getBoundingClientRect().height < 2 && b.getBoundingClientRect().height < 110 && document.querySelectorAll('#chat-chips button').length >= 4 && ch.getBoundingClientRect().top < innerHeight; })()")))
+        c.js("(() => { const q = document.getElementById('chat-q'), ans = document.getElementById('chat-answer'); q.value = 'Why is Freeport flow unverified?'; window.__first = null; window.__t0 = performance.now(); "
+             "new MutationObserver(() => { if (window.__first === null && ans.textContent.length > 20) window.__first = performance.now() - window.__t0; }).observe(ans, { childList: true, subtree: true, characterData: true }); "
+             "document.getElementById('chat-form').requestSubmit(); return 1; })()")
+        wait_js("window.__first !== null", 8)
+        first_ms = c.js("window.__first")
+        check(f"answer text starts rendering in under 500 ms of the submit, measured in the browser: {first_ms and round(first_ms)} ms (V5)", first_ms is not None and first_ms < 500)
+        check("drawer expands into a split pane (answer left, citations right)", bool(c.js("(() => { const b = document.getElementById('chatbar'); const m = document.querySelector('.chat-main').getBoundingClientRect(), s = document.querySelector('.chat-side').getBoundingClientRect(); return b.dataset.open === 'true' && s.left > m.left + 50 && s.width > 100; })()")))
+        check("answer completes and states the collector is pending, citing the cutoff shown in the header (V3, V4)", wait_js("/first event/.test(document.getElementById('chat-meta').textContent)", 180) and bool(c.js("(() => { const t = document.getElementById('chat-answer').textContent, m = document.getElementById('chat-meta').textContent, a = document.getElementById('asof').textContent.replace('as of ', '').split(' · ')[0].replace(' ', 'T'); return /pending/i.test(t) && m.includes('cutoff ' + a); })()")))
+        print("      answer:", str(c.js("document.getElementById('chat-answer').textContent"))[:240].replace("\n", " "), "|", str(c.js("document.getElementById('chat-meta').textContent"))[:200])
+        check("citations list knowledge nodes with their domain role", bool(c.js("(() => { const bs = [...document.querySelectorAll('#chat-nodes .chat-node-btn')]; return bs.length >= 1 && /(market narrative|physical fundamental|pricing parameter)/.test(bs[0].textContent); })()")))
+        if a.chat_shot:
+            shot("document.getElementById('chatbar')", a.chat_shot)
+        check("cite-to-highlight: clicking a cited node selects it in the knowledge library (R3.4)", bool(c.js("(() => { const b = document.querySelector('#chat-nodes .chat-node-btn'); b.click(); return true; })()")) and wait_js("document.querySelectorAll('.kg-node.sel').length === 1 && document.getElementById('kg-detail').textContent.length > 40", 8))
+        c.js("(() => { const r = document.querySelector('.drv-row:not(.pend)'); r.click(); return 1; })()")
+        check("click-to-ask: the pinned tooltip offers 'Ask Ollama about this' (R3.3)", wait_js("!!document.querySelector('#ngl-tip .tip-ask')", 4))
+        c.js("(() => { document.querySelector('#ngl-tip .tip-ask').click(); return 1; })()")
+        check("click-to-ask pre-loads the metric context into the chat (facts carry the lineage)", wait_js("/Explain/.test(document.getElementById('chat-q').value)", 4) and wait_js("/Metric under discussion|payload hash/.test(document.getElementById('chat-facts').textContent)", 60))
+        wait_js("/first event/.test(document.getElementById('chat-meta').textContent)", 180)
+        c.js("(() => { NGLTip.hide(); document.getElementById('chat-toggle').click(); return 1; })()")
+        check("chat can be collapsed again", bool(c.js("document.getElementById('chatbar').dataset.open === 'false'")))
         hover("source table row", "document.querySelector('#sources tbody tr')", ["Agent", "Available (PIT)"], None)
         hover("source table header", "document.querySelectorAll('#sources thead th')[5]", ["earliest moment", "look-ahead"], None)
         hover("knowledge node", "document.querySelector('#kg .kg-node')", ["Where it came from", "Available (PIT)"], "tip_kg_node")

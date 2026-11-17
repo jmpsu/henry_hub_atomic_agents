@@ -14,6 +14,22 @@
   <div class="asof" id="asof">loading</div>
 </header>
 
+<section class="chatbar" id="chatbar" data-open="false" aria-label="Ask the data">
+  <form id="chat-form" class="chat-row" autocomplete="off">
+    <label class="chat-label" for="chat-q">ASK</label>
+    <input id="chat-q" type="text" maxlength="800" placeholder="Ask about a terminal, a hub, the forward curve, a pending feed…">
+    <button type="submit" id="chat-go">Ask</button>
+    <button type="button" id="chat-toggle" aria-expanded="false" aria-controls="chat-drawer" title="Expand or collapse">&#9662;</button>
+  </form>
+  <div class="chat-chips" id="chat-chips"></div>
+  <div class="chat-drawer" id="chat-drawer">
+    <div class="chat-split">
+      <div class="chat-main"><div class="chat-meta" id="chat-meta"></div><div class="chat-answer" id="chat-answer" aria-live="polite"></div><div class="chat-facts" id="chat-facts"></div></div>
+      <aside class="chat-side"><h3>Cited knowledge nodes</h3><div id="chat-nodes"></div><h3>Cited documents</h3><div id="chat-docs"></div></aside>
+    </div>
+  </div>
+</section>
+
 <nav class="controls" aria-label="Market selection">
   <div class="seg" id="product-seg" role="group" aria-label="Product"></div>
   <div class="seg" id="timeframe-seg" role="group" aria-label="Timeframe"></div>

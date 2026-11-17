@@ -30,7 +30,7 @@ Created 2026-11-17 from the user's pasted requirement messages plus the LNG spec
 | G3 | "Do not stop until you have some working form of populating these elements of the final output" (the elements listed in section 4, rows E1-E8) | ◐ | ◐ | ☐ | Not started beyond the existing EIA monthly series. |
 | G4 | Reconstruct missing LNG feedgas flows for 8 terminals from physical/operational/mass-balance proxies without contaminating the forward price model (section 5). | ◐ | ◐ | ☐ | Not started. Existing: EIA monthly exports only. |
 | G5 | Classify and integrate the 7 fundamental elements as Direct Ingested Inputs vs Separately Calculated Orthogonal Modules, with graph nodes, tooltips and Ollama context (section 6). | ◐ | ◐ | ☐ | Not started. |
-| G6 | Ollama-powered RAG and Graph-RAG chat interface on markets.joeysvault.app, in four phases (section 7). | ☐ | ☐ | ☐ | Not started. |
+| G6 | Ollama-powered RAG and Graph-RAG chat interface on markets.joeysvault.app, in four phases (section 7). | ☑ | ☑ | ☐ | Not started. |
 | G7 | Everything fulfilled, implemented, tested and pushed to the final code location so that a complete test run can be done (section 10). | ☐ | ☐ | ☐ | |
 
 ## 3. G1 detail: LNG forward price (from the user's message and the LNG spec it references)
@@ -159,7 +159,7 @@ Note: the existing EIA monthly series are in **MMcf/month** (as published), not 
 | N1e | `Fractionation_Rejection_Econ → [modifies_dry_gas_supply] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
 | N1f | `EIA_Border_Pipeline_Volumes → [feeds_net_exports] → Forward_Pricing_Model` | ☑ | ☑ | ☐ |
 | N2 | Dashboard: attach the dotted-underline hover/pin metadata to **each of the 7 rows** under "Production & fundamental elements behind the calculation" showing **Current Value, Frequency, Collector Status (active vs bootstrapped proxy), Raw Payload Hash**. | ☑ | ☑ | ☐ |
-| N3 | When a user asks Ollama how the forward curve is built, Ollama retrieves **all 7 graph nodes**, **cites the exact PDFs/methodologies in `/home/joey/Projects/energy_market_intelligence`** governing each formula, and explicitly distinguishes **direct EIA/NOAA actuals** from **bootstrapped LNG feedgas** and **calculated ethane rejection**. | ☐ | ☐ | ☐ |
+| N3 | When a user asks Ollama how the forward curve is built, Ollama retrieves **all 7 graph nodes**, **cites the exact PDFs/methodologies in `/home/joey/Projects/energy_market_intelligence`** governing each formula, and explicitly distinguishes **direct EIA/NOAA actuals** from **bootstrapped LNG feedgas** and **calculated ethane rejection**. | ☑ | ☑ | ☐ |
 
 Existing tooltips (release 1.0.5) already show source, available (PIT) time, quality and payload hash for driver rows; "frequency" and "active vs bootstrapped proxy" are not yet shown. Hence N2 ◐.
 
@@ -171,47 +171,47 @@ Goal statement: "integrate an Ollama-powered RAG & Graph-RAG chat interface into
 
 | ID | Requirement | I | T | P |
 |---|---|---|---|---|
-| R1.1 | Layer 1, PIT guardrails: enforce strict `as_of_timestamp` filtering across **all** vector and graph queries. | ☐ | ☐ | ☐ |
-| R1.2 | Every PDF chunk, graph node and database metric carries an `available_at` timestamp, so neither the chatbot nor backtested forward-pricing calculations have look-ahead bias. | ☐ | ☐ | ☐ |
-| R1.3 | Layer 2, document and PDF ingestion: parse **all PDFs and research resources** in `/home/joey/Projects/energy_market_intelligence` with **layout-aware chunking** (preserving tables, formulas, terminal specs). | ☐ | ☐ | ☐ |
-| R1.4 | Embed chunks with a **local Ollama embedding model** (e.g., `nomic-embed-text` or `mxbai-embed-large`). | ◐ | ◐ | ☐ |
-| R1.5 | Knowledge-graph edges: link extracted entities (e.g., Sabine Pass, Mont Belvieu, Henry Hub, Frac Spread, Creole Trail Pipeline) directly to the existing graphical vector nodes. | ☐ | ☐ | ☐ |
-| R1.6 | Multi-hop retrieval: hybrid search returning top-k dense vector chunks **and 1-to-2 hop graph neighbours** (e.g., a terminal outage PDF note linked to its downstream pipeline node and forward-curve sensitivity). | ☐ | ☐ | ☐ |
-| R1.7 | Layer 3, separation of concerns: tag every ingested knowledge object with a `domain_role` flag: `market_narrative`, `physical_fundamental` or `pricing_parameter`. | ☐ | ☐ | ☐ |
-| R1.8 | Forward-pricing engine reads **only** `physical_fundamental` and `pricing_parameter` nodes (e.g., physical LNG mass-balance proxies, heat rates, storage capacities); narrative commentary never touches pricing weights. | ☐ | ☐ | ☐ |
-| R1.9 | Chatbot gets **read-only** access across all three roles plus live collector status, so it can explain why a price moved and how it was calculated. | ☐ | ☐ | ☐ |
+| R1.1 | Layer 1, PIT guardrails: enforce strict `as_of_timestamp` filtering across **all** vector and graph queries. | ☑ | ☑ | ☐ |
+| R1.2 | Every PDF chunk, graph node and database metric carries an `available_at` timestamp, so neither the chatbot nor backtested forward-pricing calculations have look-ahead bias. | ☑ | ☑ | ☐ |
+| R1.3 | Layer 2, document and PDF ingestion: parse **all PDFs and research resources** in `/home/joey/Projects/energy_market_intelligence` with **layout-aware chunking** (preserving tables, formulas, terminal specs). | ☑ | ☑ | ☐ |
+| R1.4 | Embed chunks with a **local Ollama embedding model** (e.g., `nomic-embed-text` or `mxbai-embed-large`). | ☑ | ☑ | ☐ |
+| R1.5 | Knowledge-graph edges: link extracted entities (e.g., Sabine Pass, Mont Belvieu, Henry Hub, Frac Spread, Creole Trail Pipeline) directly to the existing graphical vector nodes. | ☑ | ☑ | ☐ |
+| R1.6 | Multi-hop retrieval: hybrid search returning top-k dense vector chunks **and 1-to-2 hop graph neighbours** (e.g., a terminal outage PDF note linked to its downstream pipeline node and forward-curve sensitivity). | ☑ | ☑ | ☐ |
+| R1.7 | Layer 3, separation of concerns: tag every ingested knowledge object with a `domain_role` flag: `market_narrative`, `physical_fundamental` or `pricing_parameter`. | ☑ | ☑ | ☐ |
+| R1.8 | Forward-pricing engine reads **only** `physical_fundamental` and `pricing_parameter` nodes (e.g., physical LNG mass-balance proxies, heat rates, storage capacities); narrative commentary never touches pricing weights. | ☑ | ☑ | ☐ |
+| R1.9 | Chatbot gets **read-only** access across all three roles plus live collector status, so it can explain why a price moved and how it was calculated. | ☑ | ☑ | ☐ |
 
 **Phase 2: backend API and Ollama orchestration (FastAPI or Node/Python service inside `/home/joey/Projects/energy_market_intelligence`)**
 
 | ID | Requirement | I | T | P |
 |---|---|---|---|---|
-| R2.0 | Build a lightweight FastAPI or Node/Python service bridging the frontend chat box, the local database and Ollama. | ☐ | ☐ | ☐ |
-| R2.1 | Context assembly on every prompt, step 1: **intent and entity router** extracting hubs, terminals or metrics (e.g., "Why is Sabine Pass flow unverified?", "How does ethane frac spread impact Henry Hub?"). | ☐ | ☐ | ☐ |
-| R2.2 | Step 2: **live telemetry and collector-state injection**: query the local PIT database and the source-availability table for real-time status (pending collector, raw payload hash, last valid timestamp, active alerts). | ☐ | ☐ | ☐ |
-| R2.3 | Step 3: **graph-vector context retrieval**: matching PDF passages, methodology definitions and connected graph-node relationships **up to the active UI cutoff time**. | ☐ | ☐ | ☐ |
-| R2.4 | Grounding: system prompt (e.g., llama3.1, qwen2.5 or deepseek-r1 locally) must **never hallucinate missing collector values**; if a feed has no data, state the collector is pending and cite the last verified PIT value or the bootstrapped proxy. | ☐ | ☐ | ☐ |
-| R2.5 | Return **structured JSON alongside streamed text** with `cited_nodes` and `cited_documents` so the UI can highlight them in the existing Vector knowledge library explorer. | ☐ | ☐ | ☐ |
+| R2.0 | Build a lightweight FastAPI or Node/Python service bridging the frontend chat box, the local database and Ollama. | ☑ | ☑ | ☐ |
+| R2.1 | Context assembly on every prompt, step 1: **intent and entity router** extracting hubs, terminals or metrics (e.g., "Why is Sabine Pass flow unverified?", "How does ethane frac spread impact Henry Hub?"). | ☑ | ☑ | ☐ |
+| R2.2 | Step 2: **live telemetry and collector-state injection**: query the local PIT database and the source-availability table for real-time status (pending collector, raw payload hash, last valid timestamp, active alerts). | ☑ | ☑ | ☐ |
+| R2.3 | Step 3: **graph-vector context retrieval**: matching PDF passages, methodology definitions and connected graph-node relationships **up to the active UI cutoff time**. | ☑ | ☑ | ☐ |
+| R2.4 | Grounding: system prompt (e.g., llama3.1, qwen2.5 or deepseek-r1 locally) must **never hallucinate missing collector values**; if a feed has no data, state the collector is pending and cite the last verified PIT value or the bootstrapped proxy. | ☑ | ☑ | ☐ |
+| R2.5 | Return **structured JSON alongside streamed text** with `cited_nodes` and `cited_documents` so the UI can highlight them in the existing Vector knowledge library explorer. | ☑ | ☑ | ☐ |
 
 **Phase 3: frontend (markets.joeysvault.app), preserving hover/pin tooltips and the dark terminal look**
 
 | ID | Requirement | I | T | P |
 |---|---|---|---|---|
-| R3.1 | Collapsible top command and chat bar mounted directly **beneath the top navigation header** ("← joeysvault.app / MARKETS.JOEYSVAULT.APP"). | ☐ | ☐ | ☐ |
-| R3.2 | Compact when idle (**1-line input + quick-prompt chips**) so charts stay above the fold; expands smoothly into a **split-pane drawer** when active. | ☐ | ☐ | ☐ |
-| R3.3 | **Click-to-Ask:** add an **"Ask Ollama about this"** trigger inside the existing pin tooltip; clicking pre-loads that metric's formula, raw payload hash and lineage into the chat context. | ☐ | ☐ | ☐ |
-| R3.4 | **Cite-to-Highlight:** clicking a source badge in an answer selects and centres that node in the Vector knowledge library section below. | ☐ | ☐ | ☐ |
-| R3.5 | Preserve the existing interactive hover/pin architecture and dark-mode terminal aesthetic. | ☐ | ☐ | ☐ |
+| R3.1 | Collapsible top command and chat bar mounted directly **beneath the top navigation header** ("← joeysvault.app / MARKETS.JOEYSVAULT.APP"). | ☑ | ☑ | ☐ |
+| R3.2 | Compact when idle (**1-line input + quick-prompt chips**) so charts stay above the fold; expands smoothly into a **split-pane drawer** when active. | ☑ | ☑ | ☐ |
+| R3.3 | **Click-to-Ask:** add an **"Ask Ollama about this"** trigger inside the existing pin tooltip; clicking pre-loads that metric's formula, raw payload hash and lineage into the chat context. | ☑ | ☑ | ☐ |
+| R3.4 | **Cite-to-Highlight:** clicking a source badge in an answer selects and centres that node in the Vector knowledge library section below. | ☑ | ☑ | ☐ |
+| R3.5 | Preserve the existing interactive hover/pin architecture and dark-mode terminal aesthetic. | ☑ | ☑ | ☐ |
 
 **Phase 4: verification checklist ("before deploying to production, audit these six critical checkpoints")**
 
 | ID | Audit area | Verification requirement | I | T | P |
 |---|---|---|---|---|---|
-| V1 | Corpus completeness | 100% of PDFs, markdown notes and methodology docs in `/home/joey/Projects/energy_market_intelligence` are indexed **with hash tracking so updated files re-index automatically**. | ☐ | ☐ | ☐ |
-| V2 | Forward-pricing isolation | Forward-pricing scripts read only orthogonal physical inputs and parameter nodes, **never LLM-generated text or unverified narrative summaries**. | ☐ | ☐ | ☐ |
-| V3 | Cutoff synchronization | The chat API respects the exact PIT cutoff timestamp displayed on the dashboard. | ☐ | ☐ | ☐ |
-| V4 | Missing-collector handling | Test queries on pending-collector / no-data feeds (e.g., Freeport, Corpus Christi) confirm Ollama cites collector status and fallback proxies rather than guessing. | ☐ | ☐ | ☐ |
-| V5 | Streaming and latency | Token streaming (SSE) from Ollama so responses **begin rendering in under 500 ms** without blocking chart interactions. | ☐ | ☐ | ☐ |
-| V6 | Audit logging | Log every prompt, retrieved graph node ID, PDF chunk ID and model response **locally** for provenance parity with the agent roster. | ☐ | ☐ | ☐ |
+| V1 | Corpus completeness | 100% of PDFs, markdown notes and methodology docs in `/home/joey/Projects/energy_market_intelligence` are indexed **with hash tracking so updated files re-index automatically**. | ☑ | ☑ | ☐ |
+| V2 | Forward-pricing isolation | Forward-pricing scripts read only orthogonal physical inputs and parameter nodes, **never LLM-generated text or unverified narrative summaries**. | ☑ | ☑ | ☐ |
+| V3 | Cutoff synchronization | The chat API respects the exact PIT cutoff timestamp displayed on the dashboard. | ☑ | ☑ | ☐ |
+| V4 | Missing-collector handling | Test queries on pending-collector / no-data feeds (e.g., Freeport, Corpus Christi) confirm Ollama cites collector status and fallback proxies rather than guessing. | ☑ | ☑ | ☐ |
+| V5 | Streaming and latency | Token streaming (SSE) from Ollama so responses **begin rendering in under 500 ms** without blocking chart interactions. | ◐ | ◐ | ☐ |
+| V6 | Audit logging | Log every prompt, retrieved graph node ID, PDF chunk ID and model response **locally** for provenance parity with the agent roster. | ☑ | ☑ | ☐ |
 
 Open input requested by the user's source text: "share: your frontend and backend stack (e.g., React/Next.js, Python FastAPI/Flask, SQLite/PostgreSQL, and current vector store like Chroma, Qdrant, or pgvector)" and "which Ollama models you currently have pulled locally". (Discoverable facts from this session: frontend is plain JS + d3 + maplibre + deck.gl served by FastAPI `markets_hub`; DB is SQLite; vectors are float32 BLOBs in `kb_nodes` plus a Chroma mirror; Ollama has `qwen3:4b` and `nomic-embed-text`. Not yet provided to the user as an answer.)
 
@@ -392,3 +392,17 @@ Written by the implementation run of docs/IMPLEMENT_GOAL_CHECKLIST.md. Each entr
 - **N1/N1a-f:** 8 first-class graph nodes in `kb_nodes` (domain `fundamentals`: M1-M7 definitions + `Forward_Pricing_Model`), embedded with nomic-embed-text, and the six named edges (`feeds_supply`, `feeds_rescomm_demand`, `feeds_inventory_balance`, `calibrated_by` (M4 -> M6), `modifies_dry_gas_supply`, `feeds_net_exports`) stored as non-derived edge types that survive `rebuild_edges`. The edge legend and the `Forward_Pricing_Model` node text say they are **declared by the requirement, not measured causation, and no calculation consumes them yet**. Live ingest: 8 new nodes, 6 declared edges. Checkpoint `henry_hub_pit.db.pre-kbnodes.20261117T122728Z`.
 - **N2:** hover/pin tooltip on each of the 7 rows shows Current value, Frequency, Collector status (active collector / bootstrapped proxy / pending collector), Raw payload hash(es), the calculations it feeds and its blockers. Verified in headless Chrome (45/45); screenshot `docs/poc/fundamentals.png`.
 - **N3 not yet done:** it needs the chat/Ollama retrieval (G6, section 2e); it will retrieve all 7 nodes and cite the PDFs under `/home/joey/Projects/energy_market_intelligence`.
+
+### 2e: G6 chat bar, grounded Ollama chat, research-library ingestion, N3 (implemented 2026-11-17)
+
+- **Files:** `chat_service.py` (router, telemetry, hybrid retrieval, grounded answer, audit), `knowledge_roles.py`, `emi_ingest.py`, hub routes `POST /api/chat` and `POST /api/chat/stream` (SSE), chat bar + drawer + Ask-Ollama tooltip action + cite-to-highlight in `web/`, entity nodes in `kb_ingest.py`, `scripts/verify_chat_live.py`. Tests: `tests/test_chat_g6.py` (24). Full suite 287 passed. Browser: 55/55 (`scripts/verify_tooltips.py`); live model: all checks of `scripts/verify_chat_live.py` pass. Screenshot `docs/poc/chat_bar.png`.
+- **R1.1/R1.2/V3 (PIT):** every retrieval (knowledge nodes, 1-2 hop neighbours, research chunks, telemetry state) is limited to the cutoff, and the page sends the exact cutoff it displays (`state.as_of`). Live: at cutoff 2026-11-16T12:00Z the nodes and documents created on 2026-11-17 are not retrievable (3 nodes, 0 documents).
+- **R1.3/V1 corpus:** `python emi_ingest.py` indexed **398 of 398** corpus files (286 md, 108 txt, 4 odt; 100.00 % coverage; 1,971 chunks; 0 errors; embeddings nomic-embed-text) with sha256 tracking: unchanged files are skipped, a changed file becomes a new document and its predecessor is superseded (`superseded_epoch`, so earlier cutoffs still see the older text), a removed file is superseded; a re-sync indexed 0 new / 398 unchanged. **Note:** the `energy_market_intelligence` tree contains no PDF files; the PDFs the library holds (10 papers + 6 news) were ingested earlier from `/home/joey/Documents/ngl_study_journals`. Layout-aware chunking keeps tables, fenced code and $$ formulas whole under their heading trail (a test found and fixed a bug that dropped short formulas). 238 chunks labelled "SYNTHETIC HYPOTHETICAL DATA" are never cited.
+- **R1.5:** 14 entity nodes (8 terminals, Mont Belvieu, Conway, Henry Hub, Waha, Frac Spread, Creole Trail Pipeline) with `mentions` edges to every node whose text names them (derived, recomputed per ingest). **R1.6:** hybrid retrieval = dense top-k + 1-2 hop neighbours over the non-derived edge types (the user-requested example, an outage note linked to its pipeline and curve node, is the same mechanism).
+- **R1.7/R1.8/V2:** `domain_role` stored in side tables `kb_roles` (412+14 nodes: 330 market_narrative, 81 physical_fundamental, 1 pricing_parameter before entities) and `lit_roles` (414 documents, all market_narrative: no library quote has qualified as a parameter). An AST test proves the price modules (`lng_forward`, `lng_config`, `frac_module`, `lng_feedgas`, `fundamentals`) import no chat, model, knowledge-store or HTTP code; `assert_pricing_input` rejects `market_narrative`. **O13-R re-run over the full library:** no verbatim quote states k or L acceptably, so the labelled defaults (k 1.15, L 2.50) stay.
+- **R2.x grounding and what the live run taught:** (1) `qwen3:4b` narrated its reasoning in free text, so answers are schema-constrained JSON and streamed through an extractor; (2) it asserted a cause ("rose due to force majeure"), so `why` answers containing causal wording are withheld, and the actual price move is now a grounded fact; (3) it presented the bootstrapped proxy (3.037 Bcf/d) as a "last verified value", so any proxy number must be called a proxy or the model text is withheld; (4) citation tags must point at provided items; every number must appear in what the model was shown. A withheld model answer is replaced by the deterministic answer and the verdict is shown. My own first R1.9 check passed that causal answer (loose regex): it was tightened.
+- **N3 (live):** `How is the forward curve built?` retrieves all 7 element nodes + `Forward_Pricing_Model`, names governing documents per topic from the research library, and the answer separates direct EIA/NOAA actuals, the bootstrapped feedgas proxy and the calculated ethane rejection, and states that none moves the forward price (O6). On this CPU-only host the model's free-text answer usually fails that distinction gate, so the deterministic structured answer is what the user sees.
+- **V5 (partial, honest):** SSE first event 14-25 ms, facts + deterministic answer 22-170 ms server-side, **245 ms to first visible text in the browser** (< 500 ms). The local model's own first token takes 10-30 s because inference is CPU-only (18 threads, 0 GB VRAM) and both Ollama models stay resident; this is hardware, not code. Activating faster model tokens needs a GPU or a smaller model (`HH_CHAT_MODEL=off` disables the model and keeps the deterministic answer).
+- **V4 (live):** Freeport and Corpus Christi (collector pending) answers say the collector is pending, quote only numbers present in the facts, and name the bootstrapped proxy as a proxy. **V6:** every turn is appended to `runtime/chat_log.db` (prompt, cutoff, intent, node ids, chunk ids, fact ids, model, verdict, answer, timings); the chat reads the market database through read-only connections and never writes to it.
+- **R3.3/R3.4:** pinned tooltips show `Ask Ollama about this`; the client sends only the metric id and agent id and the server rebuilds the metric's explanation and lineage from its own payload (a forged client text field is ignored: tested). Cited node badges select, pulse and scroll to the node in the Vector knowledge library.
+- **Backups:** `runtime/literature_kb.db.pre-emi.20261117T123302Z`, `henry_hub_pit.db.pre-roles.20261117T124600Z`, `henry_hub_pit.db.pre-entities.*`. **O4 note:** the EMI NGL study guide (the methodology) tabulates ethane at 0.0665 MMBtu/gal while the requirement says ~0.0664; the code uses the requirement's 0.0664 (difference 0.15 %).

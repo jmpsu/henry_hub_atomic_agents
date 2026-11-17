@@ -21,6 +21,7 @@ Long source documents are chunked (chunk_text: paragraph boundaries, overlap on 
 from __future__ import annotations
 
 import hashlib
+import re
 import json
 import os
 import sqlite3
@@ -90,6 +91,7 @@ def _obj(domain, series_key, period, title, document, agents, available, source_
             "published_timestamp": published or available, "source_id": source_id, "raw_payload_hash": raw_hash or "", "provenance": provenance}
 
 
+DEFINED_AT = "2026-11-17T00:00:00Z"      # when the entity dictionary was adopted (availability of the entity nodes)
 CHUNK_CHARS, CHUNK_OVERLAP = 1800, 200
 
 
@@ -248,6 +250,35 @@ def build_objects(conn, weeks: int = 12, months: int = 12) -> list:
     return out
 
 
+# R1.5: named entities as first-class nodes, linked to every existing node whose text mentions them. (name, pattern, plain definition; no market values)
+ENTITIES = [("Sabine Pass", r"sabine pass", "Sabine Pass LNG, a US Gulf Coast LNG export terminal in Louisiana."), ("Corpus Christi", r"corpus christi", "Corpus Christi LNG, a US LNG export terminal in Texas."),
+            ("Freeport", r"freeport", "Freeport LNG, a US LNG export terminal in Texas (electric-drive liquefaction)."), ("Cameron", r"\bcameron\b", "Cameron LNG, a US LNG export terminal in Louisiana."),
+            ("Calcasieu Pass", r"calcasieu pass", "Calcasieu Pass LNG, a US LNG export terminal in Louisiana."), ("Plaquemines", r"plaquemines", "Plaquemines LNG, a US LNG export terminal in Louisiana."),
+            ("Elba Island", r"elba", "Elba Island LNG, a US LNG export terminal in Georgia."), ("Cove Point", r"cove point", "Cove Point LNG, a US LNG export terminal in Maryland."),
+            ("Mont Belvieu", r"mont belvieu", "Mont Belvieu, the Texas Gulf Coast NGL trading and fractionation hub."), ("Conway", r"\bconway\b", "Conway, the Kansas Midcontinent NGL hub."),
+            ("Henry Hub", r"henry hub", "Henry Hub, the Louisiana natural gas pricing point of the NYMEX futures contract."), ("Waha", r"\bwaha\b", "Waha, the West Texas natural gas hub."),
+            ("Frac Spread", r"frac(?:tionation)? spread", "The frac spread, the value of ethane as fuel minus the gas price; it decides ethane recovery or rejection."),
+            ("Creole Trail Pipeline", r"creole trail", "Creole Trail Pipeline, an interstate pipeline serving the Sabine Pass LNG terminal.")]
+ENTITY_ROLE_DOMAIN = "entity"
+
+
+def link_entities(conn) -> int:
+    """Create (idempotently) one node per entity and 'mentions' edges entity -> every non-entity node whose text mentions it. Derived: recomputed on every ingest."""
+    conn.execute("DELETE FROM kb_edges WHERE type='mentions'")
+    n, now_ep = 0, epoch(DEFINED_AT)
+    for name, pat, defn in ENTITIES:
+        nid = node_id(ENTITY_ROLE_DOMAIN, f"entity_{name}:definition")
+        conn.execute("INSERT OR IGNORE INTO kb_nodes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                     (nid, ENTITY_ROLE_DOMAIN, f"entity_{name}", "definition", name, defn, "entity_dictionary", "", DEFINED_AT, now_ep, DEFINED_AT, "", "source_document",
+                      hashlib.sha256(defn.encode()).hexdigest(), DEFINED_AT, None))
+        rx = re.compile(pat, re.I)
+        for oid, title, doc in conn.execute("SELECT id, title, document FROM kb_nodes WHERE domain<>? AND domain<>'fundamentals'", (ENTITY_ROLE_DOMAIN,)).fetchall():
+            if rx.search(title or "") or rx.search(doc or ""):
+                conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (nid, oid, "mentions", None))
+                n += 1
+    return n
+
+
 # N1: relation names from the requirement. Stored as non-derived edge types (rebuild_edges keeps them); they are declarations, not measured causation.
 DECLARED_EDGES = [("M1", "feeds_supply", None), ("M2", "feeds_rescomm_demand", None), ("M3", "feeds_inventory_balance", None), ("M4", "calibrated_by", "M6"),
                   ("M5", "modifies_dry_gas_supply", None), ("M7", "feeds_net_exports", None)]
@@ -321,6 +352,9 @@ def ingest(db_path: str, collection=None, embedder=embed, now: str | None = None
                     conn.execute("INSERT OR IGNORE INTO kb_edges VALUES (?,?,?,?)", (parent, nid, "builds_on", None))
         edges = rebuild_edges(conn)
         edges["declared_requirement_edges"] = declare_edges(conn)
+        edges["entity_mentions"] = link_entities(conn)
+        import knowledge_roles
+        edges["roles_tagged"] = knowledge_roles.tag_kb(conn)            # R1.7: every node carries a domain_role (market_narrative / physical_fundamental / pricing_parameter)
         conn.commit()
         total = conn.execute("SELECT COUNT(*) FROM kb_nodes").fetchone()[0]
         return {"objects_built": len(objs), "new": new, "changed": changed, "mirrored_theses": mirrored, "nodes_total": total, **edges}
@@ -406,6 +440,7 @@ EDGE_LEGEND = {"previous_in_series": "prior object of the same series", "same_pe
                "builds_on": "thesis generated with the linked node in context", "semantic_neighbor": "nearest earlier object by embedding similarity (not causation)",
                "evidence_for": "knowledge an agent cited when it produced the finding", "evaluated_by": "hypothesis tested by a PIT walk-forward backtest",
                "part_of": "a chunk of a longer source document (parent-child)",
+               "mentions": "a named entity (terminal, hub, pipeline, spread) appears in the text of the linked node",
                **{t: "relation declared by the requirement; no calculation consumes this input yet (not measured causation)" for _s, t, _d in DECLARED_EDGES}}
 
 
