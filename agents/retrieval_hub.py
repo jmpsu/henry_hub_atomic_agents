@@ -1,26 +1,44 @@
+from __future__ import annotations
+import os
+import sys
 
-# Bypass NLTK stopwords permission and lookup errors in CI
+# Configure NLTK to use a private user directory to prevent permission errors in CI
+os.environ["NLTK_DATA"] = os.path.expanduser("~/nltk_data")
 try:
-    from llama_index.core.utils import globals_helper
-    if getattr(globals_helper, "_stopwords", None) is None:
-        globals_helper._stopwords = {
-            "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
-            "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can't",
-            "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during",
-            "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having",
-            "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how",
-            "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself",
-            "let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once",
-            "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she",
-            "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the",
-            "their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll",
-            "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was",
-            "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's",
-            "where", "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would",
-            "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
-        }
+    import nltk
+    user_nltk_dir = os.path.expanduser("~/nltk_data")
+    os.makedirs(user_nltk_dir, exist_ok=True)
+    if user_nltk_dir not in nltk.data.path:
+        nltk.data.path.insert(0, user_nltk_dir)
 except Exception:
     pass
+
+# Pre-populate LlamaIndex globals_helper stopwords
+try:
+    from llama_index.core.utils import globals_helper
+    default_sw = {
+        "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
+        "as", "at", "be", "because", "been", "before", "being", "below", "between", "both", "but", "by",
+        "can't", "cannot", "could", "couldn't", "did", "didn't", "do", "does", "doesn't", "doing", "don't",
+        "down", "during", "each", "few", "for", "from", "further", "had", "hadn't", "has", "hasn't", "have",
+        "haven't", "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him",
+        "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is",
+        "isn't", "it", "it's", "its", "itself", "let's", "me", "more", "most", "mustn't", "my", "myself",
+        "no", "nor", "not", "of", "off", "on", "once", "only", "or", "other", "ought", "our", "ours",
+        "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd", "she'll", "she's", "should",
+        "shouldn't", "so", "some", "such", "than", "that", "that's", "the", "their", "theirs", "them",
+        "themselves", "then", "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've",
+        "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "wasn't", "we",
+        "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "what's", "when", "when's", "where",
+        "where's", "which", "while", "who", "who's", "whom", "why", "why's", "with", "won't", "would",
+        "wouldn't", "you", "you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves"
+    }
+    globals_helper._stopwords = default_sw
+except Exception:
+    pass
+
+# Bypass NLTK stopwords permission and lookup errors in CI
+
 
 """LlamaIndex Multi-Engine Retrieval Hub (QUANT_HUB_SPEC section 2).
 
@@ -44,8 +62,6 @@ only nodes whose metadata `available_timestamp <= as_of` are returned (mirroring
 Both indexes are held in a llama_index StorageContext pointed at `storage_dir`; `save()` persists it, and
 `load(storage_dir, ...)` rebuilds the hub so persistent knowledge across runs is available to agents.
 """
-from __future__ import annotations
-
 import os
 from datetime import datetime, timezone
 from pathlib import Path
