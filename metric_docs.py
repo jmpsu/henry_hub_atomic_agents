@@ -11,6 +11,7 @@ from typing import Callable
 
 import lng_config as lc
 import lng_forward as lf
+import lng_global as lg
 
 
 def _d(fn: Callable, name: str):
@@ -120,6 +121,14 @@ def build(me) -> dict:
                            lf.NETBACK_FORMULA, {"shipping_usd_mmbtu": lc.SHIPPING_USD_MMBTU, "regas_usd_mmbtu": lc.REGAS_USD_MMBTU, "mmbtu_per_mwh": lc.MMBTU_PER_MWH, "max_quote_age_days": lc.MAX_QUOTE_AGE_DAYS},
                            read="Margin = netback minus FOB cost. A month is shown only when its TTF quote and the EUR/USD quote were both available at the cutoff and traded within the age limit.",
                            caveat="TTF and EUR/USD are delayed, unofficial quotes. Shipping and regasification are labelled assumptions, and deferred TTF months can go days without trading, in which case no netback is shown. JKM has no free futures source, so it is pending a collector, never estimated."),
+        "lng_global": doc("Global LNG forward pricing model", "An integrated model that calculates all 20 LNG metrics for 24 monthly delivery periods. Observed point-in-time quotes anchor available months; missing inputs are estimated with calibrated fundamentals, facility marginal-cost stacks, engineering voyage economics, comparable-market relationships and correlated scenario simulation.",
+                          "marginal FOB = minimum available-facility cost at regional demand; netback = (destination price x delivered energy - voyage cost - regas - loading) / loaded energy; bands = P10/P50/P90 of simulated scenarios",
+                          {"delivery_months": lg.DELIVERY_COUNT, "model_version": lg.MODEL_VERSION},
+                          read="Gold cells are observed anchors; all other cells are modeled estimates. Low/base/high and confidence bands live in the tooltip behind every cell.",
+                          caveat="Estimates are not tradeable quotes. Facility costs, charter rates, boil-off, canal availability, basis and seasonal parameters are calibrated assumptions where observations are unavailable; the full parameter set and backtest result are in the model diagnostics drilldown."),
+        "lng_global_point": doc("Modeled LNG calculation for one delivery month", "One of the 20 global LNG calculations for a single monthly delivery period, with observed anchor, low/base/high scenarios and model confidence.",
+                                "P10 / P50 / P90 from correlated scenario simulation", read="Hover or focus the cell for the scenario distribution and the modeling diagnostics behind the value.",
+                                caveat="Observed anchors are point-in-time gated. All modeled inputs are deterministic for a given model version, calibration vintage and seed."),
         # ---- fundamentals
         "shale_total": doc("Shale gas, six basins", "Sum of the monthly-average production of the six roster basins (Appalachia, Permian, Haynesville, Eagle Ford, Bakken, DJ).", "sum of the six basin series (Bcf/d)",
                            caveat="Shown only when all six are present; it is a sum of six basins, not total U.S. production."),
@@ -153,4 +162,35 @@ def build(me) -> dict:
         "pit_rows": doc("Point-in-time rows", "Rows in the market database, each stamped with when it became available."),
         "kg_node": doc("Knowledge object", "A durable summary or source document stored in the vector knowledge library, with the time it became available and where it came from."),
     }
+    formulas = {
+        "hh_forward": "observed Henry Hub quote at the delivery month, otherwise base + seasonal amplitude with mean reversion",
+        "terminal_feedgas": "HH + terminal basis + terminal tariff + fuel share x HH",
+        "usgc_fob": "terminal feedgas x feed factor + liquefaction fee + loading cost",
+        "atlantic_fob": "cost of the lowest-cost available Atlantic facility that clears regional demand after outages",
+        "pacific_fob": "cost of the lowest-cost available Pacific facility that clears regional demand after outages",
+        "spark30s_atlantic_freight": "(charter x voyage days + fuel tons x days x fuel price + canal toll + port charge x cargo) / delivered energy",
+        "spark25s_pacific_freight": "(charter x voyage days + fuel tons x days x fuel price + canal toll + port charge x cargo) / delivered energy on the selected Pacific route",
+        "usgc_ttf_netback": "(TTF at arrival month x delivered energy - voyage cost - regas x delivered energy - loading x cargo) / loaded cargo energy",
+        "usgc_jkm_netback": "(JKM at arrival month x delivered energy - voyage cost - regas x delivered energy - loading x cargo) / loaded cargo energy",
+        "panama_cape_spread": "Panama netback - Cape netback, per MMBtu of loaded cargo",
+        "jkm_forward": "TTF + JKM basis + Asia winter premium + basis shock",
+        "ttf_forward": "TTF(EUR/MWh) x EURUSD / 3.412142, anchored to PIT quotes where available",
+        "nwe_des": "TTF + northwest Europe regas fee + regional basis shock",
+        "swe_des": "TTF + southwest Europe basis + regional basis shock",
+        "nbp_forward": "TTF + NBP basis + regional basis shock",
+        "wim_forward": "JKM - west India marker discount - regional basis shock",
+        "jkm_ttf_spread": "JKM - TTF - 0.55 x Pacific freight - 0.18 x absolute basis shock",
+        "winter_summer_spread": "mean of rolling winter-minus-summer spreads across Henry Hub, TTF, JKM and NBP",
+        "m1_m2_calendar_spread": "mean of M1-minus-M2 spreads across Henry Hub, TTF, JKM and NBP",
+        "brent_linked_parity": "(WTI + WTI-to-Brent premium) x Brent slope + constant",
+    }
+    for key, label, unit in lg.CALCULATIONS:
+        out[f"lng_{key}"] = doc(
+            label,
+            f"One of the 20 Global LNG Forward Pricing calculations. {label} is modeled for every delivery month M1-M24; PIT quotes anchor the months where they exist.",
+            formulas[key],
+            {"unit": unit, "model_version": lg.MODEL_VERSION},
+            read="The M1 card shows the P10-P90 range; the matrix shows P50 for M1-M24. Hover or focus a cell for the observed anchor, P25/P75, 95% interval, confidence and diagnostics.",
+            caveat="Modeled values are estimates, not observed market prices. Facility costs, freight, boil-off, basis, demand and seasonal parameters are explicit calibrated assumptions where observations are unavailable; provenance and vintage are in the API payload.",
+        )
     return out

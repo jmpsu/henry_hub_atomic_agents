@@ -410,6 +410,74 @@
     below(box, foot);
   }
 
+  const LNG_GLOBAL_DOCS = {
+    hh_forward: "lng_hh_forward", terminal_feedgas: "lng_terminal_feedgas", usgc_fob: "lng_usgc_fob", atlantic_fob: "lng_atlantic_fob",
+    pacific_fob: "lng_pacific_fob", spark30s_atlantic_freight: "lng_spark30s_atlantic_freight", spark25s_pacific_freight: "lng_spark25s_pacific_freight",
+    usgc_ttf_netback: "lng_usgc_ttf_netback", usgc_jkm_netback: "lng_usgc_jkm_netback", panama_cape_spread: "lng_panama_cape_spread",
+    jkm_forward: "lng_jkm_forward", ttf_forward: "lng_ttf_forward", nwe_des: "lng_nwe_des", swe_des: "lng_swe_des", nbp_forward: "lng_nbp_forward",
+    wim_forward: "lng_wim_forward", jkm_ttf_spread: "lng_jkm_ttf_spread", winter_summer_spread: "lng_winter_summer_spread",
+    m1_m2_calendar_spread: "lng_m1_m2_calendar_spread", brent_linked_parity: "lng_brent_linked_parity"
+  };
+
+  function renderLngGlobal(s) {
+    const root = $("lng-global"), tg = clear($("lng-global-tags")), g = (s.curves || {}).lng_global;
+    if (!root || !g || !g.calculations) return;
+    clear(root);
+    const items = Object.entries(g.calculations), months = g.delivery_months || [];
+    const d = g.diagnostics || {}, cal = g.calibration || {};
+    const fmt = (v, n) => fv(v, n == null ? 2 : n);
+    const spark = (values) => {
+      const ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), line = document.createElementNS(ns, "polyline");
+      const ys = values.map((v) => v.base).filter((v) => Number.isFinite(v));
+      const lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys), span = Math.max(hi - lo, 1e-9);
+      svg.setAttribute("viewBox", "0 0 132 30"); svg.setAttribute("width", "132"); svg.setAttribute("height", "30"); svg.setAttribute("class", "lng-spark");
+      line.setAttribute("points", values.map((v, i) => `${(i / Math.max(values.length - 1, 1)) * 128 + 2},${27 - ((v.base - lo) / span) * 24}`).join(" "));
+      line.setAttribute("fill", "none"); line.setAttribute("stroke", "#d7a94a"); line.setAttribute("stroke-width", "1.5");
+      svg.appendChild(line); return svg;
+    };
+    const cards = el("div", { class: "lng-card-grid" });
+    for (const [key, item] of items) {
+      const vals = item.values || [], first = vals[0] || {};
+      const card = el("div", { class: "lng-card" }, [el("div", { class: "lng-card-h", text: item.id }),
+        el("div", { class: "lng-card-v", text: `${fmt(first.base)} ${item.unit || ""}` }),
+        el("div", { class: "lng-card-r", text: `M1 ${fmt(first.low)} – ${fmt(first.high)} · ${vals.length} months` }), spark(vals)]);
+      T(LNG_GLOBAL_DOCS[key] || "lng_global", card, () => ({ title: item.id, value: `${fmt(first.base)} ${item.unit || ""}`,
+        sections: [{ h: "Model", rows: [["Calculation", key], ["Unit", item.unit], ["Delivery months", String(vals.length)], ["Provenance", g.provenance], ["Model version", g.model_version]] },
+          { h: "Method", rows: [["Marginal FOB", "facility-level cost ranking with available capacity"], ["Freight and netback", "voyage simulation with fuel, boil-off, canal, arrival timing and delivered energy"], ["Uncertainty", "low/base/high are P10/P50/P90 from correlated scenario simulation"]] }] }), "lngg_card_" + key);
+      cards.appendChild(card);
+    }
+    root.appendChild(cards);
+    const matrixWrap = el("div", { class: "lng-matrix-wrap" }), table = el("table", { class: "lng-matrix" }), thead = el("thead"), trh = el("tr");
+    trh.appendChild(el("th", { class: "lng-row-h", text: "Calculation" }));
+    for (const m of months) trh.appendChild(el("th", { text: m }));
+    thead.appendChild(trh); table.appendChild(thead);
+    const tbody = el("tbody");
+    for (const [key, item] of items) {
+      const row = el("tr"), label = el("th", { class: "lng-row-h", text: item.id });
+      T(LNG_GLOBAL_DOCS[key] || "lng_global", label, () => ({ title: item.id, value: item.unit }), "lngg_row_" + key);
+      row.appendChild(label);
+      item.values.forEach((v, i) => {
+        const cell = el("td", { class: v.observed != null ? "observed" : "", text: fmt(v.base) });
+        T(LNG_GLOBAL_DOCS[key] || "lng_global_point", cell, () => ({ title: `${item.id} · ${v.contract}`, value: `${fmt(v.base)} ${item.unit}`, badge: badgeOf(v.observed != null ? "measured" : g.provenance),
+          sections: [{ h: "Delivery", rows: [["Contract", v.contract], ["Delivery month", v.delivery_month], ["Observed anchor", v.observed == null ? "calibrated estimate" : fmt(v.observed, 3)]] },
+            { h: "Scenario distribution", rows: [["Low P10", fmt(v.low, 3)], ["P25", fmt(v.p25, 3)], ["Base P50", fmt(v.base, 3)], ["P75", fmt(v.p75, 3)], ["High P90", fmt(v.high, 3)], ["95% CI", `${fmt(v.ci_low, 3)} – ${fmt(v.ci_high, 3)}`], ["Model confidence", fmt(v.model_confidence, 3)]] },
+            { h: "Diagnostics", rows: [["Atlantic marginal plant", d.atlantic_marginal_facility], ["Pacific marginal plant", d.pacific_marginal_facility], ["Pacific route", d.pacific_route], ["Scenarios", String(d.scenario_count || "")]] }] }), "lngg_" + key + "_" + i);
+        row.appendChild(cell);
+      });
+      tbody.appendChild(row);
+    }
+    table.appendChild(tbody); matrixWrap.appendChild(table); root.appendChild(matrixWrap);
+    const foot = el("div", { class: "lng-global-foot" }, [el("span", { text: `${items.length} calculations · ${months.length} delivery months · ${d.scenario_count || 0} scenarios · ${g.model_version}` }),
+      el("span", { text: `Marginal plants: ${d.atlantic_marginal_facility || "—"} / ${d.pacific_marginal_facility || "—"} · Pacific route: ${d.pacific_route || "—"}` }),
+      el("span", { text: `Calibration: ${cal.source || "defaults"}${cal.available_timestamp ? " · " + fts(cal.available_timestamp) : ""}${cal.backtest && cal.backtest.selected ? " · backtest winner " + cal.backtest.selected : ""}` })]);
+    root.appendChild(foot);
+    T("lng_global", tg.appendChild(tag(g.model_version, "gold")), () => ({ title: "Global LNG model diagnostics", value: g.model_version,
+      sections: [{ h: "Calibration", rows: [["Source", cal.source], ["Available", fts(cal.available_timestamp)], ["Backtest winner", cal.backtest && cal.backtest.selected], ["Scenario count", String(cal.scenario_count || "")]] },
+        { h: "Voyage", rows: [["Atlantic days", fmt(d.arrival_offset_days && d.arrival_offset_days.atlantic, 1)], ["Panama days", fmt(d.arrival_offset_days && d.arrival_offset_days.panama, 1)], ["Cape days", fmt(d.arrival_offset_days && d.arrival_offset_days.cape, 1)], ["Delivered fraction", fmt(d.delivered_fraction && d.delivered_fraction.panama, 3)]] }] }), "lngg_model");
+    const detail = el("details", { class: "under" }, [el("summary", { text: "Model assumptions and calibration diagnostics" }), el("pre", { class: "lng-assumptions", text: JSON.stringify({ assumptions: g.assumptions, calibration: g.calibration, diagnostics: g.diagnostics }, null, 2) })]);
+    root.appendChild(detail);
+  }
+
   /* ---------- the seven fundamental elements: direct inputs vs separately calculated modules ---------- */
   function renderFundamentals(s) {
     const box = clear($("fundamentals")), f = s.fundamentals;
@@ -659,7 +727,7 @@
     state = s;
     const keep = NGLTip.reset();
     $("asof").textContent = `as of ${s.as_of.replace("T", " ")} · ${s.schema}`;
-    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderFundamentals(s); renderDrivers(s); renderSources(s);
+    renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderLngGlobal(s); renderFundamentals(s); renderDrivers(s); renderSources(s);
     initMap(s); drawMap(s);
     if (graph) drawGraph();
     NGLTip.restore(keep);
