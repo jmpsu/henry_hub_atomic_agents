@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-20T03:50:42Z",
+ "generated_at": "2026-11-20T07:28:41Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
  "requirements": 427,
  "totals": {
   "passed": 268,
-  "failed": 0,
-  "blocked": 159,
+  "failed": 2,
+  "blocked": 157,
   "unverified": 0
  },
  "checks": {
@@ -14,7 +14,7 @@
    "evidence": "/execute 403, /ingest 403",
    "desc": "quant.joeysvault.app refuses requests without an Access service token",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.3,
    "block_category": null,
    "block_reason": null
   },
@@ -23,7 +23,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off",
    "blocked_by": null,
-   "seconds": 10.6,
+   "seconds": 10.3,
    "block_category": null,
    "block_reason": null
   },
@@ -86,7 +86,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
-   "seconds": 1.5,
+   "seconds": 1.6,
    "block_category": null,
    "block_reason": null
   },
@@ -100,8 +100,8 @@
    "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
   },
   "branch_pushed": {
-   "status": "passed",
-   "evidence": "## quant-hub-build...origin/quant-hub-build",
+   "status": "failed",
+   "evidence": "## quant-hub-build...origin/quant-hub-build [ahead 1]",
    "desc": "local HEAD is pushed to origin",
    "blocked_by": null,
    "seconds": 0.3,
@@ -166,7 +166,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 1.9,
+   "seconds": 2.0,
    "block_category": null,
    "block_reason": null
   },
@@ -175,7 +175,7 @@
    "evidence": "mode 0o600; ignored True; tracked secret files: none",
    "desc": ".env is mode 600 and git-ignored; no secrets tracked",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.3,
    "block_category": null,
    "block_reason": null
   },
@@ -211,7 +211,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 33.5,
+   "seconds": 34.4,
    "block_category": null,
    "block_reason": null
   },
@@ -265,7 +265,7 @@
    "evidence": "tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)); 11 part_of edges in the production library",
    "desc": "long source documents are chunked so their whole text is embedded, with part_of edges",
    "blocked_by": null,
-   "seconds": 3.7,
+   "seconds": 3.8,
    "block_category": null,
    "block_reason": null
   },
@@ -274,7 +274,7 @@
    "evidence": "/knowledge 200; graph 207 nodes, edge types ['calibrated_by', 'evaluated_by', 'evidence_for', 'feeds_inventory_balance', 'feeds_net_exports', 'feeds_rescomm_demand', 'feeds_supply', 'mentions', 'modifies_dry_gas_supply', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=3; tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering",
    "blocked_by": null,
-   "seconds": 4.1,
+   "seconds": 4.2,
    "block_category": null,
    "block_reason": null
   },
@@ -346,7 +346,7 @@
    "evidence": "exit 0, 789 braille cells",
    "desc": "ngl-term.py renders the same state.json with a Braille map",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "block_category": null,
    "block_reason": null
   },
@@ -373,7 +373,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run",
    "blocked_by": null,
-   "seconds": 12.3,
+   "seconds": 12.1,
    "block_category": null,
    "block_reason": null
   },
@@ -400,7 +400,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 3.1,
+   "seconds": 3.4,
    "block_category": null,
    "block_reason": null
   },
@@ -427,7 +427,7 @@
    "evidence": "markets.joeysvault.app 200, ngl.joeysvault.app 200",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 0.7,
+   "seconds": 0.6,
    "block_category": null,
    "block_reason": null
   },
@@ -436,7 +436,7 @@
    "evidence": "ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok",
    "desc": "retrieval hub: ingest news/journal/report; query all 6 engines; PIT filter; save/load persistence",
    "blocked_by": null,
-   "seconds": 2.8,
+   "seconds": 2.7,
    "block_category": null,
    "block_reason": null
   },
@@ -481,7 +481,7 @@
    "evidence": "94/94 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.7,
    "block_category": null,
    "block_reason": null
   },
@@ -493,6 +493,15 @@
    "seconds": 0.0,
    "block_category": "none",
    "block_reason": "resolved when a memo issue exists"
+  },
+  "rich_tooltips_browser": {
+   "status": "passed",
+   "evidence": "loaded=True hover=True pin=True keyboard=True deep=True errors=0",
+   "desc": "rich tooltips render, pin, respond to keyboard focus and open from deep links in headless Chrome",
+   "blocked_by": null,
+   "seconds": 7.4,
+   "block_category": null,
+   "block_reason": null
   },
   "roster_81": {
    "status": "passed",
@@ -508,7 +517,7 @@
    "evidence": "61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, Weather_30YrNormal_HDD, ECMWF_00z_HDD_Day15, Power_CO2_AllowancePrice",
    "desc": "every roster agent has real (non-seed) data",
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
-   "seconds": 3.1,
+   "seconds": 3.7,
    "block_category": "external_data",
    "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
   },
@@ -526,7 +535,7 @@
    "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 6.7,
+   "seconds": 6.9,
    "block_category": null,
    "block_reason": null
   },
@@ -544,7 +553,7 @@
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "failure diagnosis, LLM selector repair proposal, fixture validation, PR gating",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 0.5,
    "block_category": null,
    "block_reason": null
   },
@@ -577,10 +586,10 @@
   },
   "web_ui_browser": {
    "status": "passed",
-   "evidence": "18 map nodes, panels=True, console errors=0",
+   "evidence": "18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 2.8,
+   "seconds": 2.9,
    "block_category": null,
    "block_reason": null
   },
@@ -1742,10 +1751,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.5-fa8bfa50",
@@ -1758,10 +1764,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R4-e0489c13",
@@ -6168,6 +6171,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6180,6 +6184,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6192,6 +6197,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6204,6 +6210,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6216,6 +6223,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6228,6 +6236,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6298,6 +6307,7 @@
     "knowledge_library",
     "knowledge_search_pit",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "knowledge_explorer",
     "knowledge_explorer_browser",
     "agents_share_knowledge"
@@ -6314,6 +6324,7 @@
     "knowledge_library",
     "knowledge_search_pit",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "knowledge_explorer",
     "knowledge_explorer_browser",
     "agents_share_knowledge"
@@ -6328,7 +6339,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6340,7 +6352,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6353,6 +6366,7 @@
    "checks": [
     "state_schema_contract",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6368,7 +6382,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6380,7 +6395,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6393,6 +6409,7 @@
    "checks": [
     "state_schema_contract",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6408,7 +6425,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6421,6 +6439,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6437,6 +6456,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6453,6 +6473,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6469,6 +6490,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6484,7 +6506,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6496,7 +6519,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6508,7 +6532,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6520,7 +6545,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6532,7 +6558,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6544,7 +6571,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6922,7 +6950,6 @@
  "blocked_by_cause": {
   "external_data": 88,
   "external_credentials": 108,
-  "platform_limit": 2,
   "none": 1
  }
 }

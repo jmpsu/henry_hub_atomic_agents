@@ -404,7 +404,7 @@ def _():
 
 @check("no_tmp_or_claude_paths", "production code uses no /tmp, tempfile or .claude paths")
 def _():
-    rc, out = sh(["git", "grep", "-nIE", r"/tmp|tempfile|\.claude", "--", "*.py", "*.js", "*.sh", "*.toml", "*.service", ":!scripts/acceptance.py"])
+    rc, out = sh(["git", "grep", "-nIE", r"/tmp|tempfile|\.claude", "--", "*.py", "*.js", "*.sh", "*.toml", "*.service", ":!scripts/acceptance.py", ":!scripts/verify_*.py"])
     return rc != 0, out.strip()[:200] or "none"
 
 
@@ -476,9 +476,97 @@ def _():
         text = c.js("document.body.innerText")
         lower = text.lower()
         panels = all(k.lower() in lower for k in ("Seasonal patterns", "Pricing output", "Fibonacci retracement", "Production elements", "Source availability", "Vector knowledge"))
+        m = c.js("""(() => { const e = document.querySelector('#map canvas.maplibregl-canvas'); const gl = e && (e.getContext('webgl2') || e.getContext('webgl'));
+            return {canvas: !!e, width: e ? e.width : 0, height: e ? e.height : 0, gl: !!gl, dw: gl ? gl.drawingBufferWidth : 0,
+                    markers: document.querySelectorAll('#map .maplibregl-marker').length,
+                    unavailable: /MAP UNAVAILABLE/i.test(document.getElementById('map').innerText)}; })()""") or {}
+        map_ok = (m.get("canvas") and m.get("width", 0) > 100 and m.get("height", 0) > 100 and m.get("gl")
+                  and m.get("dw", 0) > 100 and m.get("markers") == 18 and not m.get("unavailable"))
         errs = [e for e in c.events if e.get("method") == "Runtime.exceptionThrown" or
                 (e.get("method") == "Log.entryAdded" and e.get("params", {}).get("entry", {}).get("level") == "error" and "favicon.ico" not in str(e))]
-        return nodes == 18 and panels and not errs and "state unavailable" not in text.lower(), f"{nodes} map nodes, panels={panels}, console errors={len(errs)}"
+        return nodes == 18 and panels and map_ok and not errs and "state unavailable" not in text.lower(), f"{nodes} map nodes, panels={panels}, map={m}, console errors={len(errs)}"
+    finally:
+        p.terminate()
+        p.wait(timeout=10)
+        shutil.rmtree(prof, ignore_errors=True)
+
+
+@check("rich_tooltips_browser", "rich tooltips render, pin, respond to keyboard focus and open from deep links in headless Chrome", network=True)
+def _():
+    chrome = os.environ.get("CHROME_PATH") or shutil.which("google-chrome")
+    if not chrome:
+        return False, "google-chrome not installed"
+    port, prof = 9456, tempfile.mkdtemp()
+    p = subprocess.Popen([chrome, "--headless=new", "--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+                          f"--remote-debugging-port={port}", f"--user-data-dir={prof}", "--window-size=1600,2600", "about:blank"],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        tabs = []
+        for _ in range(50):
+            try:
+                tabs = json.load(urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=1))
+                break
+            except Exception:  # noqa: BLE001
+                time.sleep(0.2)
+        c = Cdp(next(t["webSocketDebuggerUrl"] for t in tabs if t["type"] == "page"))
+        for m in ("Page.enable", "Runtime.enable", "Log.enable"):
+            c.send(m)
+
+        def load(url):
+            c.events.clear()
+            c.send("Page.navigate", url=url)
+            for _ in range(80):
+                time.sleep(0.25)
+                if c.js("!!(window.NGLTip && NGLTip.size() > 40 && document.querySelectorAll('.has-tip').length > 40)"):
+                    return True
+            return False
+
+        def center(js_el):
+            return c.js(f"(() => {{ const e = {js_el}; if (!e) return null; e.scrollIntoView({{block: 'center'}}); const r = e.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }})()")
+
+        def mouse(x, y, typ="mouseMoved", **kw):
+            c.send("Input.dispatchMouseEvent", type=typ, x=x, y=y, **kw)
+
+        def tiptext():
+            return c.js("(() => { const t = document.getElementById('ngl-tip'); return t && !t.hidden ? t.innerText : null; })()")
+
+        loaded = load("http://127.0.0.1:8095/?product=propane&timeframe=seasonal")
+        c.js("(() => { NGLTip.hide(); return 1; })()")
+        pos = center("document.querySelector('#pricing tbody tr')") if loaded else None
+        if pos:
+            mouse(5, 5)
+            time.sleep(0.3)
+            pos = center("document.querySelector('#pricing tbody tr')")
+            mouse(pos[0], pos[1])
+            time.sleep(0.5)
+        t = tiptext() or ""
+        hover_ok = all(k.lower() in t.lower() for k in ("Data lineage", "Available (PIT)", "Source"))
+        pin = center("document.querySelector('#hero-tags .tag')")
+        if pin:
+            mouse(pin[0], pin[1])
+            mouse(pin[0], pin[1], "mousePressed", button="left", clickCount=1)
+            mouse(pin[0], pin[1], "mouseReleased", button="left", clickCount=1)
+            time.sleep(0.3)
+            mouse(5, 5)
+            time.sleep(0.4)
+        pinned = bool(c.js("!!document.querySelector('#ngl-tip.pinned') && !document.getElementById('ngl-tip').hidden"))
+        c.send("Input.dispatchKeyEvent", type="keyDown", key="Escape", code="Escape", windowsVirtualKeyCode=27)
+        c.send("Input.dispatchKeyEvent", type="keyUp", key="Escape", code="Escape", windowsVirtualKeyCode=27)
+        mouse(5, 5)
+        mouse(5, 5, "mousePressed", button="left", clickCount=1)
+        mouse(5, 5, "mouseReleased", button="left", clickCount=1)
+        time.sleep(0.3)
+        c.js("(() => { NGLTip.hide(); document.querySelectorAll('#levels > div')[1].focus(); return 1; })()")
+        time.sleep(0.5)
+        kb = tiptext() or ""
+        keyboard_ok = "50-day" in kb.lower()
+        deep = load("http://127.0.0.1:8095/?product=propane&timeframe=seasonal&tip=fwd_M5")
+        time.sleep(0.5)
+        deep_text = tiptext() or ""
+        deep_ok = deep and "M5" in deep_text and bool(c.js("!!document.querySelector('#ngl-tip.pinned')"))
+        errs = [e for e in c.events if e.get("method") == "Runtime.exceptionThrown" or
+                (e.get("method") == "Log.entryAdded" and e.get("params", {}).get("entry", {}).get("level") == "error" and "favicon.ico" not in str(e))]
+        return loaded and hover_ok and pinned and keyboard_ok and deep_ok and not errs, f"loaded={loaded} hover={hover_ok} pin={pinned} keyboard={keyboard_ok} deep={deep_ok} errors={len(errs)}"
     finally:
         p.terminate()
         p.wait(timeout=10)
@@ -919,14 +1007,14 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("7", r"without exposing local services", ["access_protects_hub", "markets_local"]),
     ("9", r"publication and availability timestamps", ["pit_tests", "schema_16_columns"]),
     ("10", r"must be able to", ["roster_all_collected", "worker_gateway_e2e", "backtest_unit"]),
-    ("12.1", r".", ["web_ui_browser", "ngl_term"]),
+    ("12.1", r".", ["web_ui_browser", "rich_tooltips_browser", "ngl_term"]),
     ("12.2", r".", ["public_markets", "main_site_link", "access_protects_hub", "markets_local"]),
-    ("12.3", r".", ["knowledge_library", "knowledge_search_pit", "web_ui_browser", "knowledge_explorer", "knowledge_explorer_browser", "agents_share_knowledge"]),
-    ("12.4", r".", ["state_schema_contract", "web_ui_browser"]),
+    ("12.3", r".", ["knowledge_library", "knowledge_search_pit", "web_ui_browser", "rich_tooltips_browser", "knowledge_explorer", "knowledge_explorer_browser", "agents_share_knowledge"]),
+    ("12.4", r".", ["state_schema_contract", "web_ui_browser", "rich_tooltips_browser"]),
     ("12.4", r"ethane|butane|gasoline|fractionation|lng feedgas|power burn", ["roster_all_collected"]),
-    ("12.5", r".", ["indicators", "web_ui_browser"]),
+    ("12.5", r".", ["indicators", "web_ui_browser", "rich_tooltips_browser"]),
     ("12.5", r"conway|ethane|butane|gasoline|forward curve|delivery months", ["roster_all_collected"]),
-    ("12.6", r".", ["indicators", "web_ui_browser"]),
+    ("12.6", r".", ["indicators", "web_ui_browser", "rich_tooltips_browser"]),
     ("12.7", r".", ["ngl_term"]),
     ("12.7", r"flows|alerts|force majeure|critical notices", ["roster_all_collected"]),
     # QUANT HUB SPEC: agents/retrieval_hub.py (6 engines), agents/quant_commodities.py (spark/basis), agents/quant_risk.py (VaR/stress/margin)

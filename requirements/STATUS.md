@@ -1,12 +1,12 @@
-# Requirement status (2026-11-20T03:50:42Z)
+# Requirement status (2026-11-20T07:28:41Z)
 
 Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 427 atomic requirements
 
 | Status | Count |
 |---|---|
 | passed | 268 |
-| failed | 0 |
-| blocked | 159 |
+| failed | 2 |
+| blocked | 157 |
 | unverified | 0 |
 
 ## Checks
@@ -25,7 +25,7 @@ Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 427 atomic r
 | `branch_protection` | blocked | Welcome to GitHub CLI!
 
 To authenticate, please run `gh auth login`. | platform_limit: GitHub requires Pro or a public repository for branch protection on this private repo |
-| `branch_pushed` | passed | ## quant-hub-build...origin/quant-hub-build |  |
+| `branch_pushed` | failed | ## quant-hub-build...origin/quant-hub-build [ahead 1] |  |
 | `collector_freshness` | passed | all daily series fresh (<=5 days) |  |
 | `collector_schedule` | passed | timer deployment unit (systemctl unavailable in this runner); worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, re |  |
 | `collectors_run` | passed (carried over) | OK   cpc_heating {'agent': 'Agent_Weather_Actual_HDD', 'obse / OK   cpc_cooling {'agent': 'Agent_Weather_Actual_CDD', 'obse / OK   eia_storage [{'agent': 'Agent_Storage_East', 'obs |  |
@@ -72,6 +72,7 @@ To authenticate, please run `gh auth login`. | platform_limit: GitHub requires P
 | `research_log_live` | blocked | Welcome to GitHub CLI!
 
 To authenticate, please run `gh auth login`. | none: resolved when a memo issue exists |
+| `rich_tooltips_browser` | passed | loaded=True hover=True pin=True keyboard=True deep=True errors=0 |  |
 | `roster_81` | passed | 94 unique (81 baseline agents plus quant extensions) |  |
 | `roster_all_collected` | blocked | 61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi | external_data: NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed |
 | `schema_16_columns` | passed | missing=[] |  |
@@ -81,7 +82,7 @@ To authenticate, please run `gh auth login`. | none: resolved when a memo issue 
 | `snapshots_versioned` | passed | tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True (/root/henry_hub_atomic_agents/deploy/hh-collect-cpc.service) |  |
 | `state_schema_contract` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
 | `unstructured_sources` | passed | documents {'noaa_discussion': 1, 'pipeline_notice': 376}; indexed in knowledge library {'noaa_discussion': 12, 'pipeline_notice': 85} |  |
-| `web_ui_browser` | passed | 18 map nodes, panels=True, console errors=0 |  |
+| `web_ui_browser` | passed | 18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0 |  |
 | `webhook_recovery` | blocked | GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0 | external_credentials: no GitHub webhook deliveries or Worker deployment in this runner |
 | `worker_gateway_e2e` | passed (carried over) | PASS no bearer (401) / PASS bad bearer (401) / PASS origin without Access token (403) / PASS authenticated /execute (200) / PASS payload shape |  |
 
@@ -94,7 +95,6 @@ A requirement blocked by several checks is counted under each cause.
 | external_credentials | 108 |
 | external_data | 88 |
 | none | 1 |
-| platform_limit | 2 |
 
 ## Requirements not passed
 
@@ -141,8 +141,8 @@ A requirement blocked by several checks is counted under each cause.
 | R3.2-7856bc0f | 92 | blocked | Local authenticated ingestion endpoint. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
 | R3.2-d700c127 | 94 | blocked | The local workstation must not expose an unauthenticated public ingestion port. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
 | R3.3-d8238967 | 104 | blocked | agent_id | roster_all_collected, collector_schedule, edge_collection, schema_16_columns, provenance_labels |
-| R3.5-f90f98c5 | 137 | blocked | The Git history must preserve historical revisions and support reproducible retrieval. | raw_payloads_verified, observations_reference_payloads, schema_16_columns, provenance_labels, snapshots_versioned, branch_pushed, branch_protection |
-| R3.5-fa8bfa50 | 137 | blocked | Enforce repository permissions and branch protections; do not assume ordinary Git history is intrinsically imm | snapshots_versioned, branch_pushed, branch_protection |
+| R3.5-f90f98c5 | 137 | failed | The Git history must preserve historical revisions and support reproducible retrieval. | raw_payloads_verified, observations_reference_payloads, schema_16_columns, provenance_labels, snapshots_versioned, branch_pushed, branch_protection |
+| R3.5-fa8bfa50 | 137 | failed | Enforce repository permissions and branch protections; do not assume ordinary Git history is intrinsically imm | snapshots_versioned, branch_pushed, branch_protection |
 | R4-e0489c13 | 145 | blocked | These changes must not silently create permanent data gaps. | collector_freshness, selfheal_unit, roster_all_collected |
 | R4.1-ced2a6ba | 149 | blocked | The Python orchestration system must monitor all 81 atomic agents. | selfheal_unit, gatekeeper, collector_freshness, roster_all_collected |
 | R4.4-f57940b2 | 192 | blocked | The repair pipeline must: | selfheal_unit, selfheal_pr_live |
@@ -252,12 +252,12 @@ A requirement blocked by several checks is counted under each cause.
 | R11-049dcf38 | 619 | blocked | Your responsibility is to backward-engineer the complete execution path from the ultimate objective to the req | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-1de351b2 | 629 | blocked | Identify existing agents, scripts, tests, scheduled jobs, and services. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-2d6da86e | 642 | blocked | External data sources and access requirements. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
-| R12.4-97513311 | 696 | blocked | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, roster_all_collected |
-| R12.4-b78c405d | 699 | blocked | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, roster_all_collected |
-| R12.5-0f7de509 | 704 | blocked | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, roster_all_collected |
-| R12.5-66afc426 | 705 | blocked | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, roster_all_collected |
-| R12.5-42a3ffd8 | 706 | blocked | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, roster_all_collected |
-| R12.5-f4ab8294 | 707 | blocked | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, roster_all_collected |
+| R12.4-97513311 | 696 | blocked | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.4-b78c405d | 699 | blocked | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-0f7de509 | 704 | blocked | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-66afc426 | 705 | blocked | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-42a3ffd8 | 706 | blocked | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-f4ab8294 | 707 | blocked | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
 | R12.7-31088a85 | 724 | blocked | Live Regional Flows & Active Pipeline Alerts: Real-time border/LNG/interstate meter flows, capacity constraint | ngl_term, roster_all_collected |
 
 ## CLAUDE.md directive (requirement -> implementation -> checks)

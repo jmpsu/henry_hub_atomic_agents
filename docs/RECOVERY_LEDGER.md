@@ -34,6 +34,11 @@ Repair and expand the existing Henry Hub application in place. The current repos
 - Added `deploy/hh-collect-cpc.timer` and made schedule/snapshot acceptance checks verify repository deployment units when `systemctl` is unavailable in the runner.
 - Corrected acceptance checks for documented `bootstrapped_physical_proxy` provenance, the expanded 94-agent roster, and external-credential/deployment blockers (`alert_delivery`, `audit_gists`, `selfheal_pr_live`, `webhook_recovery`, `queue_dispatch`, `edge_collection`).
 - Updated browser acceptance to discover Chromium through `CHROME_PATH` and use CDP with SwiftShader so WebGL map nodes are exercised.
+- Removed the `or True` escape hatch from the tooltip verifier's map-label check and the vacuous chat-log assertion; added `tests/test_verification_integrity.py` to prevent their return.
+- Replaced `--disable-gpu` with SwiftShader in `scripts/verify_tooltips.py`, then added executable checks for a real MapLibre WebGL canvas, 18 markers, no unavailable fallback, and monthly LNG export labels.
+- Added acceptance check `rich_tooltips_browser` with real hover, click-to-pin, keyboard-focus, deep-link and console-exception evidence; strengthened `web_ui_browser` with canvas/WebGL/marker assertions.
+- Established document focus before programmatic focus in tooltip evidence so the keyboard-focus check proves a tooltip actually renders.
+- Excluded verification scripts from the production `tempfile` path check so the check tests production code rather than browser-test scaffolding.
 
 ## Test evidence
 
@@ -46,7 +51,12 @@ Repair and expand the existing Henry Hub application in place. The current repos
 - Literature ingestion: 14 new / 8 unchanged / 3 known-elsewhere, 4,167 chunks, 4,165 semantic edges, 37 docs, 100% coverage.
 - Graph KB: 207 nodes, 213 browser-rendered nodes, 242 edges, 20 agent findings; Chroma vector retrieval verified.
 - Warnings only: pytest-asyncio fixture loop scope unset; LlamaIndex `KnowledgeGraphIndex`/`KnowledgeGraphRAGRetriever` deprecations.
+- Targeted acceptance after repair: `web_ui_browser` passed with `map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}`; `rich_tooltips_browser` passed with `loaded=True hover=True pin=True keyboard=True deep=True errors=0`.
+- Browser tooltip verifier: `CHROME_PATH=... scripts/verify_tooltips.py http://127.0.0.1:8095 --port 9471` -> 77 passed, 0 failed, including four MapLibre canvas/marker checks and real tooltip render, pin, keyboard and deep-link checks.
+- Full pytest after repair: `NOTIFY=0 .venv/bin/python -m pytest -q` -> 320 passed, 13 warnings, 2 subtests passed.
+- Static checks: Python compile pass over all tracked/untracked non-virtualenv sources passed; CI `py_compile` passed; `node --input-type=module --check < worker.js` passed; CI secret scan passed. No repository lint/type-check configuration exists; `bandit` is not installed in the runner.
+- Full acceptance immediately before publication: 427 requirements, 268 passed, 2 failed, 157 blocked, 0 unverified; directive 22/22 passed. The only failed check was `branch_pushed` (`ahead 1`), expected while the repair commit was still local; the two failed requirements inherit that check.
 
 ## Remaining work
 
-- Review complete diff, stage intended project changes, commit, push to `origin/quant-hub-build`, and verify remote hashes.
+- Commit and push the repaired checks and ledger to `origin/quant-hub-build`, then verify local and remote commit hashes.
