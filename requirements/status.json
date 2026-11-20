@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-14T02:16:43Z",
+ "generated_at": "2026-11-19T23:49:18Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
- "requirements": 422,
+ "requirements": 427,
  "totals": {
-  "passed": 328,
-  "failed": 0,
-  "blocked": 94,
+  "passed": 151,
+  "failed": 258,
+  "blocked": 18,
   "unverified": 0
  },
  "checks": {
@@ -14,59 +14,54 @@
    "evidence": "/execute 403, /ingest 403",
    "desc": "quant.joeysvault.app refuses requests without an Access service token",
    "blocked_by": null,
-   "seconds": 4.8,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agent_unit": {
    "status": "passed",
-   "evidence": "31 passed in 2.17s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off",
    "blocked_by": null,
-   "seconds": 2.4,
+   "seconds": 8.7,
    "block_category": null,
    "block_reason": null
   },
   "agents_live_run": {
-   "status": "passed",
-   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synthesis': 16}; embedding ok calls 62",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: agent_runs",
    "desc": "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_scheduled": {
-   "status": "passed",
-   "evidence": "timer enabled; ExecStopPost run_agents.py=True; /ingest trigger=True",
+   "status": "failed",
+   "evidence": "timer /bin/sh: 1: systemctl: not found; ExecStopPost run_agents.py=False; /ingest trigger=True",
    "desc": "agents run after every scheduled collection (timer ExecStopPost and the hub's /ingest trigger)",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_share_knowledge": {
-   "status": "passed",
-   "evidence": "22 cross-agent message reads {'data_quality': 1, 'pipeline_event': 1}; 21 findings, 13 linked to source/data evidence, 15 finding->finding links (later runs build on earlier findings); 21 mirrored in Chroma",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: agent_message_reads",
    "desc": "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "alert_delivery": {
-   "status": "passed",
-   "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[data-quality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre']",
+   "status": "failed",
+   "evidence": "incident issues []; event streams []",
    "desc": "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues",
    "blocked_by": null,
-   "seconds": 1.2,
+   "seconds": 0.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "architecture_doc": {
    "status": "passed",
@@ -75,48 +70,43 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "audit_gists": {
-   "status": "passed",
-   "evidence": "5 recent hub gists",
+   "status": "failed",
+   "evidence": "0 recent hub gists",
    "desc": "audit gists are created for /execute calls (gh authenticated, recent gist present)",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "backtest_unit": {
    "status": "passed",
-   "evidence": "11 passed in 0.43s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 1.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "branch_protection": {
    "status": "blocked",
-   "evidence": "{\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://d",
+   "evidence": "Welcome to GitHub CLI!\n\nTo authenticate, please run `gh auth login`.",
    "desc": "main is protected on GitHub",
    "blocked_by": "owner decision (GitHub settings)",
-   "seconds": 0.3,
+   "seconds": 0.0,
    "block_category": "platform_limit",
-   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo",
-   "carried_over": true
+   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
   },
   "branch_pushed": {
    "status": "passed",
    "evidence": "## quant-hub-build...origin/quant-hub-build",
    "desc": "local HEAD is pushed to origin",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_freshness": {
    "status": "passed",
@@ -125,18 +115,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_schedule": {
-   "status": "passed",
-   "evidence": "timer enabled; worker crons ['crons = [\"30 13 * * *\", \"45 15 * * THU\"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbers Sunday as 1']",
+   "status": "failed",
+   "evidence": "timer /bin/sh: 1: systemctl: not found; worker crons ['crons = [\"30 13 * * *\", \"45 15 * * THU\"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbers Sunday as 1']",
    "desc": "local systemd timer and Worker cron triggers are installed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collectors_run": {
    "status": "passed",
@@ -148,63 +136,57 @@
   },
   "cross_domain_sources": {
    "status": "blocked",
-   "evidence": "have ['agent_finding', 'alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
+   "evidence": "error: OperationalError: no such table: kb_nodes",
    "desc": "FERC filings, LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products are ingested",
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
    "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds",
-   "carried_over": true
+   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds"
   },
   "db_integrity": {
    "status": "passed",
    "evidence": "ok",
    "desc": "SQLite integrity_check returns ok",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "edge_collection": {
-   "status": "passed",
-   "evidence": "edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage']",
+   "status": "failed",
+   "evidence": "edge sources with successful runs: []",
    "desc": "Cloudflare Workers fetch source data at the edge and forward payload + fetch metadata through Access",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "edge_ingest_unit": {
    "status": "passed",
-   "evidence": "3 passed in 0.63s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 0.9,
+   "seconds": 2.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "env_locked": {
    "status": "passed",
    "evidence": "mode 0o600; ignored True; tracked secret files: none",
    "desc": ".env is mode 600 and git-ignored; no secrets tracked",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "execute_sandbox_tests": {
    "status": "passed",
-   "evidence": "11 passed in 0.18s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "/execute SQL sandbox, as_of normalisation, scenario arithmetic, thesis sign check",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 0.9,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiment_endpoint": {
    "status": "passed",
@@ -213,157 +195,142 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiments_recorded": {
-   "status": "passed",
-   "evidence": "38 experiments, 0 incomplete",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: experiments",
    "desc": "every experiment (including rejected) is recorded with periods, data version and baseline",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "full_test_suite": {
    "status": "passed",
-   "evidence": "175 passed in 26.58s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 26.9,
+   "seconds": 22.1,
    "block_category": null,
    "block_reason": null
   },
   "gatekeeper": {
    "status": "passed",
-   "evidence": "3 passed in 0.09s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hub_health": {
    "status": "passed",
-   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":245}",
+   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":0,\"version\":\"1.0.2\",\"release_version\":\"1.0.2\",\"release_commit\":\"dev\",\"",
    "desc": "privileged hub answers locally on 127.0.0.1:8090",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_evaluated_live": {
-   "status": "passed",
-   "evidence": "finding verdicts {'evaluated': 2, 'rejected': 6, 'superseded': 3, 'valid': 7}; evaluated_by edges 2; memos 1",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: finding_status",
    "desc": "an agent hypothesis was evaluated by the PIT walk-forward backtester and a complete 5.4 memo was persisted",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_memo": {
    "status": "passed",
-   "evidence": "5 passed in 0.01s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "alpha hypotheses carry every required field and are rejected without out-of-sample, cost-inclusive backtests",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "indicators": {
    "status": "passed",
-   "evidence": "9 passed in 0.07s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "triangles, Bollinger squeeze, 50/200 crossovers, RSI/MACD divergence, Fibonacci, frac spread, WTI ratio",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "kb_chunking": {
-   "status": "passed",
-   "evidence": "tests 2 passed in 0.15s; 17 part_of edges in the production library",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: kb_edges",
    "desc": "long source documents are chunked so their whole text is embedded, with part_of edges",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 2.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer": {
-   "status": "passed",
-   "evidence": "/knowledge 200; graph 245 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=6; tests 7 passed in 0.37s",
+   "status": "failed",
+   "evidence": "/knowledge 200; graph 0 nodes, edge types []; inspector 0 edges=0; tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 3.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer_browser": {
-   "status": "passed",
-   "evidence": "251 nodes, 340 edges, 22 agent findings drawn, console errors=0",
+   "status": "failed",
+   "evidence": "google-chrome not installed",
    "desc": "the /knowledge page renders the interactive graph in headless Chrome with no console errors",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_library": {
-   "status": "passed",
-   "evidence": "245 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 2, 'evidence_for': 38, 'part_of': 17, 'previous_in_series': 185, 'same_period': 24, 'semantic_neighbor': 234}, 0 missing PIT metadata",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: kb_nodes",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_search_pit": {
-   "status": "passed",
-   "evidence": "old cutoff -> 0 results; now -> 8",
+   "status": "failed",
+   "evidence": "old cutoff -> 0 results; now -> 0",
    "desc": "semantic search returns nothing that was unavailable at the cutoff",
    "blocked_by": null,
-   "seconds": 0.8,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "leaderboard_versioned": {
-   "status": "passed",
-   "evidence": "tracked=True; 38/38 experiments listed",
+   "status": "failed",
+   "evidence": "error: OperationalError: no such table: experiments",
    "desc": "LEADERBOARD.md exists, matches the experiments table and is tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "main_site_link": {
-   "status": "blocked",
-   "evidence": "HTTP 200, link present=False",
+   "status": "passed",
+   "evidence": "HTTP 200, link present=True",
    "desc": "https://joeysvault.app links to markets.joeysvault.app",
    "blocked_by": "deploy after the public routes serve",
-   "seconds": 2.2,
-   "block_category": "owner_action",
-   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)",
-   "carried_over": true
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
   },
   "markets_local": {
    "status": "passed",
    "evidence": "state 200 ngl-state/1, /execute 404, / 200",
    "desc": "read-only markets hub serves state.json, UI and refuses privileged routes",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "multi_feature_experiments": {
    "status": "passed",
@@ -372,18 +339,16 @@
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ngl_term": {
    "status": "passed",
-   "evidence": "exit 0, 794 braille cells",
+   "evidence": "exit 0, 718 braille cells",
    "desc": "ngl-term.py renders the same state.json with a Braille map",
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
@@ -392,38 +357,34 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "observations_reference_payloads": {
    "status": "passed",
-   "evidence": "92844/92844 measured rows reference an archived payload",
+   "evidence": "0/0 measured rows reference an archived payload",
    "desc": "measured rows from collectors cite an archived raw payload",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_live_integration": {
    "status": "passed",
-   "evidence": "4 passed in 23.67s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run",
    "blocked_by": null,
-   "seconds": 23.9,
+   "seconds": 11.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_models": {
    "status": "passed",
-   "evidence": "['nomic-embed-text:latest', 'qwen3:4b']",
+   "evidence": "['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen2.5:7b', 'qwen3:4b']",
    "desc": "local Ollama serves qwen3:4b and nomic-embed-text",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_only_local": {
    "status": "passed",
@@ -432,18 +393,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "pit_tests": {
    "status": "passed",
-   "evidence": "23 passed in 0.96s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 1.1,
+   "seconds": 3.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "promotion_gate": {
    "status": "passed",
@@ -452,8 +411,7 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "provenance_labels": {
    "status": "passed",
@@ -462,48 +420,79 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "public_markets": {
-   "status": "blocked",
-   "evidence": "markets.joeysvault.app 404, ngl.joeysvault.app 404",
+   "status": "passed",
+   "evidence": "markets.joeysvault.app 200, ngl.joeysvault.app 200",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 4.4,
-   "block_category": "owner_action",
-   "block_reason": "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh",
-   "carried_over": true
+   "seconds": 0.9,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_retrieval": {
+   "status": "passed",
+   "evidence": "ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok",
+   "desc": "retrieval hub: ingest news/journal/report; query all 6 engines; PIT filter; save/load persistence",
+   "blocked_by": null,
+   "seconds": 2.9,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_spark_basis": {
+   "status": "passed",
+   "evidence": "HH spot 3.87; forward curve 91 pts",
+   "desc": "Spark spread & basis differentials (pure math + PIT data functions)",
+   "blocked_by": null,
+   "seconds": 0.1,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_stress": {
+   "status": "passed",
+   "evidence": "winter_storm_uri_freeze_scenario: 31 pts, pipeline_outage_shock: 8 pts, multi_factor_shift: 36 pts",
+   "desc": "Stress scenarios (Uri freeze, pipeline outage, multi-factor) + capital & margin estimation",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_var": {
+   "status": "passed",
+   "evidence": "parametric: VaR 0.362, ES 0.473; historical: VaR 0.365, ES 0.473; montecarlo: VaR 0.366, ES 0.447",
+   "desc": "Parametric / historical / Monte Carlo VaR + expected shortfall execution",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
   },
   "queue_dispatch": {
-   "status": "passed",
-   "evidence": "│ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1        ",
+   "status": "failed",
+   "evidence": "/bin/sh: 1: wrangler: not found\n",
    "desc": "Cloudflare Queue producer/consumer bound on the Worker",
    "blocked_by": null,
-   "seconds": 1.4,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "raw_payloads_verified": {
-   "status": "passed",
-   "evidence": "179/179 verified",
+   "status": "failed",
+   "evidence": "0/0 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 1.0,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "research_log_live": {
-   "status": "passed",
-   "evidence": "5\tOPEN\tAlpha hypothesis: [REJECTED] Rising US shale gas output (3-month change, six basins) pre\talpha-hypothesis\t2026-11",
+   "status": "blocked",
+   "evidence": "Welcome to GitHub CLI!\n\nTo authenticate, please run `gh auth login`.",
    "desc": "alpha memos are published with gh issue create",
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
-   "seconds": 0.4,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "seconds": 0.0,
+   "block_category": "none",
+   "block_reason": "resolved when a memo issue exists"
   },
   "roster_81": {
    "status": "passed",
@@ -512,18 +501,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "roster_all_collected": {
    "status": "blocked",
-   "evidence": "50/81 with real data; missing 31: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, ECMWF_00z_HDD_Day10, ECMWF_00z_HDD_Day11, ECMWF_00z_HDD_Day12, ECMWF_00z_HDD_Day13, ECMWF_00z_HDD_Day14, ECMWF_00z_HDD_Day15",
+   "evidence": "0/81 with real data; missing 81: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M1, HH_M2, HH_M3, HH_M4, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Prod_Appalachia, Prod_Permian, Prod_Haynesville, Prod_EagleFord, Prod_Bakken, Prod_DJBasin, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, Demand_PowerBurn, Demand_Industrial, Demand_ResComm, Weather_Actual_HDD, ",
    "desc": "every roster agent has real (non-seed) data",
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
-   "seconds": 1.8,
+   "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed",
-   "carried_over": true
+   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
   },
   "schema_16_columns": {
    "status": "passed",
@@ -532,88 +519,79 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_live_ollama": {
    "status": "passed",
    "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 7.0,
+   "seconds": 6.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_pr_live": {
-   "status": "passed",
-   "evidence": "self-heal PRs: [(2, 'MERGED')]",
+   "status": "failed",
+   "evidence": "self-heal PRs: []",
    "desc": "a validated, test-passing repair opens a real GitHub pull request (never merged automatically)",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_unit": {
    "status": "passed",
-   "evidence": "12 passed in 0.02s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "failure diagnosis, LLM selector repair proposal, fixture validation, PR gating",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "snapshots_versioned": {
-   "status": "passed",
-   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14']; scheduled=True",
+   "status": "failed",
+   "evidence": "error: FileNotFoundError: [Errno 2] No such file or directory: '/root/.config/systemd/user/hh-collect-cpc.service'",
    "desc": "deterministic snapshot manifests are exported daily and tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "state_schema_contract": {
    "status": "passed",
-   "evidence": "13 passed in 0.24s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "state.json carries every section the UI and terminal render, with explicit provenance",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 1.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "unstructured_sources": {
-   "status": "passed",
-   "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 19, 'pipeline_notice': 91}",
+   "status": "failed",
+   "evidence": "no such table: documents",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "web_ui_browser": {
-   "status": "passed",
-   "evidence": "18 map nodes, panels=True, console errors=0",
+   "status": "failed",
+   "evidence": "google-chrome not installed",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 1.4,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "webhook_recovery": {
-   "status": "passed",
-   "evidence": "GitHub deliveries accepted after signature check: 3 of 3; reruns verified+ok=2, forged refused=1",
+   "status": "failed",
+   "evidence": "GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0",
    "desc": "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "worker_gateway_e2e": {
    "status": "passed",
@@ -638,10 +616,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-b2d7a135",
@@ -656,10 +631,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-42c22dd1",
@@ -674,10 +646,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-9282b34e",
@@ -692,10 +661,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-0f6ca3ca",
@@ -710,10 +676,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-fa12c75e",
@@ -728,10 +691,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-b5cb2f21",
@@ -746,10 +706,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-ef031a2f",
@@ -764,10 +721,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R1-f49cb20e",
@@ -782,10 +736,7 @@
     "knowledge_library",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R2-2d69b17c",
@@ -885,7 +836,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-568e4dd8",
@@ -898,7 +849,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-4a0ec542",
@@ -912,7 +863,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-79b4fa66",
@@ -925,7 +876,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-8e92a39d",
@@ -938,7 +889,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-9b7d461a",
@@ -951,7 +902,7 @@
     "raw_payloads_verified",
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-4c44878c",
@@ -964,7 +915,7 @@
     "raw_payloads_verified",
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-aab33591",
@@ -977,7 +928,7 @@
     "raw_payloads_verified",
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-f82d10cb",
@@ -990,7 +941,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-643ab18c",
@@ -1003,7 +954,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-2ce58f4b",
@@ -1016,7 +967,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-d6fb9a7f",
@@ -1029,7 +980,7 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-42dd3747",
@@ -1042,7 +993,7 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R2-64ac65b8",
@@ -1081,10 +1032,7 @@
     "schema_16_columns",
     "provenance_labels"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-8dfbddee",
@@ -1097,10 +1045,7 @@
     "collector_schedule",
     "edge_collection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-71a35591",
@@ -1114,10 +1059,7 @@
     "edge_collection",
     "edge_ingest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-270357ba",
@@ -1131,10 +1073,7 @@
     "edge_collection",
     "edge_ingest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-7f86c8bc",
@@ -1150,10 +1089,7 @@
     "raw_payloads_verified",
     "observations_reference_payloads"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-55936e8e",
@@ -1169,10 +1105,7 @@
     "raw_payloads_verified",
     "observations_reference_payloads"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-d19b71d8",
@@ -1188,10 +1121,7 @@
     "collector_freshness",
     "selfheal_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-92a7a9c5",
@@ -1205,10 +1135,7 @@
     "edge_collection",
     "collectors_run"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-7c54704e",
@@ -1226,10 +1153,7 @@
     "schema_16_columns",
     "provenance_labels"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-62633990",
@@ -1243,10 +1167,7 @@
     "edge_collection",
     "edge_ingest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-6570b1fe",
@@ -1260,10 +1181,7 @@
     "edge_collection",
     "collectors_run"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.1-026cdf34",
@@ -1290,10 +1208,7 @@
     "schema_16_columns",
     "provenance_labels"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.2-730c15bc",
@@ -1307,7 +1222,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-81a4d839",
@@ -1323,10 +1238,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.2-2601812e",
@@ -1340,7 +1252,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-fa6b555a",
@@ -1354,7 +1266,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-873b3767",
@@ -1368,7 +1280,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-a95205e8",
@@ -1382,7 +1294,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-91b8b6d3",
@@ -1396,7 +1308,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-7856bc0f",
@@ -1410,7 +1322,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.2-d700c127",
@@ -1424,7 +1336,7 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.3-6a26807a",
@@ -1461,10 +1373,7 @@
     "schema_16_columns",
     "provenance_labels"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.3-fad37b89",
@@ -1667,7 +1576,7 @@
     "pit_tests",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.4-e684b36f",
@@ -1679,7 +1588,7 @@
     "pit_tests",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R3.5-f90f98c5",
@@ -1696,10 +1605,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.5-fa8bfa50",
@@ -1712,10 +1618,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R4-e0489c13",
@@ -1916,7 +1819,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.2-9605ad89",
@@ -1928,7 +1831,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.2-129d5f32",
@@ -1940,7 +1843,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.2-dee76e0c",
@@ -1952,7 +1855,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.2-4728e1aa",
@@ -1964,7 +1867,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.2-72522df4",
@@ -1976,7 +1879,7 @@
     "selfheal_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.3-d88dd3a2",
@@ -2072,7 +1975,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-333bdf25",
@@ -2084,7 +1987,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-f69ec027",
@@ -2096,7 +1999,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-02d45091",
@@ -2108,7 +2011,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-5aedbcff",
@@ -2120,7 +2023,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-2781b5c3",
@@ -2132,7 +2035,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-f06a7416",
@@ -2144,7 +2047,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-44c2a840",
@@ -2156,7 +2059,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-a113ed48",
@@ -2168,7 +2071,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-d78818ad",
@@ -2180,7 +2083,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.4-afc642da",
@@ -2192,7 +2095,7 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.5-34636c2d",
@@ -2203,7 +2106,7 @@
    "checks": [
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R4.5-81c63eb3",
@@ -2214,7 +2117,7 @@
    "checks": [
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5-ee5ec77f",
@@ -2226,10 +2129,7 @@
     "knowledge_library",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.1-bce3a3ea",
@@ -2240,7 +2140,7 @@
    "checks": [
     "unstructured_sources"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-9063d06b",
@@ -2251,7 +2151,7 @@
    "checks": [
     "unstructured_sources"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-fb226838",
@@ -2262,7 +2162,7 @@
    "checks": [
     "unstructured_sources"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-e87f9b97",
@@ -2287,7 +2187,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-a8f3b9e5",
@@ -2298,7 +2198,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-94e57388",
@@ -2310,7 +2210,7 @@
     "unstructured_sources",
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-cd0ea029",
@@ -2321,7 +2221,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-b701c525",
@@ -2361,10 +2261,7 @@
     "cross_domain_sources",
     "knowledge_library"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.1-4a9afabc",
@@ -2431,7 +2328,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-439d46f3",
@@ -2442,7 +2339,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.1-bbd46e5a",
@@ -2481,7 +2378,7 @@
    "checks": [
     "knowledge_library"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-8039cbe9",
@@ -2494,7 +2391,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-6b5ef082",
@@ -2507,7 +2404,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-5afea306",
@@ -2520,7 +2417,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-20b04406",
@@ -2533,7 +2430,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-1ad10fbf",
@@ -2546,7 +2443,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-c9a8c0b7",
@@ -2559,7 +2456,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-99aa362c",
@@ -2572,7 +2469,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-2ae66e0f",
@@ -2585,7 +2482,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-10ddaa3c",
@@ -2598,7 +2495,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.2-8d561091",
@@ -2611,7 +2508,7 @@
     "knowledge_library",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-cd46a0a7",
@@ -2626,7 +2523,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-b02ef1e4",
@@ -2642,10 +2539,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-160de023",
@@ -2661,10 +2555,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-86b2bb28",
@@ -2680,10 +2571,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-fbe545d1",
@@ -2699,10 +2587,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-23aee387",
@@ -2718,10 +2603,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-d78a74b5",
@@ -2737,10 +2619,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-7ae87737",
@@ -2755,7 +2634,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-76b20e87",
@@ -2771,10 +2650,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-afcfe344",
@@ -2790,10 +2666,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-01b98b4c",
@@ -2809,10 +2682,7 @@
     "hypothesis_evaluated_live",
     "cross_domain_sources"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R5.3-c438ffef",
@@ -2827,7 +2697,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-1907fd19",
@@ -2842,7 +2712,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-d38ce7eb",
@@ -2857,7 +2727,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-f6f5e656",
@@ -2872,7 +2742,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-e4ada600",
@@ -2887,7 +2757,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-e41ce236",
@@ -2902,7 +2772,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-222d3d02",
@@ -2917,7 +2787,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.3-b9a2bb3c",
@@ -2932,7 +2802,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-59b4b120",
@@ -2944,7 +2814,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-991a8f1f",
@@ -2956,7 +2826,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-18282658",
@@ -2968,7 +2838,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-13a38a0d",
@@ -2980,7 +2850,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-f0975322",
@@ -2992,7 +2862,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-be2b6cda",
@@ -3004,7 +2874,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-86e33f3d",
@@ -3016,7 +2886,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-f6005fb7",
@@ -3028,7 +2898,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-0b624c4a",
@@ -3040,7 +2910,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-7ea4c9b5",
@@ -3052,7 +2922,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-7a27c13e",
@@ -3064,7 +2934,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-ac03ec4a",
@@ -3076,7 +2946,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.4-dac6a247",
@@ -3088,7 +2958,7 @@
     "hypothesis_memo",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R5.5-c478768c",
@@ -3100,7 +2970,10 @@
     "hypothesis_memo",
     "research_log_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "none"
+   ]
   },
   {
    "id": "R6-104ed187",
@@ -3113,7 +2986,7 @@
     "experiments_recorded",
     "multi_feature_experiments"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-4385e970",
@@ -3126,7 +2999,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-935d4351",
@@ -3139,7 +3012,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-145227b9",
@@ -3152,7 +3025,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-79761076",
@@ -3165,7 +3038,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-6eb6b2fb",
@@ -3178,7 +3051,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-eee2811d",
@@ -3191,7 +3064,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-8d00578a",
@@ -3204,7 +3077,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-ad5bf78c",
@@ -3217,7 +3090,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-c491e8d0",
@@ -3230,7 +3103,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-9c71df28",
@@ -3243,7 +3116,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-c7db39af",
@@ -3256,7 +3129,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-94f23cad",
@@ -3269,7 +3142,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-360db41e",
@@ -3282,7 +3155,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-2ac160e8",
@@ -3295,7 +3168,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-30a88cfd",
@@ -3308,7 +3181,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.1-95616166",
@@ -3321,7 +3194,7 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.2-d4023761",
@@ -3334,7 +3207,7 @@
     "experiment_endpoint",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.2-0a994e96",
@@ -3348,7 +3221,7 @@
     "experiments_recorded",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.3-8c3316a3",
@@ -3634,7 +3507,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-e534af5f",
@@ -3647,7 +3520,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-9290b747",
@@ -3660,7 +3533,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-47917d73",
@@ -3673,7 +3546,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-54fa2594",
@@ -3686,7 +3559,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-0ba87ca8",
@@ -3699,7 +3572,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-c56c87ac",
@@ -3712,7 +3585,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-6a4bc07f",
@@ -3725,7 +3598,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-9ac6238e",
@@ -3738,7 +3611,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-62edc8cb",
@@ -3751,7 +3624,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R6.5-1327d7c4",
@@ -3764,7 +3637,7 @@
     "experiments_recorded",
     "promotion_gate"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7-d3739e59",
@@ -3900,7 +3773,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-6df3dff9",
@@ -3914,7 +3787,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-29f62f6e",
@@ -3928,7 +3801,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-8887b5f9",
@@ -3942,7 +3815,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-63c54804",
@@ -3956,7 +3829,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-cc50cceb",
@@ -3970,7 +3843,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-04f26655",
@@ -3984,7 +3857,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-c6c83a38",
@@ -3998,7 +3871,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-4134c254",
@@ -4012,7 +3885,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-f950bef5",
@@ -4026,7 +3899,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-e8d5effb",
@@ -4040,7 +3913,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-b37d8292",
@@ -4054,7 +3927,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-2c83d004",
@@ -4068,7 +3941,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-67c26786",
@@ -4082,7 +3955,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.2-e2bcc67c",
@@ -4096,7 +3969,7 @@
     "knowledge_search_pit",
     "experiment_endpoint"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.3-18d57e7d",
@@ -4432,7 +4305,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-40eaa3f5",
@@ -4444,7 +4317,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-92e67c77",
@@ -4456,7 +4329,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-1e4e243f",
@@ -4468,7 +4341,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-0b23f89c",
@@ -4480,7 +4353,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-037320b0",
@@ -4492,7 +4365,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-559b279e",
@@ -4504,7 +4377,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-a6215bca",
@@ -4516,7 +4389,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-0b7265d4",
@@ -4528,7 +4401,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-62f4a68f",
@@ -4540,7 +4413,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-cd216305",
@@ -4552,7 +4425,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-b77ca20d",
@@ -4564,7 +4437,7 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R7.5-205221b1",
@@ -4575,7 +4448,7 @@
    "checks": [
     "alert_delivery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R8-97616259",
@@ -4592,10 +4465,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-8df61f90",
@@ -4612,10 +4482,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-976918fe",
@@ -4632,10 +4499,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-725b75a3",
@@ -4652,10 +4516,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-414f2111",
@@ -4672,10 +4533,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-b7b57c6c",
@@ -4692,10 +4550,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-4268a48c",
@@ -4712,10 +4567,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-b6c9a07c",
@@ -4732,10 +4584,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-356a1f16",
@@ -4752,10 +4601,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-e0ad558a",
@@ -4772,10 +4618,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-88b7bc11",
@@ -4792,10 +4635,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-e43422f7",
@@ -4812,10 +4652,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-ed3fcfb1",
@@ -4832,10 +4669,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-27bd6ebc",
@@ -4852,10 +4686,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-20b70032",
@@ -4872,10 +4703,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-520b6109",
@@ -4892,10 +4720,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R8-9adaa64a",
@@ -4912,10 +4737,7 @@
     "edge_collection",
     "alert_delivery"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R9-f108de6c",
@@ -4939,7 +4761,7 @@
     "pit_tests",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-3a1be834",
@@ -4951,7 +4773,7 @@
     "pit_tests",
     "knowledge_search_pit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-a1c2e449",
@@ -4966,7 +4788,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-b83173bd",
@@ -4981,7 +4803,7 @@
     "selfheal_unit",
     "provenance_labels"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-d2990544",
@@ -4994,7 +4816,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-2ae68d46",
@@ -5007,7 +4829,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-cd701f5d",
@@ -5020,7 +4842,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-8f90ea08",
@@ -5033,7 +4855,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-2a6392bf",
@@ -5046,7 +4868,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-8843da81",
@@ -5059,7 +4881,7 @@
     "schema_16_columns",
     "gatekeeper"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-68a73ee7",
@@ -5075,7 +4897,7 @@
     "selfheal_unit",
     "provenance_labels"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-0349b2d7",
@@ -5140,7 +4962,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-466b1aff",
@@ -5153,7 +4975,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-75a5cec9",
@@ -5166,7 +4988,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-ee48ca9a",
@@ -5179,7 +5001,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-ab790e63",
@@ -5192,7 +5014,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-985a406c",
@@ -5205,7 +5027,7 @@
     "promotion_gate",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-8d62a603",
@@ -5219,7 +5041,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-319a765e",
@@ -5236,7 +5058,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-e22e92b1",
@@ -5250,7 +5072,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-6ec4b921",
@@ -5264,7 +5086,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-7dfd4af1",
@@ -5278,7 +5100,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R9-a93f59cd",
@@ -5292,7 +5114,7 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R10-cf8a2b74",
@@ -5339,10 +5161,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-1a94b50e",
@@ -5357,10 +5176,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-13e066a4",
@@ -5376,10 +5192,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-88e4ed77",
@@ -5395,10 +5208,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-4c202fb8",
@@ -5414,10 +5224,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-325030ce",
@@ -5433,10 +5240,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-513986e3",
@@ -5452,10 +5256,7 @@
     "worker_gateway_e2e",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-973553ea",
@@ -5470,10 +5271,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-3dba0e7d",
@@ -5488,10 +5286,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-466788d5",
@@ -5506,10 +5301,7 @@
     "roster_all_collected",
     "worker_gateway_e2e"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-dd8d6fa7",
@@ -5524,10 +5316,7 @@
     "roster_all_collected",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-0cd3fea1",
@@ -5542,10 +5331,7 @@
     "roster_all_collected",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-7b0e4bd5",
@@ -5560,10 +5346,7 @@
     "roster_all_collected",
     "backtest_unit"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R10-182dd91b",
@@ -5580,10 +5363,7 @@
     "collector_schedule",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R11-2228150e",
@@ -5945,7 +5725,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-569c27e8",
@@ -5957,7 +5737,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-2a65d69c",
@@ -5969,7 +5749,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-9bd48e8f",
@@ -5981,7 +5761,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-0441f203",
@@ -5993,7 +5773,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-4388e823",
@@ -6005,7 +5785,7 @@
     "web_ui_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.2-f0f82166",
@@ -6019,10 +5799,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-817681e4",
@@ -6036,10 +5813,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-01eef309",
@@ -6053,10 +5827,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-e5fa8809",
@@ -6070,10 +5841,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.3-b24434ad",
@@ -6089,7 +5857,7 @@
     "knowledge_explorer_browser",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.3-f23bf6e2",
@@ -6105,7 +5873,7 @@
     "knowledge_explorer_browser",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-cdd9c4bc",
@@ -6117,7 +5885,7 @@
     "state_schema_contract",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-61440bd5",
@@ -6129,7 +5897,7 @@
     "state_schema_contract",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-97513311",
@@ -6142,10 +5910,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.4-c6890b6e",
@@ -6157,7 +5922,7 @@
     "state_schema_contract",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-c53cea8c",
@@ -6169,7 +5934,7 @@
     "state_schema_contract",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-b78c405d",
@@ -6182,10 +5947,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.4-79c1b0ff",
@@ -6197,7 +5959,7 @@
     "state_schema_contract",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.5-0f7de509",
@@ -6210,10 +5972,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-66afc426",
@@ -6226,10 +5985,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-42a3ffd8",
@@ -6242,10 +5998,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-f4ab8294",
@@ -6258,10 +6011,7 @@
     "web_ui_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-242c56a9",
@@ -6273,7 +6023,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-3737fe92",
@@ -6285,7 +6035,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-cdf6ceaf",
@@ -6297,7 +6047,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-9e40e670",
@@ -6309,7 +6059,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-5c6339ea",
@@ -6321,7 +6071,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-1ec5f656",
@@ -6333,7 +6083,7 @@
     "indicators",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.7-ab041beb",
@@ -6404,6 +6154,67 @@
     "ngl_term"
    ],
    "status": "passed"
+  },
+  {
+   "id": "R13-e1",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 1. Architectural Baseline",
+   "line": 1,
+   "text": "Inspect kb_ingest.py, agents/memory.py, agents/llm.py, agents/workers.py, command_hub.py, scripts/acceptance.py; run the baseline acceptance tests; keep SQLite and Chroma compatibility.",
+   "context": "source: QUANT_HUB_SPEC.md section 1",
+   "checks": [
+    "db_integrity",
+    "pit_tests",
+    "full_test_suite"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e2",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 2. LlamaIndex Multi-Engine Retrieval Hub",
+   "line": 1,
+   "text": "Implement agents/retrieval_hub.py: ingestion of news articles, scientific journals and reports; a unified interface with 6 query engine modalities (1. KG vector-based entity retrieval [default], 2. KG keyword-based entity retrieval, 3. Raw vector index retrieval, 4. custom combo engine [vector + KG entity retrieval], 5. KnowledgeGraphQueryEngine, 6. KnowledgeGraphRAGRetriever) behind the factory get_query_engine(engine_type='kg_vector', **kwargs); PIT-filtered retrieval at as_of.",
+   "context": "source: QUANT_HUB_SPEC.md section 2",
+   "checks": [
+    "quant_hub_retrieval"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e3",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 3. Power, Natural Gas & Cross-Commodity Modeling",
+   "line": 1,
+   "text": "Implement agents/quant_commodities.py: Henry Hub spot & forward curve analysis; basis differentials vs Waha, Houston Ship Channel, Transco Zone 6; spark/clean-spark/dark spread economics; regional ISO/RTO nodes (ERCOT, PJM, MISO, CAISO, NYISO); EIA storage cycles, pipeline flows, LNG export terminal demand; cross-commodity exposure (WTI/Brent, refined products, carbon allowances).",
+   "context": "source: QUANT_HUB_SPEC.md section 3",
+   "checks": [
+    "quant_hub_spark_basis"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e4",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 4. Quantitative Risk Management Engine",
+   "line": 1,
+   "text": "Implement agents/quant_risk.py: parametric, historical simulation and Monte Carlo VaR plus expected shortfall (CVaR); winter storm Uri freeze, pipeline outage shock and multi-factor commodity price shift scenarios; initial/variation margin modeling and liquidity buffer estimation; all from PIT HH spot series.",
+   "context": "source: QUANT_HUB_SPEC.md section 4",
+   "checks": [
+    "quant_hub_var",
+    "quant_hub_stress"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e5",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 5. Integration & Acceptance Testing",
+   "line": 1,
+   "text": "Connect the retrieval engine into agents/memory.search and the risk engine into agents/workers.py (QuantRiskAgent); add acceptance coverage to scripts/acceptance.py: ingestion and querying across all 6 engine types, spark spread and basis differential calculations, parametric/historical/Monte Carlo VaR execution; run python scripts/acceptance.py and commit to the quant-hub-build branch.",
+   "context": "source: QUANT_HUB_SPEC.md section 5",
+   "checks": [
+    "quant_hub_retrieval",
+    "quant_hub_spark_basis",
+    "quant_hub_var",
+    "quant_hub_stress"
+   ],
+   "status": "passed"
   }
  ],
  "directive": [
@@ -6416,7 +6227,7 @@
     "ollama_live_integration",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: structured extraction, classification, normalization, validation",
@@ -6427,7 +6238,7 @@
     "ollama_live_integration",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: anomaly detection and data-quality investigation",
@@ -6437,7 +6248,7 @@
     "agent_unit",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: agent-to-agent knowledge exchange and synthesis",
@@ -6448,7 +6259,7 @@
     "agents_share_knowledge",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: research synthesis grounded in retrieved source data",
@@ -6459,7 +6270,7 @@
     "agents_live_run",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: embedding generation and semantic retrieval",
@@ -6470,7 +6281,7 @@
     "knowledge_search_pit",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Ollama: error diagnosis and bounded self-healing assistance",
@@ -6501,7 +6312,7 @@
     "ollama_live_integration",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: ingestion of documents, source material, agent findings, validated intelligence",
@@ -6511,7 +6322,7 @@
     "knowledge_library",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: text extraction, chunking, metadata, source attribution, provenance",
@@ -6522,7 +6333,7 @@
     "knowledge_library",
     "provenance_labels"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: vector embeddings and persistent vector indexing",
@@ -6533,7 +6344,7 @@
     "agents_share_knowledge",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: semantic search and retrieval by agents and research workflows",
@@ -6544,7 +6355,7 @@
     "agents_live_run",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: relationships between documents, concepts, series, agents, findings, features",
@@ -6555,7 +6366,7 @@
     "agents_share_knowledge",
     "hypothesis_evaluated_live"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: graphical interface for exploring, searching, inspecting, navigating",
@@ -6566,7 +6377,7 @@
     "knowledge_explorer_browser",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: persistent across runs, updates, deduplication, traceable sources",
@@ -6577,7 +6388,7 @@
     "agent_unit",
     "raw_payloads_verified"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: Ollama for embedding and synthesis",
@@ -6587,7 +6398,7 @@
     "ollama_live_integration",
     "agents_live_run"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Agents use shared intelligence and knowledge infrastructure (verified execution)",
@@ -6598,7 +6409,7 @@
     "agents_share_knowledge",
     "agents_scheduled"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Point-in-time correctness, no look-ahead in features, retrieval, inputs, training, backtesting",
@@ -6610,7 +6421,7 @@
     "agent_unit",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "End-to-end: acquisition -> ... -> agent collaboration -> Ollama synthesis -> backtesting -> persistent knowledge",
@@ -6623,7 +6434,7 @@
     "hypothesis_evaluated_live",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Acceptance 6: point-in-time and no-look-ahead tests pass",
@@ -6646,8 +6457,7 @@
   }
  ],
  "blocked_by_cause": {
-  "external_data": 88,
-  "platform_limit": 2,
-  "owner_action": 4
+  "external_data": 17,
+  "none": 1
  }
 }

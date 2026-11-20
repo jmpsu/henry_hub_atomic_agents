@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import sqlite3
 import statistics
@@ -34,7 +35,7 @@ from pathlib import Path
 
 import kb_ingest
 import markets_engine as me
-from agents import memory
+from agents import memory, quant_risk, retrieval_hub
 from agents.llm import LLM, REASONING_MODEL, numbers_grounded, status as llm_status
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -494,6 +495,32 @@ class AnomalyAgent:
         return {"anomalies": out}
 
 
+# ----------------------------------------------------------------------------- risk engine connection (Spec 4 integration)
+class QuantRiskAgent:
+    """Connects the risk engine (agents/quant_risk.py) into the agent system: VaR/ES on the Henry Hub spot
+    series, with a 'risk_alert' message + finding when the expected tail loss is material (any positive tail)."""
+    name = "quant_risk"
+
+    def run(self, conn, llm: LLM, as_of: str, collection=None) -> dict:
+        s = me.load_series(conn, "Agent_HH_Spot_EIA", as_of)
+        returns = [s[i][1] / s[i - 1][1] - 1 for i in range(1, len(s)) if s[i - 1][1]] if s else []
+        metrics = {"hh_spot": s[-1][1] if s else None, "hh_spot_available_timestamp": s[-1][2] if s else None}
+        if returns:
+            for k in ("var_parametric", "var_historical", "var_montecarlo", "cvar_parametric", "cvar_historical"):
+                metrics[k] = round(getattr(quant_risk, k)(returns, 0.05), 4)
+            metrics["liquidity_buffer"] = round(quant_risk.liquidity_buffer(metrics["var_historical"]), 4)
+        alerts = [k for k in ("var_parametric", "var_historical", "var_montecarlo", "cvar_parametric", "cvar_historical")
+                  if metrics.get(k) and metrics[k] > 0.05]
+        out = {"alerts": alerts, "metrics": {k: v for k, v in metrics.items() if v is not None}}
+        if alerts and metrics["hh_spot"]:
+            body = (f"HH spot series shows tail risk at the cutoff {as_of}: {', '.join(alerts)}. "
+                    f"Latest spot: {metrics['hh_spot']} (available {metrics['hh_spot_available_timestamp']}).")
+            f = memory.add_finding(conn, llm, self.name, f"Risk alert: HH spot tail risk {max(metrics[k] for k in alerts):.3f}",
+                                   body, as_of, [], "model_hypothesis", "risk_alert", collection)
+            memory.publish(conn, self.name, "risk_alert", {"alerts": alerts, "finding": f["id"]}, ref=f"HH_Spot_EIA:{as_of[:10]}")
+        return out
+
+
 # ----------------------------------------------------------------------------- structured PIT observations
 def _normal_hdd(conn, dates: list, as_of: str) -> dict:
     """30-year normal HDD per target date, latest vintage available at as_of (provenance extracted_estimate: derived normals)."""
@@ -652,8 +679,8 @@ class SynthesisAgent:
     STANDING = ["Henry Hub natural gas price, storage and weather", "pipeline capacity restriction force majeure notice",
                 "Mont Belvieu propane price relative to WTI crude oil", "shale gas production and power burn demand"]
 
-    def __init__(self, run_backtests: bool = True):
-        self.run_backtests = run_backtests
+    def __init__(self, run_backtests: bool = True, hub=None):
+        self.run_backtests, self.hub = run_backtests, hub
 
     # -- re-check earlier findings with the current rules (the text is kept; the verdict goes to finding_status)
     def recheck(self, conn, as_of: str) -> dict:
@@ -695,7 +722,7 @@ class SynthesisAgent:
         topics = list(dict.fromkeys(topics))[:4] + self.STANDING
         hits = {}
         for t in topics:
-            for h in memory.search(conn, llm, t, as_of, 3):
+            for h in memory.search(conn, llm, t, as_of, 3, hub=self.hub):
                 hits.setdefault(h["id"], h)
         for p in prior[:4]:
             hits.setdefault(p["id"], {"id": p["id"], "domain": "agent_finding", "title": p["title"], "document": p["document"],
@@ -874,7 +901,9 @@ def run_all(db_path: str, collection=None, as_of: str | None = None, llm_factory
     memory.ensure(conn)
     st = llm_status() if llm_factory is None else {"ok": True, "injected": True}
     mk = llm_factory or (lambda name: LLM(conn, name, available=st["ok"]))
-    plan = [DiagnosticsAgent(), DataQualityAgent(), RepairAgent(), NoticeAnalystAgent(notice_limit), AnomalyAgent(), SynthesisAgent(run_backtests)]
+    hub = retrieval_hub.RetrievalHub(storage_dir=os.environ.get("HH_RETRIEVAL_DIR")) if llm_factory is None else None
+    plan = [DiagnosticsAgent(), DataQualityAgent(), RepairAgent(), NoticeAnalystAgent(notice_limit), AnomalyAgent(), SynthesisAgent(run_backtests, hub=hub),
+            QuantRiskAgent()]
     report = {"as_of": as_of, "ollama": st, "agents": {}}
     try:
         report["embeddings_backfilled"] = memory.backfill_embeddings(conn, mk("memory"), collection)

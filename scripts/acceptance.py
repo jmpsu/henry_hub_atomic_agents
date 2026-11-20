@@ -28,6 +28,8 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parent.parent
 PY = str(ROOT / ".venv" / "bin" / "python")
 DB = os.environ.get("DB_PATH") or str(ROOT / "henry_hub_pit.db")
@@ -682,6 +684,120 @@ def _():
     return rc and n > 0, f"tests {tail}; {n} part_of edges in the production library"
 
 
+# ----------------------------------------------------------------------------- QUANT HUB SPEC (agents/retrieval_hub.py, agents/quant_commodities.py, agents/quant_risk.py)
+@check("quant_hub_retrieval", "retrieval hub: ingest news/journal/report; query all 6 engines; PIT filter; save/load persistence")
+def _():
+    import tempfile
+    from agents import retrieval_hub as rh
+    from llama_index.core.llms.mock import MockLLM
+    from llama_index.core.embeddings.mock_embed_model import MockEmbedding
+
+    class _StubLLM(MockLLM):   # predict() echoes the query: KG keyword extraction and query synthesis become deterministic
+        def predict(self, prompt, **kwargs):
+            q = kwargs.get("question") or kwargs.get("query_str") or ""
+            return "KEYWORDS: " + q
+
+    def triplets(text):
+        t = text.lower()
+        if "henry hub" in t:
+            return [("Henry Hub", "quoted_in", "eia henry hub spot"), ("Henry Hub", "located", "us golf coast")]
+        if "journal" in t or "fractionation" in t:
+            return [("NGL", "fractionated_from", "wet gas at mont belvieu"), ("Mont Belvieu", "exports", "natural gas")]
+        if "weather" in t:
+            return [("Henry Hub", "sensitive_to", "weather regimes")]
+        return [("Report", "mention", "natural gas")]
+
+    notes = []
+    with tempfile.TemporaryDirectory() as d:
+        def mk():
+            return rh.RetrievalHub(storage_dir=os.path.join(d, "hub"), llm=_StubLLM(max_tokens=32),
+                                   embed_model=MockEmbedding(embed_dim=8), kg_triplet_extract_fn=triplets)
+        hub = mk()
+        n = hub.ingest_texts(["Market report: Henry Hub quoted at $3.42 per MMBtu in November 2026, the strongest move in months.",
+                              "Scientific journal article on NGL fractionation economics at Mont Belvieu and propane cracking.",
+                              "Regular market report on power generation and weather risk in the US Gulf Coast region."], source_kind="article")
+        n += hub.ingest_texts(["Breaking news: compressor outage forces TGP force majeure notice on Nov 13."], source_kind="news")
+        ok = n >= 3; notes.append(f"ingested {n} documents")
+        for et in rh.ENGINE_TYPES:
+            eng = hub.get_query_engine(et)
+            hits = hub.search("Henry Hub", engine_type=et)
+            ok &= len(hits) > 0
+            notes.append(f"{et}: {len(hits)} hits")
+        ok &= hub.search("Henry Hub", as_of="2000-01-01T00:00:00Z") == []                    # PIT: nothing known at year 0
+        ok &= len(hub.search("Henry Hub", as_of="2027-01-01T00:00:00Z")) > 0
+        ok &= hub.save()
+        hub2 = rh.RetrievalHub.load(os.path.join(d, "hub"), llm=hub.llm, embed_model=hub.embed_model, kg_triplet_extract_fn=triplets)
+        ok &= len(hub2.search("Henry Hub")) > 0
+        notes.append("save/load ok")
+        try:
+            hub.get_query_engine("not_an_engine"); ok = False
+        except ValueError:
+            pass
+    return ok, ", ".join(notes)
+
+
+@check("quant_hub_spark_basis", "Spark spread & basis differentials (pure math + PIT data functions)")
+def _():
+    import tempfile
+    from agents import quant_commodities as qc
+    ok, notes = True, []
+    ok &= abs(qc.spark_spread(10.50, 4.20) - (10.50 - 4.20 / 8.5)) < 1e-9
+    ok &= abs(qc.clean_spark_spread(10.50, 4.20, fuel_adjustment_cost_per_mmbtu=0.20) - (10.50 - 4.20 / 8.5 - 0.20)) < 1e-9
+    ok &= abs(qc.dark_spread(10.50, 4.20) + qc.spark_spread(10.50, 4.20)) < 1e-9
+    ok &= abs(qc.basis_differential(10.50, 10.20) - 0.30) < 1e-9
+    with tempfile.TemporaryDirectory() as d:
+        db = os.path.join(d, "q.db")
+        from init_db import migrate
+        migrate(db)
+        c = sqlite3.connect(db)
+        from datetime import date, timedelta
+        for i in range(50):
+            day = date(2026, 6, 1) + timedelta(days=i)
+            ingest_mod.record_observation(c, agent_id="Agent_HH_Spot_EIA", target_timestamp=day.isoformat() + "T00:00:00Z",
+                                          available_timestamp=day.isoformat() + "T21:00:00Z", value=3.0 + 0.03 * i,
+                                          source_id="t", raw_payload_hash="")
+        c.commit()
+        hh = qc.hh_spot(c, "2026-07-01T00:00:00Z")
+        ok &= hh is not None and abs(hh[1] - 3.0 - 0.03 * 29) < 1e-6
+        curve = qc.hh_forward_curve(c, "2026-07-01T00:00:00Z")
+        ok &= len(curve) == 91 and curve[-1][1] > hh[1]
+        ok &= qc.hh_basis(c, "2026-07-01T00:00:00Z")["Waha"] is None                          # no Waha proxy ingested
+        ok &= qc.regional_spot(c, "PJM", "2026-07-01T00:00:00Z")["source"] == "hh_proxy"
+        ok &= qc.hh_spot(c, "2020-01-01T00:00:00Z") is None
+        notes.append(f"HH spot {hh and round(hh[1], 3)}; forward curve {len(curve)} pts")
+    return ok, ", ".join(notes)
+
+
+@check("quant_hub_var", "Parametric / historical / Monte Carlo VaR + expected shortfall execution")
+def _():
+    from agents import quant_risk as qr
+    rng = np.random.default_rng(20261119)
+    returns = rng.normal(-0.05, 0.2, 400)
+    v = {"parametric": qr.var_parametric(returns), "historical": qr.var_historical(returns),
+         "montecarlo": qr.var_montecarlo(returns, n_sims=20000)}
+    es = {"parametric": qr.cvar_parametric(returns), "historical": qr.cvar_historical(returns),
+          "montecarlo": qr.cvar_montecarlo(returns, n_sims=20000)}
+    ok = all(v[k] > 0 for k in v) and all(es[k] >= v[k] - 1e-9 for k in v) \
+        and abs(v["parametric"] - v["historical"]) < 0.35 * v["historical"] + 1e-3
+    return ok, "; ".join(f"{k}: VaR {v[k]:.3f}, ES {es[k]:.3f}" for k in v)
+
+
+@check("quant_hub_stress", "Stress scenarios (Uri freeze, pipeline outage, multi-factor) + capital & margin estimation")
+def _():
+    from agents import quant_risk as qr
+    from datetime import date
+    s = [(date(2026, 1, i + 1).isoformat(), 3.0 + 0.1 * i, f"2026-01-{i + 1:02d}T21:00:00Z") for i in range(30)]
+    ok, notes = True, []
+    for fn in (qr.winter_storm_uri_freeze_scenario, qr.pipeline_outage_shock, qr.multi_factor_shift):
+        r = fn(s)
+        ok &= bool(r["series"]) and bool(r["description"]) and len(r["series"]) >= 8
+        notes.append(f"{fn.__name__}: {len(r['series'])} pts")
+    ok &= qr.initial_margin(10_000_000) > 0
+    ok &= qr.variation_margin_path([0.01, -0.02], 1000)[-1] == -10
+    ok &= qr.liquidity_buffer(2.5) > 0
+    return ok, ", ".join(notes)
+
+
 # ----------------------------------------------------------------------------- mapping
 RULES = [  # (section prefix or None, regex on text/context, checks) - first matching rule set is unioned per requirement
     ("1", r".", ["roster_all_collected", "experiments_recorded", "promotion_gate", "knowledge_library", "worker_gateway_e2e"]),
@@ -764,6 +880,11 @@ RULES = [  # (section prefix or None, regex on text/context, checks) - first mat
     ("12.6", r".", ["indicators", "web_ui_browser"]),
     ("12.7", r".", ["ngl_term"]),
     ("12.7", r"flows|alerts|force majeure|critical notices", ["roster_all_collected"]),
+    # QUANT HUB SPEC: agents/retrieval_hub.py (6 engines), agents/quant_commodities.py (spark/basis), agents/quant_risk.py (VaR/stress/margin)
+    ("13", r"architectural baseline|baseline acceptance|SQLite and Chroma|kept compatible", ["db_integrity", "pit_tests", "full_test_suite"]),
+    ("13", r"retrieval hub|6 engine|llamaindex|query engine|engine modality|news|journal|report", ["quant_hub_retrieval"]),
+    ("13", r"spark spread|basis differential|forward curve|regional node|EIA storage cycle|LNG export demand|cross-commodity|exposure", ["quant_hub_spark_basis"]),
+    ("13", r"VaR|expected shortfall|historical simulation|Monte Carlo|stress scenario|stress testing|pipeline outage|winter storm|Uri|initial margin|variation margin|liquidity buffer|parametric", ["quant_hub_var", "quant_hub_stress"]),
 ]
 
 
