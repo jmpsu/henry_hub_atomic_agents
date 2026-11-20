@@ -1,0 +1,244 @@
+{
+ "generated_at": "2026-11-17T08:22:56Z",
+ "summary": {
+  "threshold": 0.72,
+  "holdout_n": 6,
+  "supported_when_expected": "2/3",
+  "abstained_when_expected": "3/3",
+  "all_quotes_verbatim": true,
+  "avg_ms": 555,
+  "total_s": 3.3
+ },
+ "rows": [
+  {
+   "split": "holdout2",
+   "subject": "intraday_returns",
+   "question": "How do hourly patterns affect oil futures returns?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 1109,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "Intra-day seasonality in finance refers to the systematic patterns observed in trading activity, price movements, and volatility that occur within a single trading day.",
+     "similarity": 0.7836,
+     "chunk_id": "doc_44a6b785e7:0002",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8089
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "Intra-day seasonality in finance refers to the systematic patterns observed in trading activity, price movements, and volatility that occur within a single trading day.",
+     "similarity": 0.7836,
+     "chunk_id": "doc_44a6b785e7:0002",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8089
+    },
+    {
+     "quote": "One of the key aspects of intra-day seasonality is the U-shaped pattern often observed in trading volume and volatility.",
+     "similarity": 0.7607,
+     "chunk_id": "doc_44a6b785e7:0002",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8089
+    },
+    {
+     "quote": "Understanding intra-day seasonality is crucial for traders and market participants as it can significantly impact trading strategies and risk management.",
+     "similarity": 0.7587,
+     "chunk_id": "doc_44a6b785e7:0002",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8089
+    },
+    {
+     "quote": "Do intraday week effect in currencies hourly trading reflect leverage and asymmetric anomalies? policy implications for traders. doi: 10.1108/jcefts-07-2020 -0034 Aradhyula, S.",
+     "similarity": 0.7381,
+     "chunk_id": "doc_44a6b785e7:0025",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8014
+    },
+    {
+     "quote": "The impact of intra-day seasonality on market risk cannot be understated.",
+     "similarity": 0.7276,
+     "chunk_id": "doc_44a6b785e7:0002",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.8089
+    }
+   ],
+   "chunks_considered": 4
+  },
+  {
+   "split": "holdout2",
+   "subject": "coalition_power",
+   "question": "How does market power change when producers and consumers form coalitions?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 1272,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "In natural gas markets, coalitions among players have taken various forms.",
+     "similarity": 0.7964,
+     "chunk_id": "doc_e025a2ded5:0008",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7894
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "In natural gas markets, coalitions among players have taken various forms.",
+     "similarity": 0.7964,
+     "chunk_id": "doc_e025a2ded5:0008",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7894
+    },
+    {
+     "quote": "This paper develops a cooperative game-theoretic model for the North American natural gas market, integrating production, storage, transportation, and liquefaction\u2013regasification activities within a multi-period, multi-producer framework.",
+     "similarity": 0.7307,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.8579
+    },
+    {
+     "quote": "On the ground, landowner coalitions in shale regions, such as the Marcellus formation, have functioned as decentralized governance structures, negotiating production leases and influencing environmental outcomes across large, contiguous land areas (28).",
+     "similarity": 0.7089,
+     "chunk_id": "doc_e025a2ded5:0008",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7894
+    },
+    {
+     "quote": "Building on these motivations, this study investigates the economic and operational implications of cooperative behavior among North American natural gas producers in an integrated market.",
+     "similarity": 0.7012,
+     "chunk_id": "doc_e025a2ded5:0009",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7888
+    },
+    {
+     "quote": "how pairwise cooperation influences surplus distributions, thereby providing insights into the trade-offs in strategic behavior in natural gas markets under cooperative dynamics.",
+     "similarity": 0.6929,
+     "chunk_id": "doc_e025a2ded5:0009",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7888
+    }
+   ],
+   "chunks_considered": 4
+  },
+  {
+   "split": "holdout2",
+   "subject": "diversification",
+   "question": "Why do commodity returns help diversify a portfolio?",
+   "expect_support": true,
+   "abstained": true,
+   "ms": 807,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [
+    {
+     "quote": "Variations in commodity returns may be the result of common movements in macroeconomic variables that affect the demand for or the supply of broad sets of commodities, as well as commodity-specific factors that are unique to each commodity.",
+     "similarity": 0.6771,
+     "chunk_id": "doc_981ac8e9d5:0037",
+     "doc_id": "doc_981ac8e9d5",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "available_timestamp": "2026-11-17T08:12:24Z",
+     "chunk_similarity": 0.7318
+    },
+    {
+     "quote": "Finally, using the capital asset pricing model as a loose framework, we find that global macroeconomic risk components have become relatively more important in explaining commodity price volatility.",
+     "similarity": 0.6683,
+     "chunk_id": "doc_981ac8e9d5:0001",
+     "doc_id": "doc_981ac8e9d5",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "available_timestamp": "2026-11-17T08:12:24Z",
+     "chunk_similarity": 0.721
+    },
+    {
+     "quote": "The slope coefficient \u03b2i can be used to approximate the overall volatility of an individual commodity\u2019s return relative to the world commodity market returns.",
+     "similarity": 0.6658,
+     "chunk_id": "doc_981ac8e9d5:0037",
+     "doc_id": "doc_981ac8e9d5",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "available_timestamp": "2026-11-17T08:12:24Z",
+     "chunk_similarity": 0.7318
+    },
+    {
+     "quote": "Using a new methodology for examining cross-sectional variation of commodity returns and its components, we find strong evidence that the prices of world primary commodities are extremely volatile.",
+     "similarity": 0.6628,
+     "chunk_id": "doc_981ac8e9d5:0001",
+     "doc_id": "doc_981ac8e9d5",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "available_timestamp": "2026-11-17T08:12:24Z",
+     "chunk_similarity": 0.721
+    },
+    {
+     "quote": "Conceptually, the former component cannot be diversified away by combining with other commodities in a portfolio, whereas the latter can.",
+     "similarity": 0.6529,
+     "chunk_id": "doc_981ac8e9d5:0037",
+     "doc_id": "doc_981ac8e9d5",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "available_timestamp": "2026-11-17T08:12:24Z",
+     "chunk_similarity": 0.7318
+    }
+   ],
+   "chunks_considered": 2
+  },
+  {
+   "split": "holdout2",
+   "subject": "eia_storage_now",
+   "question": "What is the current EIA working gas in storage in Bcf?",
+   "expect_support": false,
+   "abstained": true,
+   "ms": 38,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  },
+  {
+   "split": "holdout2",
+   "subject": "cme_settlement",
+   "question": "How does the CME calculate daily settlement prices?",
+   "expect_support": false,
+   "abstained": true,
+   "ms": 60,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  },
+  {
+   "split": "holdout2",
+   "subject": "texas_uri",
+   "question": "What caused the Texas winter storm Uri power outages in 2021?",
+   "expect_support": false,
+   "abstained": true,
+   "ms": 49,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  }
+ ]
+}

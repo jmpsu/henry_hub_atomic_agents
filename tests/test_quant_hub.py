@@ -54,9 +54,10 @@ sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "tests"))
 os.environ["NOTIFY"] = "0"
 import _scratch
 import init_db, ingest
-from agents import quant_commodities as qc
+from agents import memory, quant_commodities as qc
 from agents import quant_risk as qr
 from agents import retrieval_hub as rh
+from agents import workers
 
 TRIPLETS = [("Henry Hub", "quoted_in", "eia henry hub spot"), ("Henry Hub", "located", "us golf coast"),
             ("NGL", "fractionated_from", "wet gas at mont belvieu"), ("Mont Belvieu", "exports", "natural gas"),
@@ -193,6 +194,36 @@ class RiskEngineTests(unittest.TestCase):
         self.assertGreater(qr.initial_margin(10_000_000), 0.0)
         self.assertEqual(qr.variation_margin_path([0.01, -0.02], 1000)[-1], -10.0)
         self.assertGreater(qr.liquidity_buffer(2.5), 0.0)
+
+
+class AgentIntegrationTests(unittest.TestCase):
+    def test_risk_alert_is_a_first_class_finding_kind(self):
+        self.assertIn("risk_alert", memory.KINDS)
+
+    def test_quant_risk_agent_publishes_a_pit_risk_alert(self):
+        import sqlite3
+
+        class StubLLM:
+            def embed(self, text):
+                return [0.01] * 8
+
+        with _scratch.TemporaryDirectory() as d:
+            db = str(Path(d) / "risk.db")
+            init_db.migrate(db)
+            c = sqlite3.connect(db)
+            for i, v in enumerate((3.0, 2.0, 3.0, 2.0, 3.0, 2.0, 3.0)):
+                day = date(2026, 11, 1) + timedelta(days=i)
+                ingest.record_observation(c, agent_id="Agent_HH_Spot_EIA", target_timestamp=day.isoformat() + "T00:00:00Z",
+                                          available_timestamp=day.isoformat() + "T21:00:00Z", value=v, source_id="test", unit="USD/MMBtu")
+            c.commit()
+            out = workers.QuantRiskAgent().run(c, StubLLM(), "2026-11-20T00:00:00Z")
+            self.assertTrue(out["alerts"], out)
+            row = c.execute("SELECT series_key FROM kb_nodes WHERE domain='agent_finding' AND series_key LIKE '%risk_alert'").fetchone()
+            self.assertIsNotNone(row)
+            self.assertTrue(row[0].endswith("_risk_alert"), row)
+            msg = c.execute("SELECT topic FROM agent_messages WHERE topic='risk_alert'").fetchone()
+            self.assertIsNotNone(msg)
+            c.close()
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ import json
 import math
 import os
 import sqlite3
+import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -19,10 +20,15 @@ from typing import Any
 
 import numpy as np
 
+import lng_forward
+
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_VERSION = "ngl-state/1"
 GAL_PER_BBL = 42.0
-ETHANE_MMBTU_PER_GAL = 0.0665
+import frac_module
+import fundamentals
+import lng_feedgas
+ETHANE_MMBTU_PER_GAL = frac_module.ETHANE_MMBTU_PER_GAL      # single source of truth (spec 0.0664, O4)
 PENDING = "pending_collector"
 
 PRODUCTS = {
@@ -48,14 +54,14 @@ GEO_NODES = [  # id, label, kind, lat, lon, agent (driver shown at the node, if 
     ("CNW", "Conway KS", "ngl_hub", 38.37, -97.64, CONWAY_AGENT),
     ("HHB", "Henry Hub LA", "gas_hub", 29.96, -92.04, "Agent_HH_Spot_EIA"),
     ("CSH", "Cushing OK", "crude_hub", 35.98, -96.77, WTI_AGENT),
-    ("SAB", "Sabine Pass LNG", "lng", 29.73, -93.87, "Agent_LNG_SabinePass_Flow"),
-    ("CRP", "Corpus Christi LNG", "lng", 27.88, -97.27, "Agent_LNG_CorpusChristi_Flow"),
-    ("FPT", "Freeport LNG", "lng", 28.94, -95.31, "Agent_LNG_Freeport_Flow"),
-    ("CAM", "Cameron LNG", "lng", 30.04, -93.33, "Agent_LNG_Cameron_Flow"),
-    ("CCP", "Calcasieu Pass LNG", "lng", 29.77, -93.34, "Agent_LNG_CalcasieuPass_Flow"),
-    ("PLQ", "Plaquemines LNG", "lng", 29.60, -89.90, "Agent_LNG_Plaquemines_Flow"),
-    ("ELB", "Elba Island LNG", "lng", 32.09, -81.00, "Agent_LNG_ElbaIsland_Flow"),
-    ("CVP", "Cove Point LNG", "lng", 38.39, -76.41, "Agent_LNG_CovePoint_Flow"),
+    ("SAB", "Sabine Pass LNG", "lng", 29.73, -93.87, "Agent_LNGExports_SabinePass"),
+    ("CRP", "Corpus Christi LNG", "lng", 27.88, -97.27, "Agent_LNGExports_CorpusChristi"),
+    ("FPT", "Freeport LNG", "lng", 28.94, -95.31, "Agent_LNGExports_Freeport"),
+    ("CAM", "Cameron LNG", "lng", 30.04, -93.33, "Agent_LNGExports_Cameron"),
+    ("CCP", "Calcasieu Pass LNG", "lng", 29.77, -93.34, "Agent_LNGExports_CalcasieuPass"),
+    ("PLQ", "Plaquemines LNG", "lng", 29.60, -89.90, "Agent_LNGExports_Plaquemines"),
+    ("ELB", "Elba Island LNG", "lng", 32.09, -81.00, "Agent_LNGExports_ElbaIsland"),
+    ("CVP", "Cove Point LNG", "lng", 38.39, -76.41, "Agent_LNGExports_CovePoint"),
     ("PRM", "Permian Basin", "basin", 31.80, -102.40, "Agent_Prod_Permian"),
     ("APP", "Appalachia Basin", "basin", 40.50, -79.50, "Agent_Prod_Appalachia"),
     ("HYN", "Haynesville Basin", "basin", 32.30, -93.70, "Agent_Prod_Haynesville"),
@@ -71,6 +77,8 @@ GEO_FLOWS = [
     ("HHB", "SAB", "gas"), ("HHB", "CAM", "gas"), ("HHB", "CCP", "gas"), ("HHB", "PLQ", "gas"), ("MBV", "FPT", "gas_ngl"),
     ("APP", "ELB", "gas"),
 ]
+FUNDAMENTALS_PRICE_NOTE = ("No fundamentals-to-price model exists in this code (checklist O6). The Henry Hub forward curve is a delayed market quote and the LNG forward is derived "
+                           "from it as k x HH + L; none of the seven elements below enters either number. They are shown as the context that moves the market.")
 DRIVER_GROUPS = [
     ("production", "Shale gas production by basin", ["Agent_Prod_Appalachia", "Agent_Prod_Permian", "Agent_Prod_Haynesville",
                                                       "Agent_Prod_EagleFord", "Agent_Prod_Bakken", "Agent_Prod_DJBasin"]),
@@ -80,10 +88,14 @@ DRIVER_GROUPS = [
     ("storage", "Working gas in storage by region", ["Agent_Storage_East", "Agent_Storage_Midwest", "Agent_Storage_Mountain", "Agent_Storage_Pacific",
                                                      "Agent_Storage_SouthCentral_Salt", "Agent_Storage_SouthCentral_NonSalt"]),
     ("demand", "Demand", ["Agent_Demand_Industrial", "Agent_Demand_ResComm", "Agent_Demand_PowerBurn"]),
-    ("lng", "LNG feedgas", ["Agent_LNG_SabinePass_Flow", "Agent_LNG_CorpusChristi_Flow", "Agent_LNG_Freeport_Flow", "Agent_LNG_Cameron_Flow",
+    ("lng", "LNG feedgas (daily meters, no collector yet)", ["Agent_LNG_SabinePass_Flow", "Agent_LNG_CorpusChristi_Flow", "Agent_LNG_Freeport_Flow", "Agent_LNG_Cameron_Flow",
                             "Agent_LNG_CalcasieuPass_Flow", "Agent_LNG_CovePoint_Flow", "Agent_LNG_ElbaIsland_Flow", "Agent_LNG_Plaquemines_Flow"]),
     ("fractionation", "Fractionation / rejection economics", ["Agent_NGL_MontBelvieu_Ethane", "Agent_NGL_MontBelvieu_Propane", "Agent_HH_Spot_EIA"]),
     ("crude_and_carbon", "Crude and carbon", [WTI_AGENT, "Agent_Power_CO2_AllowancePrice"]),
+    ("lng_exports", "LNG exports by terminal (EIA, monthly)", ["Agent_LNGExports_SabinePass", "Agent_LNGExports_CorpusChristi", "Agent_LNGExports_Freeport", "Agent_LNGExports_Cameron",
+                                                              "Agent_LNGExports_CalcasieuPass", "Agent_LNGExports_CovePoint", "Agent_LNGExports_ElbaIsland", "Agent_LNGExports_Plaquemines"]),
+    ("border_flows", "Pipeline volumes at border points (EIA, monthly)", ["Agent_BorderFlow_Eastport_FromCanada", "Agent_BorderFlow_Noyes_FromCanada", "Agent_BorderFlow_Waddington_FromCanada",
+                                                                        "Agent_BorderFlow_RioGrande_ToMexico", "Agent_BorderFlow_Brownsville_ToMexico"]),
 ]
 
 
@@ -268,12 +280,42 @@ def rsi_macd_divergence(values) -> dict:
     return {"rsi": _divergence(values, rsi(values)), "macd": _divergence(values, macd(values)["line"])}
 
 
+def _turns(values: list, flat_band: float) -> int:
+    """Number of direction reversals between consecutive contracts, ignoring moves within flat_band."""
+    moves = [(1 if b - a > flat_band else -1 if b - a < -flat_band else 0) for a, b in zip(values, values[1:])]
+    nz = [m for m in moves if m]
+    return sum(1 for a, b in zip(nz, nz[1:]) if a != b)
+
+
 def curve_regime(points: list, flat_band: float = 0.05) -> str:
-    """Contango when the back of the curve is above the front by more than flat_band, backwardation when below."""
+    """SEASONAL when a curve of 6+ contracts reverses direction at least twice (M12 minus M1 is then not a like-for-like slope: it compares
+    different calendar months, e.g. December with November). Otherwise contango when the back is above the front by more than flat_band,
+    backwardation when below."""
     if len(points) < 2:
         return "UNAVAILABLE"
+    if len(points) >= 6 and _turns([p["value"] for p in points], flat_band) >= 2:
+        return "SEASONAL"
     slope = points[-1]["value"] - points[0]["value"]
     return "CONTANGO" if slope > flat_band else "BACKWARDATION" if slope < -flat_band else "FLAT"
+
+
+def curve_shape(points: list, flat_band: float = 0.05) -> dict:
+    """Deterministic structural facts behind the regime label, every number computed from the points (nothing generated)."""
+    if len(points) < 2:
+        return {}
+    vals = [p["value"] for p in points]
+    hi, lo = max(points, key=lambda p: p["value"]), min(points, key=lambda p: p["value"])
+    ref = lambda p: {"contract": p["contract"], "delivery_month": p.get("delivery_month"), "value": p["value"]}  # noqa: E731
+    out = {"front_spread": round(vals[1] - vals[0], 4), "front_spread_label": f'{points[1]["contract"]} minus {points[0]["contract"]}',
+           "last_minus_first": round(vals[-1] - vals[0], 4), "reversals": _turns(vals, flat_band), "peak": ref(hi), "trough": ref(lo)}
+    regime = curve_regime(points, flat_band)
+    if regime == "SEASONAL":
+        out["basis"] = (f'Seasonal: the curve reverses direction {out["reversals"]} times (peak {hi["contract"]} {hi.get("delivery_month") or ""} {hi["value"]:.3f}, '
+                        f'trough {lo["contract"]} {lo.get("delivery_month") or ""} {lo["value"]:.3f}), so {points[-1]["contract"]} minus {points[0]["contract"]} '
+                        f'({out["last_minus_first"]:+.3f}) compares different calendar months and is not read as contango or backwardation.')
+    else:
+        out["basis"] = f'{regime.title()}: {points[-1]["contract"]} minus {points[0]["contract"]} = {out["last_minus_first"]:+.3f} (band {flat_band}).'
+    return out
 
 
 def seasonal_overlay(dates, values, as_of_year: int, years_back: int = 5, step: int = 7) -> dict:
@@ -331,7 +373,7 @@ def latest_rows(conn, as_of: str) -> dict:
     """Newest PIT-eligible row per agent (by target date, then vintage), with its provenance and payload reference.
     Real rows always win: an old demo seed row is only reported for an agent that has nothing else."""
     cols = ("p.agent_id,p.target_timestamp,p.available_timestamp,p.value,p.unit,p.source_id,p.retrieved_timestamp,p.quality_status,"
-            "p.raw_payload_hash,p.provenance,p.geographic_scope")
+            "p.raw_payload_hash,p.provenance,p.geographic_scope,p.series_id,p.published_timestamp")
     seed = "(COALESCE(quality_status,'')='unverified_seed' OR source_id IS NULL OR source_id='')"
     out = {}
     for real in (False, True):  # seeds first, then real rows overwrite them
@@ -344,7 +386,8 @@ def latest_rows(conn, as_of: str) -> dict:
         for r in rows:  # ordered by vintage, so the last one per agent wins
             out[r[0]] = {"agent_id": r[0], "latest_target_timestamp": r[1], "available_timestamp": r[2], "value": r[3], "unit": r[4] or "",
                          "source_id": r[5], "retrieved_timestamp": r[6], "quality_status": r[7], "raw_payload_hash": r[8] or None,
-                         "provenance": (r[9] or "measured") if real else "unverified_seed", "geographic_scope": r[10] or ""}
+                         "provenance": (r[9] or "measured") if real else "unverified_seed", "geographic_scope": r[10] or "",
+                         "series_id": r[11] or "", "published_timestamp": r[12] or ""}
     return out
 
 
@@ -371,6 +414,26 @@ def _roster() -> list:
         return [a["agent_id"] for a in json.loads((BASE_DIR / "agents_roster.json").read_text())]
     except Exception:  # noqa: BLE001
         return []
+
+
+def _roster_meta() -> dict:
+    """agent_id -> {series, source}: what each roster agent measures and where it is meant to come from (agents_roster.json)."""
+    try:
+        return {a["agent_id"]: {"series": a.get("series"), "source": a.get("source")} for a in json.loads((BASE_DIR / "agents_roster.json").read_text())}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+_EXPLAIN: dict | None = None
+
+
+def explain() -> dict:
+    """Definitions and formulas for every figure (metric_docs.build), built once; parameters come from this module's own signatures."""
+    global _EXPLAIN
+    if _EXPLAIN is None:
+        import metric_docs
+        _EXPLAIN = metric_docs.build(sys.modules[__name__])
+    return _EXPLAIN
 
 
 def active_product(default: str = "propane") -> str:
@@ -443,6 +506,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                      "available_timestamp": full[-1][2], "change_1d": vals[-1] - prev, "change_1d_pct": (vals[-1] / prev - 1) * 100 if prev else None,
                      "change_5d": vals[-1] - wk, "change_5d_pct": (vals[-1] / wk - 1) * 100 if wk else None,
                      "window_high": max(vv), "window_low": min(vv),
+                     "agent_id": meta["agent_id"], **{k: (latest.get(meta["agent_id"]) or {}).get(k) for k in ("source_id", "retrieved_timestamp", "quality_status", "raw_payload_hash")},
                      "pct_of_wti": wti_ratio(vals[-1], wti[-1][1]) if (wti and meta["unit"] == "cents/gal") else None}
             state["series"] = {"status": "measured", "dates": vd, "values": vv}
             state["technicals"] = {
@@ -481,11 +545,26 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         for m_ in range(1, 13):
             r = latest.get(f"Agent_HH_M{m_}")
             if r and r["provenance"] == "measured":
-                fwd.append({"contract": f"M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10], "available_timestamp": r["available_timestamp"]})
+                sid = r.get("series_id") or ""
+                dm = sid[sid.rfind("(") + 1:-1] if sid.endswith(")") and "(" in sid else None   # "NGZ26.NYM (2026-12)" -> "2026-12"
+                fwd.append({"contract": f"M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10], "available_timestamp": r["available_timestamp"],
+                            "unit": r["unit"], "series_id": sid, "delivery_month": dm, "source_id": r["source_id"], "quality_status": r["quality_status"],
+                            "published_timestamp": r.get("published_timestamp") or None, "retrieved_timestamp": r["retrieved_timestamp"],
+                            "raw_payload_hash": r["raw_payload_hash"]})
         fwd_dates = {p["date"] for p in fwd}
         fwd_age = _age_days(max(p["available_timestamp"] for p in fwd), cutoff) if fwd else None
         fwd_stale = bool(fwd) and (len(fwd_dates) > 1 or (fwd_age is not None and fwd_age > 10))
+        def _q(agent):  # a collected quote as lng_forward expects it (None if absent at this cutoff)
+            r = latest.get(agent)
+            if not r or r.get("provenance") != "measured":
+                return None
+            return {"value": r["value"], "published_timestamp": r.get("published_timestamp") or None, "available_timestamp": r["available_timestamp"],
+                    "latest_target_timestamp": r["latest_target_timestamp"], "series_id": r.get("series_id"), "quality_status": r["quality_status"], "raw_payload_hash": r["raw_payload_hash"]}
+        ttf_agents = {p["delivery_month"]: "Agent_TTF_" + p["delivery_month"].replace("-", "_") for p in fwd if p.get("delivery_month")}
+        import lng_evidence
+        lng = lng_forward.build(fwd, {m: _q(a) for m, a in ttf_agents.items() if _q(a)}, _q("Agent_FX_EURUSD"), cutoff, lng_evidence.validated(lng_evidence.load(cutoff)))
         curves = {
+            "lng_forward": lng,
             "ngl_to_wti_pct": {"formula": "(cents/gal / 100 * 42) / WTI_usd_bbl * 100", "wti": {"status": "measured" if wti else PENDING,
                                "value": wti[-1][1] if wti else None, "date": wti[-1][0] if wti else None, "unit": "USD/bbl"},
                                "propane": pct_curve("propane"), "normal_butane": pct_curve("normal_butane"), "natural_gasoline": pct_curve("natural_gasoline")},
@@ -496,9 +575,9 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
             "frac_spread": ({"status": "measured", "dates": [a[0] for a in fr], "ethane_usd_mmbtu": [ethane_usd_mmbtu(a[1]) for a in fr],
                              "henry_hub_usd_mmbtu": [a[2] for a in fr], "frac_spread_usd_mmbtu": [frac_spread(a[1], a[2]) for a in fr],
                              "regime": "RECOVERY" if frac_spread(fr[-1][1], fr[-1][2]) > 0 else "REJECTION"} if len(fr) >= 30 else
-                            {"status": PENDING, "missing": [PRODUCTS["ethane"]["agent_id"]], "formula": "(cents/gal / 100) / 0.0665 - Henry Hub",
+                            {"status": PENDING, "missing": [PRODUCTS["ethane"]["agent_id"]], "formula": "(cents/gal / 100) / 0.0664 - Henry Hub",
                              "henry_hub_latest": hh[-1][1] if hh else None, "note": "Ethane has no collector, so recovery vs rejection cannot be computed."}),
-            "forward_curve": {"status": "measured" if fwd else PENDING, "points": fwd, "regime": curve_regime(fwd) if fwd else "UNAVAILABLE",
+            "forward_curve": {"status": "measured" if fwd else PENDING, "points": fwd, "regime": curve_regime(fwd) if fwd else "UNAVAILABLE", "shape": curve_shape(fwd) if fwd else {},
                               "stale": fwd_stale, "as_of_date": max(fwd_dates) if fwd else None, "age_days": fwd_age,
                               "missing": [f"Agent_HH_M{m_}" for m_ in range(1, 13) if f"Agent_HH_M{m_}" not in {('Agent_HH_' + p['contract']) for p in fwd}],
                               "note": "EIA stopped publishing its NYMEX contract 1-4 series on 2024-04-05; M5-M12 have no collector." if fwd_stale else ""},
@@ -527,21 +606,46 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                    "shale_production_total_bcfd": {"value": (lambda p: sum(x["value"] for x in p) if len(p) == 6 else None)(
                        [latest[a] for a in DRIVER_GROUPS[0][2] if a in latest]), "unit": "Bcf/d (six roster basins)", "provenance": "extracted_estimate"}}
 
+        # ---- G5: the seven fundamental elements (direct inputs vs separately calculated modules). Nothing here is fed into any price (O6) and the block says so.
+        frac_mod = frac_module.build(latest.get(frac_module.ETHANE_AGENT), latest.get(frac_module.HH_AGENT), latest.get(frac_module.WAHA_AGENT), cutoff)
+        feedgas_mod = lng_feedgas.load(cutoff)
+        lp, ln = lng.get("points") or [], lng.get("netback") or {}
+        forward_inputs = [
+            {"id": "P1", "label": "Henry Hub NYMEX futures, M1-M12", "sets": "the Henry Hub forward curve; the LNG FOB cost is k x this price", "n": len(fwd), "date": fwd[0]["date"] if fwd else None,
+             "provenance": "measured (delayed, unofficial quote)", "status": "measured" if fwd else PENDING, "market_derived": True},
+            {"id": "P2", "label": "LNG FOB cost parameters k and L", "sets": "the LNG forward cost (k x HH + L)", "status": "estimate", "market_derived": False,
+             "value": f"k {lng['parameters']['k_hh_multiplier']['value']:g} ({lng['parameters']['k_hh_multiplier']['source']}) · L {lng['parameters']['liquefaction_usd_mmbtu']['value']:g} USD/MMBtu ({lng['parameters']['liquefaction_usd_mmbtu']['source']})",
+             "provenance": "labelled assumption unless a verbatim library quote passed the O13-R checks"} if lng.get("parameters") else None,
+            {"id": "P3", "label": "TTF monthly futures and EUR/USD", "sets": "the TTF netback beside the LNG cost", "n": ln.get("points_with_netback"), "status": ln.get("status", PENDING), "market_derived": True,
+             "provenance": "measured (delayed, unofficial quote); quotes older than the age limit are refused"},
+            {"id": "P4", "label": "Shipping and regasification", "sets": "the TTF netback", "status": "estimate", "market_derived": False,
+             "value": f"shipping {lng.get('assumptions', {}).get('shipping', {}).get('value')} + regas {lng.get('assumptions', {}).get('regas', {}).get('value')} USD/MMBtu", "provenance": "labelled assumptions"},
+        ]
+        disposition = [
+            {"group": "demand", "decision": "move", "reason": "Not one of the seven elements and it feeds no calculation on the page (res/comm demand enters through weather, M2). Kept as an underlying series, outside the fundamentals section."},
+            {"group": "crude_and_carbon", "decision": "move", "reason": "WTI feeds the NGL-to-WTI ratio, which is relative value, not a gas forward price; CO2 allowance feeds nothing. Kept as underlying series, outside the fundamentals section."},
+        ]
+        fundamentals_block = fundamentals.build(latest, {g: ag for g, _, ag in DRIVER_GROUPS}, derived, feedgas_mod, frac_mod, cutoff, FUNDAMENTALS_PRICE_NOTE,
+                                                [x for x in forward_inputs if x], disposition)
+
         # ---- source availability (every roster agent, then extras)
         roster = _roster()
         agents = roster + sorted(a for a in latest if a not in set(roster))
-        needed = {meta["agent_id"], WTI_AGENT} | {a for _, _, ag in DRIVER_GROUPS for a in ag}
+        needed = {meta["agent_id"], WTI_AGENT, "Agent_FX_EURUSD"} | set(ttf_agents.values()) | {a for _, _, ag in DRIVER_GROUPS for a in ag}
         sources = []
+        rmeta = _roster_meta()
         for a in agents:
             r = latest.get(a)
             if r:
-                sources.append({**{k: r[k] for k in ("agent_id", "source_id", "latest_target_timestamp", "available_timestamp", "retrieved_timestamp",
+                sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
+                                **{k: r[k] for k in ("agent_id", "source_id", "latest_target_timestamp", "available_timestamp", "retrieved_timestamp",
                                                      "quality_status", "raw_payload_hash", "provenance")},
                                 "status": "pending_collector" if r["provenance"] == "unverified_seed" else "collected",
                                 "raw_payload_archived": bool(r["raw_payload_hash"]) and r["raw_payload_hash"] in payload_hashes,
                                 "age_days": _age_days(r["available_timestamp"], cutoff), "in_roster": a in set(roster), "contributes": a in needed})
             else:
-                sources.append({"agent_id": a, "source_id": None, "latest_target_timestamp": None, "available_timestamp": None, "retrieved_timestamp": None,
+                sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
+                                "agent_id": a, "source_id": None, "latest_target_timestamp": None, "available_timestamp": None, "retrieved_timestamp": None,
                                 "quality_status": None, "raw_payload_hash": None, "provenance": None, "status": "pending_collector",
                                 "raw_payload_archived": False, "age_days": None, "in_roster": True, "contributes": a in needed})
         collected = [s for s in sources if s["in_roster"] and s["status"] == "collected"]
@@ -556,7 +660,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         flow_agents = [a for a in roster if a.startswith("Agent_Flow_") or (a.startswith("Agent_LNG_") and a.endswith("_Flow"))]
         flows_ok = [a for a in flow_agents if a in latest and latest[a]["provenance"] == "measured"]
         geo = {"nodes": nodes, "flows": [{"from": a, "to": b, "kind": k, "schematic": True, "value": None, "status": PENDING} for a, b, k in GEO_FLOWS],
-               "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. No pipeline-flow collector exists yet.",
+               "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. LNG terminal labels show the latest monthly exports (EIA); there is no daily pipeline-flow collector yet.",
                "flow_agents_collected": len(flows_ok), "flow_agents_total": len(flow_agents)}
 
         # ---- pipeline critical notices (source documents, PIT: posted at or before the cutoff)
@@ -596,12 +700,12 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                     alerts.append({"level": "info", "kind": "technical", "text": f"{meta['label']}: {c['type'].replace('_', ' ')} on {c['date']}."})
         if derived["hdd_anomaly"]["value"] is not None and abs(derived["hdd_anomaly"]["value"]) >= 5:
             alerts.append({"level": "info", "kind": "weather", "text": f"CONUS HDD {derived['hdd_anomaly']['value']:+.1f} vs 30-yr normal on {derived['hdd_anomaly']['date']}."})
-        alerts.append({"level": "gap", "kind": "coverage", "text": f"Pipeline and LNG flow volumes: {len(flows_ok)} of {len(flow_agents)} meters collected. "
+        alerts.append({"level": "gap", "kind": "coverage", "text": f"Daily pipeline and LNG meters: {len(flows_ok)} of {len(flow_agents)} collected (monthly EIA volumes for terminals and border points are shown separately). "
                        f"Critical notices: {notices['last_7_days']} in the last 7 days from {len(per)} pipelines."})
         def max_age(agent):  # expected cadence: daily series 10 days, monthly 75, quarterly auctions 130, static normals never
             if agent == "Agent_Weather_30YrNormal_HDD":
                 return None
-            if agent.startswith(("Agent_Prod_", "Agent_Demand_")):
+            if agent.startswith(("Agent_Prod_", "Agent_Demand_", "Agent_LNGExports_", "Agent_BorderFlow_")):
                 return 75
             return 130 if agent.startswith("Agent_Power_CO2") else 10
         stale = [s for s in sources if s["status"] == "collected" and s["contributes"] and max_age(s["agent_id"]) is not None
@@ -616,8 +720,8 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         out = {"schema": SCHEMA_VERSION, "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "as_of": cutoff,
                "active_product": product, "default_product": active_product(), "product": {"id": product, **meta},
                "timeframe": {"id": timeframe, **tf}, "products": products, "timeframes": [{"id": k, **v} for k, v in TIMEFRAMES.items()],
-               "price": price, **state, "curves": curves, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
-               "knowledge": knowledge or {"status": "unavailable"},
+               "price": price, **state, "curves": curves, "fundamentals": fundamentals_block, "modules": {"lng_feedgas": feedgas_mod, "frac": frac_mod}, "drivers": drivers, "derived": derived, "sources": sources, "geo": geo, "notices": notices, "alerts": alerts,
+               "knowledge": knowledge or {"status": "unavailable"}, "explain": explain(),
                "platform": {"roster_agents": len(roster), "roster_agents_collected": len(collected), "agents_with_data": len(latest), **stats,
                             "provenance_legend": {"measured": "published by the source and stored unchanged", "extracted_estimate": "derived here from measured rows",
                                                   "unverified_seed": "old demo row, excluded from every calculation", PENDING: "no collector yet; no value shown"}}}

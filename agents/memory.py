@@ -26,7 +26,7 @@ import kb_ingest
 
 FINDING_DOMAIN = "agent_finding"
 FINDING_PROVENANCE = ("model_hypothesis", "extracted_estimate", "backtest_result")
-KINDS = ("repair_proposal", "data_quality", "hypothesis", "evaluation", "memo", "anomaly", "diagnosis", "finding")   # series_key = agent_<agent>_<kind>
+KINDS = ("repair_proposal", "data_quality", "hypothesis", "evaluation", "memo", "anomaly", "diagnosis", "finding", "risk_alert")   # series_key = agent_<agent>_<kind>
 
 
 def ensure(conn: sqlite3.Connection) -> None:

@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 import ingest  # noqa: E402
 import init_db  # noqa: E402
 from collectors import cpc_degree_days as c  # noqa: E402
+from collectors import noaa_cpc_discussion as cd  # noqa: E402
 
 FILE = "Product: Daily Heating Degree Days\nRegion|20260101|20260102|20260103\n1|41|47|45\nCONUS|29|28|27\n"
 T1 = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
@@ -58,6 +59,31 @@ class CpcTests(unittest.TestCase):
     def test_http_error_raises(self):
         with self.assertRaises(RuntimeError):
             c.collect(self.conn, "Heating", 2026, self.fake("", 404), now=T1)
+
+
+class CpcDiscussionTests(unittest.TestCase):
+    def _html(self, stamp):
+        return f"""<html><body><pre>
+Prognostic Discussion for 6 to 10 and 8 to 14 Day Outlooks
+NWS Climate Prediction Center College Park MD
+{stamp}
+
+6-10 Day Outlook for Wed Nov 25 2026 - Sun Nov 29 2026
+
+8-14 Day Outlook for Wed Nov 25 2026 - Tue Dec 01 2026
+</pre></body></html>"""
+
+    def test_parse_accepts_current_and_legacy_issuance_stamps(self):
+        for stamp in ("3:00 PM EST Thu November 19 2026", "300 PM EST Thu November 19 2026"):
+            with self.subTest(stamp=stamp):
+                d = cd.parse(self._html(stamp))
+                self.assertEqual(d["issued"], "2026-11-19T20:00:00Z")
+                self.assertEqual(d["period_6_10"], "Wed Nov 25 2026 - Sun Nov 29 2026")
+                self.assertEqual(d["period_8_14"], "Wed Nov 25 2026 - Tue Dec 01 2026")
+
+    def test_parse_rejects_unexpected_header(self):
+        with self.assertRaises(ValueError):
+            cd.parse("<pre>unexpected discussion</pre>")
 
 
 if __name__ == "__main__":

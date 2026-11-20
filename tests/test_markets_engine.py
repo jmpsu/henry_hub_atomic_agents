@@ -16,8 +16,8 @@ class Maths(unittest.TestCase):
         self.assertAlmostEqual(me.wti_ratio(100.0, 84.0), 50.0)           # $1.00/gal * 42 = $42/bbl = 50% of $84
         self.assertIsNone(me.wti_ratio(100.0, 0.0))
     def test_frac_spread(self):
-        self.assertAlmostEqual(me.ethane_usd_mmbtu(19.95), 3.0)           # 0.1995 $/gal / 0.0665
-        self.assertAlmostEqual(me.frac_spread(19.95, 2.5), 0.5)           # recovery
+        self.assertAlmostEqual(me.ethane_usd_mmbtu(19.92), 3.0)           # 0.1992 $/gal / 0.0664
+        self.assertAlmostEqual(me.frac_spread(19.92, 2.5), 0.5)           # recovery
         self.assertLess(me.frac_spread(13.3, 3.0), 0)                     # 2.0 - 3.0 -> rejection
     def test_bollinger(self):
         flat = me.bollinger([10.0] * 40)
@@ -109,3 +109,23 @@ class PitState(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CurveShape(unittest.TestCase):
+    def pts(self, vals):
+        return [{"contract": f"M{i + 1}", "value": v, "delivery_month": f"2027-{i + 1:02d}"} for i, v in enumerate(vals)]
+    def test_live_style_seasonal_curve_is_not_called_contango(self):
+        v = [3.125, 3.503, 3.116, 2.433, 2.384, 2.445, 2.607, 2.843, 2.925, 2.913, 2.992, 3.271]   # the 2026-11-17 curve: M12 > M1 but strongly seasonal
+        self.assertEqual(me.curve_regime(self.pts(v)), "SEASONAL")
+        sh = me.curve_shape(self.pts(v))
+        self.assertEqual(sh["peak"]["contract"], "M2"); self.assertEqual(sh["trough"]["contract"], "M5")
+        self.assertAlmostEqual(sh["front_spread"], 0.378, places=3); self.assertEqual(sh["reversals"], 2); self.assertIn("not read as contango", sh["basis"])
+    def test_monotone_curves_keep_their_labels(self):
+        up = [3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6]; down = up[::-1]
+        self.assertEqual(me.curve_regime(self.pts(up)), "CONTANGO"); self.assertEqual(me.curve_regime(self.pts(down)), "BACKWARDATION")
+        self.assertEqual(me.curve_regime(self.pts([3.0] * 8)), "FLAT")
+        self.assertEqual(me.curve_shape(self.pts(up))["reversals"], 0)
+    def test_noise_inside_the_band_is_not_seasonality(self):
+        self.assertEqual(me.curve_regime(self.pts([3.00, 3.02, 3.00, 3.02, 3.00, 3.02, 3.60])), "CONTANGO")
+    def test_short_curves_unchanged(self):
+        self.assertEqual(me.curve_regime(self.pts([3.0, 3.4])), "CONTANGO"); self.assertEqual(me.curve_regime([]), "UNAVAILABLE"); self.assertEqual(me.curve_shape([]), {})

@@ -84,7 +84,8 @@
     const ec = clear($("kl-edges"));
     const counts = {}; graph.links.forEach((l) => { counts[l.type] = (counts[l.type] || 0) + 1; });
     Object.keys(graph.edge_legend).forEach((t) => {
-      const b = el("button", { type: "button", class: "chip edge-" + t, "aria-pressed": String(!hiddenEdges.has(t)), title: graph.edge_legend[t], text: `${t.replace(/_/g, " ")} ${counts[t] || 0}` });
+      const b = el("button", { type: "button", class: "chip edge-" + t, "aria-pressed": String(!hiddenEdges.has(t)), text: `${t.replace(/_/g, " ")} ${counts[t] || 0}` });
+      NGLTip.bind(b, () => ({ title: "Link type: " + t.replace(/_/g, " "), value: `${counts[t] || 0} links`, what: graph.edge_legend[t], read: "Click the chip to show or hide these links. Semantic similarity is a retrieval aid, not evidence of a real relationship." }), "edge_" + t);
       b.addEventListener("click", () => { hiddenEdges.has(t) ? hiddenEdges.delete(t) : hiddenEdges.add(t); renderFilters(); draw(); });
       ec.append(b);
     });
@@ -121,7 +122,13 @@
       .on("click", (_, d) => inspect(d.id, true)).on("keydown", (ev, d) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); inspect(d.id, true); } })
       .call(d3.drag().on("start", (ev, d) => { if (!ev.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
         .on("drag", (ev, d) => { d.fx = ev.x; d.fy = ev.y; }).on("end", (ev, d) => { if (!ev.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
-    nodesSel.append("title").text((d) => `${d.domain} · ${d.title}\navailable ${d.available_timestamp} · ${d.provenance}${d.status ? " · " + d.status : ""}`);
+    nodesSel.each(function (d) {
+      NGLTip.bind(this, () => ({ title: d.title, value: d.domain.replace(/_/g, " "), badge: { text: (d.provenance || "").replace(/_/g, " "), cls: d.provenance === "model_hypothesis" || d.provenance === "backtest_result" ? "estimate" : "measured" },
+        what: ((d.document || "").slice(0, 280)) + ((d.document || "").length > 280 ? "…" : ""), read: "Click to open the full object, its links and its checks. Drag to move it.",
+        sections: [{ h: "Where it came from", rows: [["Available (PIT)", (d.available_timestamp || "—").replace("T", " ")], ["Published", (d.published_timestamp || "—").replace("T", " ")], ["Source", d.source_id], ["Agents", (d.agent_ids || "").split(",").filter(Boolean).map(shortAgent).join(", ")],
+          ["Verdict", d.status || null], ["Raw payload", d.raw_payload_hash ? d.raw_payload_hash.slice(0, 16) + "…" : null, "hash"], ["Object id", d.id, "hash"]] }],
+        notes: ["An object is only returned for a cutoff after it became available, so older cutoffs cannot see it."] }), "kg_" + d.id, { pin: false });
+    });
     const paint = () => {
       linksSel.attr("x1", (d) => d.source.x).attr("y1", (d) => d.source.y).attr("x2", (d) => d.target.x).attr("y2", (d) => d.target.y);
       nodesSel.attr("transform", (d) => `translate(${d.x},${d.y})`);

@@ -3,12 +3,15 @@
 Isolation from the privileged hub (command_hub.py on :8090):
 - separate process and port; it has no /execute, /ingest, /experiments or /kb/ingest and imports none of that code;
 - the database is opened read-only (mode=ro) for every request and never written;
-- the only model call is a local Ollama embedding for knowledge search, rate-limited and cached;
+- the only model calls are local Ollama: an embedding for knowledge search (rate-limited, cached) and the grounded chat (/api/chat), which is read-only, limited to the
+  dashboard's point-in-time cutoff, rate-limited, and appends each turn to a SEPARATE local audit file (runtime/chat_log.db), never to the market database;
 - every static asset (libraries, basemap, fonts) is served from web/ in this repository, nothing from a third-party CDN.
 """
 from __future__ import annotations
 
+import json
 import os
+import re
 import sqlite3
 import time
 from collections import OrderedDict, deque
@@ -16,10 +19,13 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+import chat_service
+import derivation
 import kb_ingest
+import literature_kb
 import markets_engine as me
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -132,6 +138,110 @@ def agents_activity(limit: int = Query(20, ge=1, le=100)):
 @app.get("/knowledge")
 def knowledge_page():
     return FileResponse(WEB_DIR / "knowledge.html", headers={"Cache-Control": "no-cache"})
+
+
+_METRIC_RE = re.compile(r"^[A-Za-z0-9_.:\-]{1,120}$")
+
+
+@app.get("/api/derivation")
+def derivation_api(metric: str = Query(..., max_length=120), product: str | None = Query(None, max_length=32), timeframe: str = Query("seasonal", max_length=16),
+                   as_of: str | None = Query(None, max_length=40), node: str | None = Query(None, max_length=200), rows_offset: int = Query(0, ge=-1), rows_limit: int = Query(60, ge=1, le=500)):
+    """One level of the derivation tree for a displayed number (docs/DRILLDOWN_SPEC.md). `metric` is a metric id (e.g. rsi14, pct_of_wti, fwd:M3, drv:<agent>);
+    `node` selects any node of that metric's tree (an operand, a leaf, a document); `rows_offset=-1` returns the newest page of a long window. Read-only, point-in-time."""
+    if not _METRIC_RE.match(metric) or (node is not None and not re.match(r"^[A-Za-z0-9_.:\-]{1,200}$", node)):
+        raise HTTPException(status_code=422, detail="bad metric or node id")
+    _cutoff(as_of)
+    t = derivation.Trace(DB_PATH, product, timeframe, as_of)
+    try:
+        try:
+            root = t.metric(metric)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="unknown metric")
+        view = t.view(node or root, rows_offset, rows_limit)
+        if "error" in view:
+            raise HTTPException(status_code=404, detail=view["error"])
+        return {"metric": metric, "root": root, "product": t.product, "timeframe": t.timeframe, "cutoff": t.cutoff, "node": view}
+    finally:
+        t.close()
+
+
+@app.get("/api/raw/{sha}")
+def raw_payload(sha: str):
+    """The archived raw bytes behind a stored row, read-only. Only payloads registered in raw_payloads are served, and only from the archive directory next to the database."""
+    if not re.fullmatch(r"[0-9a-f]{64}", sha):
+        raise HTTPException(status_code=404)
+    conn = _ro()
+    try:
+        r = conn.execute("SELECT archive_path, byte_length FROM raw_payloads WHERE raw_payload_hash=?", (sha,)).fetchone()
+    finally:
+        conn.close()
+    if not r:
+        raise HTTPException(status_code=404)
+    base = Path(DB_PATH).parent.resolve()
+    target = (base / r[0]).resolve()
+    if base / "raw" not in target.parents or not target.is_file() or target.stat().st_size > 5_000_000:
+        raise HTTPException(status_code=404)
+    return FileResponse(target, media_type="text/plain; charset=utf-8", headers={"Content-Disposition": "inline", "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=86400"})
+
+
+class ChatReq(BaseModel):
+    message: str = Field(min_length=2, max_length=800)
+    as_of: str | None = Field(default=None, max_length=40)
+    context: dict | None = None            # click-to-ask: {"metric": explain id, "agent": agent id}; resolved server-side, never trusted as facts
+
+
+_CHAT_TIMES: deque = deque()
+CHAT_PER_MINUTE = 20
+
+
+def _chat_events(req: ChatReq):
+    cutoff = _cutoff(req.as_of)
+    now = time.time()
+    while _CHAT_TIMES and now - _CHAT_TIMES[0] > 60:
+        _CHAT_TIMES.popleft()
+    if len(_CHAT_TIMES) >= CHAT_PER_MINUTE:
+        raise HTTPException(status_code=429, detail="chat rate limit reached; try again in a minute")
+    _CHAT_TIMES.append(now)
+    ctx = None
+    if req.context:
+        ctx = {"metric": str(req.context.get("metric") or "")[:64], "agent": str(req.context.get("agent") or "")[:96]}
+    kb = _ro()
+    lit = None
+    if os.path.isfile(literature_kb.DEFAULT_DB):
+        lit = sqlite3.connect(f"file:{literature_kb.DEFAULT_DB}?mode=ro", uri=True)
+    model_on = os.environ.get("HH_CHAT_MODEL", "on") != "off"
+
+    def gen():
+        try:
+            for ev, pl in chat_service.respond(req.message, cutoff, lambda product=None: _state(product, "seasonal", req.as_of), kb, lit, kb_ingest.embed,
+                                               chat_service.ollama_stream if model_on else None, ctx):
+                yield ev, pl
+        finally:
+            kb.close()
+            if lit is not None:
+                lit.close()
+    return gen()
+
+
+@app.post("/api/chat/stream")
+def chat_stream(req: ChatReq):
+    """Server-sent events: status, context (facts, then cited nodes/documents), token*, final. The first event is sent before any retrieval or model work."""
+    events = _chat_events(req)
+
+    def sse():
+        for ev, pl in events:
+            yield f"event: {ev}\ndata: {json.dumps(pl, default=str)}\n\n"
+    return StreamingResponse(sse(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+@app.post("/api/chat")
+def chat(req: ChatReq):
+    """The same pipeline without streaming: returns the final JSON (answer, cited_nodes, cited_documents, facts, verdict)."""
+    final = None
+    for ev, pl in _chat_events(req):
+        if ev == "final":
+            final = pl
+    return final
 
 
 class SearchReq(BaseModel):

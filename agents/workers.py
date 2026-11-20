@@ -46,6 +46,22 @@ def _has(conn, table):
     return bool(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone())
 
 
+def _kb_evidence_ids(conn, agent: str | None = None, as_of: str | None = None, limit: int = 3) -> list:
+    """Resolve live knowledge-library nodes a finding can honestly cite (source/data nodes, never other findings)."""
+    if not _has(conn, "kb_nodes"):
+        return []
+    where, args = ["domain<>'agent_finding'"], []
+    if agent:
+        where.append("series_key LIKE ?")
+        args.append(f"%{agent}%")
+    if as_of:
+        where.append("available_timestamp<=?")
+        args.append(as_of)
+    args.append(limit)
+    return [r[0] for r in conn.execute(
+        f"SELECT id FROM kb_nodes WHERE {' AND '.join(where)} ORDER BY available_timestamp DESC LIMIT ?", args)]
+
+
 def _dt(ts: str) -> datetime:
     return datetime.fromisoformat(ts.replace("Z", "+00:00"))
 
@@ -96,7 +112,8 @@ class DiagnosticsAgent:
             source = llm.last_source
             body = (f"Collector {name} failed at {started}. Classified as {res['category']} ({'model' if source == 'model' else 'rule fallback'}). "
                     f"Likely fix: {res['likely_fix']} Error: {(detail or '')[:300]}")
-            f = memory.add_finding(conn, llm, self.name, f"Collector {name}: {res['category']}", body, as_of, [], "extracted_estimate", "diagnosis", collection)
+            f = memory.add_finding(conn, llm, self.name, f"Collector {name}: {res['category']}", body, as_of,
+                                   _kb_evidence_ids(conn, name, as_of), "extracted_estimate", "diagnosis", collection)
             memory.publish(conn, self.name, "incident", {"collector": name, "run_id": rid, "category": res["category"], "likely_fix": res["likely_fix"],
                                                          "detail": (detail or "")[:1500], "finding": f["id"], "source": source}, ref=f"{name}:{rid}")
             out.append({"collector": name, **res, "finding": f["id"], "source": source})
@@ -118,7 +135,11 @@ class DataQualityAgent:
     CAUSES = ["source_publication_schedule", "collector_failure", "source_revision", "upstream_outage", "parser_error", "expected_behavior", "unknown"]
     ACTIONS = ["none", "monitor", "rerun_collector", "investigate_parser", "open_incident"]
     SCHEMA = {"type": "object", "properties": {"likely_cause": {"type": "string", "enum": CAUSES}, "explanation": {"type": "string", "maxLength": 400},
-                                               "action": {"type": "string", "enum": ACTIONS}}, "required": ["likely_cause", "explanation", "action"]}
+                                                "action": {"type": "string", "enum": ACTIONS}}, "required": ["likely_cause", "explanation", "action"]}
+    TRIAGE_SCHEMA = {"type": "object", "properties": {
+        "assessment": {"type": "string", "enum": ["no_actionable_issues", "issues_already_reported", "new_issues_investigated"]},
+        "action": {"type": "string", "enum": ["none", "monitor", "rerun_collector", "investigate_parser", "open_incident"]}},
+        "required": ["assessment", "action"]}
     SKIP_QUALITY = ("historical_only", "unverified_seed")
 
     ALLOWED = {  # likely causes consistent with each detected issue type; anything else is rejected and the rules decide
@@ -238,15 +259,34 @@ class DataQualityAgent:
             if source == "model" and numbers_grounded(res["explanation"], prompt):
                 res, source = self.rules(i, run), "fallback"         # invented numbers -> deterministic explanation
             body = f"Data-quality issue ({i['type']}): {i['fact']} Likely cause: {res['likely_cause']}. {res['explanation']} Action: {res['action']}."
-            f = memory.add_finding(conn, llm, self.name, f"Data quality: {i['type']} {i['agent']}", body, as_of, [], "extracted_estimate", "data_quality",
+            f = memory.add_finding(conn, llm, self.name, f"Data quality: {i['type']} {i['agent']}", body, as_of,
+                                   _kb_evidence_ids(conn, i["agent"], as_of), "extracted_estimate", "data_quality",
                                    collection, {"agent_ids": i["agent"]})
             memory.publish(conn, self.name, "data_quality", {**i, **res, "finding": f["id"], "source": source}, ref=i["ref"])
             out.append({"type": i["type"], "agent": i["agent"], **res, "source": source, "finding": f["id"]})
+        assessment = "new_issues_investigated" if out else "issues_already_reported" if issues else "no_actionable_issues"
+        prompt = (f"Data-quality triage of the point-in-time database at {as_of}. The deterministic detector found {len(issues)} issue(s), "
+                  f"{len(new)} of which were new, and {len(out)} were investigated in this run. Rechecks: {rechecked}. "
+                  "Classify the current state and choose the next action using only these counts.")
+        triage = llm.json("triage", prompt, self.TRIAGE_SCHEMA,
+                          fallback=lambda: {"assessment": assessment, "action": "none" if not out else "monitor"},
+                          version=f"{self.VERSION}-triage")
+        source = llm.last_source
+        evidence_ids = _kb_evidence_ids(conn, as_of=as_of, limit=3)
+        triage_body = (f"Data-quality triage at {as_of}: detector found {len(issues)} issue(s), {len(new)} new, {len(out)} investigated; "
+                       f"rechecks {rechecked}. Model assessment: {triage['assessment']} ({'model' if source == 'model' else 'rule fallback'}), "
+                       f"next action: {triage['action']}.")
+        f = memory.add_finding(conn, llm, self.name, f"Data quality triage: {triage['assessment']}", triage_body, as_of,
+                               evidence_ids, "extracted_estimate", "data_quality", collection)
+        memory.publish(conn, self.name, "data_quality_triage",
+                       {"assessment": triage["assessment"], "action": triage["action"], "finding": f["id"], "source": source},
+                       ref=f"triage:{as_of[:10]}")
         if out and _notify_enabled():
             import notify
             notify.event("data-quality", f"{len(out)} data-quality issue(s) as of {as_of}",
                          "\n".join(f"- `{o['agent']}` {o['type']}: {o['likely_cause']} -> {o['action']}" for o in out))
-        return {"issues_detected": len(issues), "new_issues": len(new), "investigated": out, "rechecked": rechecked}
+        return {"issues_detected": len(issues), "new_issues": len(new), "investigated": out, "rechecked": rechecked,
+                "triage": triage, "triage_source": source, "triage_finding": f["id"]}
 
 
 def _notify_enabled() -> bool:
@@ -498,10 +538,11 @@ class AnomalyAgent:
 # ----------------------------------------------------------------------------- risk engine connection (Spec 4 integration)
 class QuantRiskAgent:
     """Connects the risk engine (agents/quant_risk.py) into the agent system: VaR/ES on the Henry Hub spot
-    series, with a 'risk_alert' message + finding when the expected tail loss is material (any positive tail)."""
+    series, with a 'risk_alert' message + finding when the expected tail loss is material (more than 5% one-day loss)."""
     name = "quant_risk"
 
     def run(self, conn, llm: LLM, as_of: str, collection=None) -> dict:
+        memory.ensure(conn)
         s = me.load_series(conn, "Agent_HH_Spot_EIA", as_of)
         returns = [s[i][1] / s[i - 1][1] - 1 for i in range(1, len(s)) if s[i - 1][1]] if s else []
         metrics = {"hh_spot": s[-1][1] if s else None, "hh_spot_available_timestamp": s[-1][2] if s else None}

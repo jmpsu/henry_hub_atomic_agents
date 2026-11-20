@@ -9,7 +9,8 @@ NOT implemented (do not assume these exist when debugging missing data):
   unverified. Earlier pasted templates for them used invented selectors/URLs/facet codes. Writing them without access
   would create collectors that fail or silently return wrong numbers. Verify the real endpoint and structure first.
 - EIA API v2 agents (production, power burn, ...): need an EIA API key (EIA_API_KEY) and verified route/facet codes.
-- GFS/ECMWF forecasts: need GRIB parsing.
+GFS/ECMWF forecast collectors are implemented; they need the ECCODES system library (`libeccodes-dev` on Debian/Ubuntu) and the
+`pygrib` Python binding from `requirements.txt`. Install with `apt-get install -y libeccodes-dev` before `pip install -r requirements.txt`.
 If a run fails or a series is empty, check here first: the collector may simply not exist or its source layout changed.
 
 ## Status (2026-11-12): 36 of the 81 roster agents collect real data

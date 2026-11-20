@@ -6,6 +6,7 @@
 <title>NGL Visual Intelligence</title>
 <link rel="stylesheet" href="/static/vendor/maplibre-gl.css">
 <link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
 </head>
 <body>
 <header class="top">
@@ -14,10 +15,27 @@
   <div class="asof" id="asof">loading</div>
 </header>
 
+<section class="chatbar" id="chatbar" data-open="false" aria-label="Ask the data">
+  <form id="chat-form" class="chat-row" autocomplete="off">
+    <label class="chat-label" for="chat-q">ASK</label>
+    <input id="chat-q" type="text" maxlength="800" placeholder="Ask about a terminal, a hub, the forward curve, a pending feed…">
+    <button type="submit" id="chat-go">Ask</button>
+    <button type="button" id="chat-toggle" aria-expanded="false" aria-controls="chat-drawer" title="Expand or collapse">&#9662;</button>
+  </form>
+  <div class="chat-chips" id="chat-chips"></div>
+  <div class="chat-drawer" id="chat-drawer">
+    <div class="chat-split">
+      <div class="chat-main"><div class="chat-meta" id="chat-meta"></div><div class="chat-answer" id="chat-answer" aria-live="polite"></div><div class="chat-facts" id="chat-facts"></div></div>
+      <aside class="chat-side"><h3>Cited knowledge nodes</h3><div id="chat-nodes"></div><h3>Cited documents</h3><div id="chat-docs"></div></aside>
+    </div>
+  </div>
+</section>
+
 <nav class="controls" aria-label="Market selection">
   <div class="seg" id="product-seg" role="group" aria-label="Product"></div>
   <div class="seg" id="timeframe-seg" role="group" aria-label="Timeframe"></div>
 </nav>
+<div class="tip-hint" id="tip-hint"><b>Hover, focus or tap</b> anything with a dotted underline, any chart, marker, row or tag for what it is, how it is calculated and where the data came from. Click to pin; Esc closes.</div>
 
 <main>
   <section class="panel hero" aria-labelledby="hero-h">
@@ -62,16 +80,18 @@
     </div>
   </div>
 
-  <div class="row four">
+  <div class="row four five">
     <section class="panel"><h2>NGL as % of WTI crude</h2><div id="wti-chart" class="chart mid"></div></section>
     <section class="panel"><h2>Mont Belvieu vs Conway</h2><div id="hub-chart" class="chart mid"></div></section>
     <section class="panel"><h2>Frac spread: ethane vs Henry Hub</h2><div id="frac-chart" class="chart mid"></div></section>
     <section class="panel"><h2>Henry Hub forward curve<span class="tags" id="fwd-tags"></span></h2><div id="fwd-chart" class="chart mid"></div></section>
+    <section class="panel"><h2>LNG forward cost (US Gulf FOB)<span class="tags" id="lng-tags"></span></h2><div id="lng-chart" class="chart mid"></div></section>
   </div>
 
   <section class="panel" aria-labelledby="drv-h">
     <h2 id="drv-h">Production &amp; fundamental elements behind the calculation</h2>
-    <div id="drivers" class="drivers"></div>
+    <div id="fundamentals" class="fund"></div>
+    <details class="under"><summary id="under-sum">Underlying series behind the elements, and two groups that are not among the seven</summary><div id="drivers" class="drivers"></div></details>
   </section>
 
   <section class="panel" aria-labelledby="src-h">
@@ -106,6 +126,9 @@
 <script src="/static/vendor/d3.min.js"></script>
 <script src="/static/vendor/maplibre-gl.js"></script>
 <script src="/static/vendor/deck.gl.min.js"></script>
-<script src="/static/app.js"></script>
+<script src="/static/vendor/katex/katex.min.js"></script>
+<script src="/static/tooltip.js?v=1.0.4"></script>
+<script src="/static/drill.js?v=1.0.4"></script>
+<script src="/static/app.js?v=1.0.4"></script>
 </body>
 </html>

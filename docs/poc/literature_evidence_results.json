@@ -1,0 +1,590 @@
+{
+ "generated_at": "2026-11-17T08:21:53Z",
+ "summary": {
+  "holdout_n": 5,
+  "supported_when_expected": "3/3",
+  "abstained_when_expected": "0/2",
+  "all_quotes_verbatim": true,
+  "avg_ms": 1199,
+  "total_s": 12.0
+ },
+ "rows": [
+  {
+   "split": "exploratory",
+   "subject": "curve_shape",
+   "question": "What does the shape of this forward curve tell a trader, and why does it look this way?",
+   "expect_support": null,
+   "abstained": false,
+   "ms": 2094,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "REPowerEU is tested under 4 weather scenarios, with the coldest winter (occurring twice a decade) expected to increase natural gas demand by 39 bcm.",
+     "similarity": 0.7239,
+     "chunk_id": "doc_867d7b318b:0100",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7047
+    },
+    {
+     "quote": "plots between storage demands 18 in x-axis and the prices in y-axis for the natural gas from January 1976 to March 2004.",
+     "similarity": 0.7168,
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7547
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "REPowerEU is tested under 4 weather scenarios, with the coldest winter (occurring twice a decade) expected to increase natural gas demand by 39 bcm.",
+     "similarity": 0.7239,
+     "chunk_id": "doc_867d7b318b:0100",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7047
+    },
+    {
+     "quote": "plots between storage demands 18 in x-axis and the prices in y-axis for the natural gas from January 1976 to March 2004.",
+     "similarity": 0.7168,
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7547
+    },
+    {
+     "quote": "Yet, by 2025, different dynamics had emerged, as visible in Figure 4.4.142 A cold winter, low power generation from wind, and the loss of additional Russian pipeline gas at the beginning of the year led to a much more rapid depletion of storage.143 There has also been growing evidence of the refilling requirement increasing summer gas prices due to the sheer volume needed to refill EU supplies.",
+     "similarity": 0.7057,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7164
+    },
+    {
+     "quote": "5.1.2 Ah-Voun et al. (2024): Gas demand and LNG exposure of REPowerEU under weather variations Ah-Voun et al.169 model the policy packages of the 2019 NECPs and REPowerEU under various weather conditions, assessing natural gas demand before and after Russia\u2019s invasion of Ukraine.",
+     "similarity": 0.6747,
+     "chunk_id": "doc_867d7b318b:0100",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7047
+    },
+    {
+     "quote": "It could be argued that high gas storage levels played a critical role in natural gas price stabilisation during the energy crisis, reducing EU exposure to LNG spot market price spikes during winter.",
+     "similarity": 0.6732,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7164
+    }
+   ],
+   "chunks_considered": 8
+  },
+  {
+   "split": "exploratory",
+   "subject": "winter_premium",
+   "question": "Why is the January contract priced above the April contract?",
+   "expect_support": null,
+   "abstained": false,
+   "ms": 280,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "It could be argued that high gas storage levels played a critical role in natural gas price stabilisation during the energy crisis, reducing EU exposure to LNG spot market price spikes during winter.",
+     "similarity": 0.7109,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7389
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "It could be argued that high gas storage levels played a critical role in natural gas price stabilisation during the energy crisis, reducing EU exposure to LNG spot market price spikes during winter.",
+     "similarity": 0.7109,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7389
+    },
+    {
+     "quote": "Yet, by 2025, different dynamics had emerged, as visible in Figure 4.4.142 A cold winter, low power generation from wind, and the loss of additional Russian pipeline gas at the beginning of the year led to a much more rapid depletion of storage.143 There has also been growing evidence of the refilling requirement increasing summer gas prices due to the sheer volume needed to refill EU supplies.",
+     "similarity": 0.6959,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7389
+    },
+    {
+     "quote": "This means storage operators risk losing money, as they are required to charge during the summer but are then subject to lower market prices in winter as the storage levels are depleted.144 An additional component of this is geographical dispersion.",
+     "similarity": 0.6747,
+     "chunk_id": "doc_867d7b318b:0085",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7389
+    }
+   ],
+   "chunks_considered": 1
+  },
+  {
+   "split": "exploratory",
+   "subject": "volatility",
+   "question": "Why can small supply changes cause large price moves in this market?",
+   "expect_support": null,
+   "abstained": false,
+   "ms": 2091,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "We show that the supply curve shape of energy in the SDV model produces the characteristics of the volatility in energy prices.",
+     "similarity": 0.7991,
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7788
+    },
+    {
+     "quote": "The findings suggest that demand and supply curves change when the market becomes tighter.",
+     "similarity": 0.7105,
+     "chunk_id": "doc_d38f5cd091:0043",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7128
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "We show that the supply curve shape of energy in the SDV model produces the characteristics of the volatility in energy prices.",
+     "similarity": 0.7991,
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7788
+    },
+    {
+     "quote": "A Supply and Demand Based Volatility Model for Energy Prices - The Relationship between Supply Curve Shape and Volatility -\u2217\n\nTakashi Kanamura\u2020\u2021 First draft: February 8, 2006 This draft: September 17, 2006\n\nABSTRACT This paper proposes a new volatility model for energy prices explicitly characterized by the supply-demand relationship, which we call a Supply and Demand based Volatility (SDV) model.",
+     "similarity": 0.7592,
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7788
+    },
+    {
+     "quote": "Key words: Energy prices, volatility, supply curve, inverse Box-Cox transformation, inverse leverage effect, volatility-in-mean effect, natural gas JEL Classification: C51, L97, Q40\n\n\u2217 Views expressed in this paper are those of the author and do not necessarily reflect those of J-POWER.",
+     "similarity": 0.7402,
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7788
+    },
+    {
+     "quote": "The findings suggest that demand and supply curves change when the market becomes tighter.",
+     "similarity": 0.7105,
+     "chunk_id": "doc_d38f5cd091:0043",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7128
+    },
+    {
+     "quote": "According to Eq. (10),11 the volatility is proportional to the price to the power of the negative BoxCox transformation parameter.12 Since it stands for the curvature of the supply curve, the magnitude of the volatility changes by the curvature.",
+     "similarity": 0.704,
+     "chunk_id": "doc_b5fa50dbe4:0011",
+     "doc_id": "doc_b5fa50dbe4",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "available_timestamp": "2026-11-17T08:08:55Z",
+     "chunk_similarity": 0.7394
+    }
+   ],
+   "chunks_considered": 6
+  },
+  {
+   "split": "exploratory",
+   "subject": "point_lineage",
+   "question": "Where does the M5 price come from and how much should I trust it?",
+   "expect_support": null,
+   "abstained": true,
+   "ms": 31,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  },
+  {
+   "split": "exploratory",
+   "subject": "propane_ratio",
+   "question": "What does the propane-to-WTI ratio measure and how is it computed?",
+   "expect_support": null,
+   "abstained": true,
+   "ms": 75,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  },
+  {
+   "split": "holdout",
+   "subject": "geo_shock",
+   "question": "How do geopolitical shocks like the Russian invasion of Ukraine affect gas prices?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 2709,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "INTRODUCTION The EU\u2019s response to Russia\u2019s invasion of Ukraine in February 2022 and the subsequent Nord Stream gas pipeline sabotage meant the EU had to turn to a more expensive liquified natural gas (LNG) on spot markets, while LNG import terminals quickly reached their regasification capacity, with dramatic impact on prices (Figure ES-1).",
+     "similarity": 0.7902,
+     "chunk_id": "doc_867d7b318b:0025",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7266
+    },
+    {
+     "quote": "F30,F50,G10,G14 ABSTRACT We investigate the event-based geopolitical shocks from the Russian invasion of Ukraine on agricultural and energy commodities using daily event-based structural vector autoregression (SVAR).",
+     "similarity": 0.7651,
+     "chunk_id": "doc_6e27a8e42f:0001",
+     "doc_id": "doc_6e27a8e42f",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "available_timestamp": "2026-11-17T08:12:13Z",
+     "chunk_similarity": 0.7972
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "INTRODUCTION The EU\u2019s response to Russia\u2019s invasion of Ukraine in February 2022 and the subsequent Nord Stream gas pipeline sabotage meant the EU had to turn to a more expensive liquified natural gas (LNG) on spot markets, while LNG import terminals quickly reached their regasification capacity, with dramatic impact on prices (Figure ES-1).",
+     "similarity": 0.7902,
+     "chunk_id": "doc_867d7b318b:0025",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7266
+    },
+    {
+     "quote": "F30,F50,G10,G14 ABSTRACT We investigate the event-based geopolitical shocks from the Russian invasion of Ukraine on agricultural and energy commodities using daily event-based structural vector autoregression (SVAR).",
+     "similarity": 0.7651,
+     "chunk_id": "doc_6e27a8e42f:0001",
+     "doc_id": "doc_6e27a8e42f",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "available_timestamp": "2026-11-17T08:12:13Z",
+     "chunk_similarity": 0.7972
+    },
+    {
+     "quote": "Yet these results align with Ferriani and Gazzani (2023a), who noted that European gas and wholesale electricity prices increased by 115% and 237%, respectively, due to shocks triggered by the Russia-Ukraine conflict. 5.",
+     "similarity": 0.7473,
+     "chunk_id": "doc_0a09ca7ea5:0052",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.7244
+    },
+    {
+     "quote": "Geopolitical Shocks And Commodity Market Dynamics: New Evidence From The Russian-Ukraine Conflict Joshua Aizenman, Robert Lindahl, David Stenvall, and Gazi Salah Uddin NBER Working Paper No. 31950 December 2023, Revised June 2024 JEL No.",
+     "similarity": 0.747,
+     "chunk_id": "doc_6e27a8e42f:0001",
+     "doc_id": "doc_6e27a8e42f",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "available_timestamp": "2026-11-17T08:12:13Z",
+     "chunk_similarity": 0.7972
+    },
+    {
+     "quote": "Europe, closely tied to Russian natural gas, witnessed a sharp increase in energy prices, adding another layer of complexity to the already stressed global economic situation post-COVID.",
+     "similarity": 0.7448,
+     "chunk_id": "doc_6e27a8e42f:0002",
+     "doc_id": "doc_6e27a8e42f",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "available_timestamp": "2026-11-17T08:12:13Z",
+     "chunk_similarity": 0.7765
+    }
+   ],
+   "chunks_considered": 8
+  },
+  {
+   "split": "holdout",
+   "subject": "asym_vol",
+   "question": "Why do electricity prices react more to bad news than good news?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 1862,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "We docu\u00ad ment significant time-varying asymmetric volatility spillovers across ten European electricity markets, with downside volatility dominating upside volatility throughout the sample period.",
+     "similarity": 0.7933,
+     "chunk_id": "doc_0a09ca7ea5:0001",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8022
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "We docu\u00ad ment significant time-varying asymmetric volatility spillovers across ten European electricity markets, with downside volatility dominating upside volatility throughout the sample period.",
+     "similarity": 0.7933,
+     "chunk_id": "doc_0a09ca7ea5:0001",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8022
+    },
+    {
+     "quote": "We ac\u00ad count for both positive and negative volatility shocks to provide a comprehensive characteriza\u00ad tion of electricity market risk and investigate how carbon, coal, and gas price fluctuations are transmitted to day-ahead electricity prices using an instrumental variable approach.",
+     "similarity": 0.7477,
+     "chunk_id": "doc_0a09ca7ea5:0001",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8022
+    },
+    {
+     "quote": "Notably, several electricity markets reflect substantial shifts, with marked changes in the Netherlands and Belgium for negative volatility and in the United Kingdom, France, and Switzerland for positive volatility.",
+     "similarity": 0.7275,
+     "chunk_id": "doc_0a09ca7ea5:0048",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8299
+    },
+    {
+     "quote": "We develop an integrated framework to examine European electricity market dynamics by jointly analyzing asymmetric volatility transmission and input cost pass-through mechanisms.",
+     "similarity": 0.7221,
+     "chunk_id": "doc_0a09ca7ea5:0001",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8022
+    },
+    {
+     "quote": "Notably, gross negative volatilities dropped significantly in the electricity markets of Belgium, the Netherlands, Germany, and France, while in other regions, such as Italy and Switzerland, they",
+     "similarity": 0.6973,
+     "chunk_id": "doc_0a09ca7ea5:0048",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.8299
+    }
+   ],
+   "chunks_considered": 7
+  },
+  {
+   "split": "holdout",
+   "subject": "battery_arbitrage",
+   "question": "How do energy storage systems earn money from price differences?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 872,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "Similarly, for Thermal Energy Storage (TES), charging takes place during periods of low tariffs, while discharging is timed with high tariffs to achieve energy arbitrage.",
+     "similarity": 0.7301,
+     "chunk_id": "doc_33672d8788:0023",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.702
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "Similarly, for Thermal Energy Storage (TES), charging takes place during periods of low tariffs, while discharging is timed with high tariffs to achieve energy arbitrage.",
+     "similarity": 0.7301,
+     "chunk_id": "doc_33672d8788:0023",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.702
+    },
+    {
+     "quote": "Fig. 8C shows the optimized hourly dispatch results of thermal energy storage (TES), including charging/discharging and the capacity provided for spinning reserve.",
+     "similarity": 0.6878,
+     "chunk_id": "doc_33672d8788:0023",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.702
+    },
+    {
+     "quote": "Fig. 8B shows the optimized hourly dispatch re\u00ad sults of electrical energy storage (EES), including charging/discharging as well as capacities provided for frequency regulation and spinning reserve.",
+     "similarity": 0.6854,
+     "chunk_id": "doc_33672d8788:0023",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.702
+    },
+    {
+     "quote": "Under the Guangdong electricity market in China When the discount rate is set at 4 % and the annual decline rate of battery price is 5 %, Scenario 1 is identified as the optimal design option for deploying Energy Storage Systems (EES) and Thermal Energy Stor\u00ad age (TES) for emergency use in data centers.",
+     "similarity": 0.6836,
+     "chunk_id": "doc_33672d8788:0028",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.7076
+    },
+    {
+     "quote": "Optimal dispatch strategy utilizing surplus capacity The dispatch optimizations for both EES and TES are programmed in Python, with the optimization models solved using the Gurobi optimi\u00ad zation solver.",
+     "similarity": 0.6163,
+     "chunk_id": "doc_33672d8788:0023",
+     "doc_id": "doc_33672d8788",
+     "title": "Optimal dispatch and design of energy storage systems under progressive loading",
+     "available_timestamp": "2026-11-17T08:12:00Z",
+     "chunk_similarity": 0.702
+    }
+   ],
+   "chunks_considered": 2
+  },
+  {
+   "split": "holdout",
+   "subject": "contract_expiry",
+   "question": "How are futures contract expiry dates determined for natural gas?",
+   "expect_support": false,
+   "abstained": false,
+   "ms": 1480,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "Of particular relevance in our context is recent work by Ewald, Haugom, Lien, St\u00f8rdal, and Wu (2022) who designed a trading strategy that exploits annual seasonal patterns in the risk premia through appropriate long-short positions in crude oil and natural gas futures contracts and delivers abnormal returns in terms of positive CAPM alpha, even after accounting for realistic transaction costs and margin requirements.",
+     "similarity": 0.7039,
+     "chunk_id": "doc_44a6b785e7:0005",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7061
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "Of particular relevance in our context is recent work by Ewald, Haugom, Lien, St\u00f8rdal, and Wu (2022) who designed a trading strategy that exploits annual seasonal patterns in the risk premia through appropriate long-short positions in crude oil and natural gas futures contracts and delivers abnormal returns in terms of positive CAPM alpha, even after accounting for realistic transaction costs and margin requirements.",
+     "similarity": 0.7039,
+     "chunk_id": "doc_44a6b785e7:0005",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7061
+    },
+    {
+     "quote": "Hence, contracted natural gas follows a downward trajectory, with existing contracted volumes expected to fall by one-third by 2030 compared to 2024 levels.",
+     "similarity": 0.6928,
+     "chunk_id": "doc_867d7b318b:0090",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7254
+    },
+    {
+     "quote": "The Brent Crude futures contract is a global benchmark in oil trading and is used to price over three-quarters of the world\u2019s traded oil.",
+     "similarity": 0.676,
+     "chunk_id": "doc_44a6b785e7:0005",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7061
+    },
+    {
+     "quote": "Securing long-term natural gas contracts is the foundation of the EU\u2019s energy security and investments in new LNG value chains.",
+     "similarity": 0.6688,
+     "chunk_id": "doc_867d7b318b:0090",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7254
+    },
+    {
+     "quote": "However, expanded LNG infrastructure in the EU, the projected expansion of suppliers (especially the US), and reduced EU gas consumption pushed 2024 gas prices back down to 2021 levels, with LNG demand likely peaking in 2024. 4.2.1 LNG contracts and EU decarbonisation LNG market demand will remain tight until 2026, when most new LNG infrastructure investments are set to be commissioned.",
+     "similarity": 0.6644,
+     "chunk_id": "doc_867d7b318b:0089",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7078
+    }
+   ],
+   "chunks_considered": 3
+  },
+  {
+   "split": "holdout",
+   "subject": "settlement_price",
+   "question": "What was the official settlement price of natural gas futures last Friday?",
+   "expect_support": false,
+   "abstained": false,
+   "ms": 499,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "A study on coalition formation and bargaining power for the North American natural gas market Abhishake Kundu * 1 and Felipe Feijoo1\n\nSchool of Industrial Engineering, Pontificia Universidad Cato\u0301lica de Valpara\u0131\u0301so, Chile 2362807\n\nNatural gas remains central to North America\u2019s energy system due to its cost, low emissions, and extensive infrastructure.",
+     "similarity": 0.7009,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "A study on coalition formation and bargaining power for the North American natural gas market Abhishake Kundu * 1 and Felipe Feijoo1\n\nSchool of Industrial Engineering, Pontificia Universidad Cato\u0301lica de Valpara\u0131\u0301so, Chile 2362807\n\nNatural gas remains central to North America\u2019s energy system due to its cost, low emissions, and extensive infrastructure.",
+     "similarity": 0.7009,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    },
+    {
+     "quote": "This paper develops a cooperative game-theoretic model for the North American natural gas market, integrating production, storage, transportation, and liquefaction\u2013regasification activities within a multi-period, multi-producer framework.",
+     "similarity": 0.6379,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    },
+    {
+     "quote": "NANGAM allows a detailed representation of the North American gas market and endogenous capacity expansion.",
+     "similarity": 0.6208,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    },
+    {
+     "quote": "The North American Natural Gas Model (NANGAM) is modified to model the cooperative structure and for data calibration.",
+     "similarity": 0.6174,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    },
+    {
+     "quote": "Three scenarios are evaluated: a monopolistic grand coalition, geographically proximate coalitions, and the current oligopoly base case.",
+     "similarity": 0.5341,
+     "chunk_id": "doc_e025a2ded5:0000",
+     "doc_id": "doc_e025a2ded5",
+     "title": "Coalition formation and bargaining power for the North American natural gas market",
+     "available_timestamp": "2026-11-17T08:09:19Z",
+     "chunk_similarity": 0.7043
+    }
+   ],
+   "chunks_considered": 1
+  }
+ ]
+}

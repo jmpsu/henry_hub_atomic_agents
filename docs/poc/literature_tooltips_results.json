@@ -1,0 +1,569 @@
+{
+ "generated_at": "2026-11-17T08:20:14Z",
+ "model": "qwen3:4b",
+ "embed_model": "nomic-embed-text",
+ "facts": {
+  "curve_shape": "Henry Hub NYMEX futures, USD/MMBtu, quote date 2026-11-17: M1 (2026-12) 3.125; M2 (2027-01) 3.503; M3 (2027-02) 3.116; M4 (2027-03) 2.433; M5 (2027-04) 2.384; M6 (2027-05) 2.445; M7 (2027-06) 2.607; M8 (2027-07) 2.843; M9 (2027-08) 2.925; M10 (2027-09) 2.913; M11 (2027-10) 2.992; M12 (2027-11) 3.271. Engine regime label: CONTANGO (last contract minus first). M2 minus M1 = 0.378. M12 minus M1 = 0.146. Highest contract M2 (2027-01) 3.503; lowest M5 (2027-04) 2.384.",
+  "winter_premium": "Henry Hub futures, USD/MMBtu: M2 delivering 2027-01 = 3.503; M5 delivering 2027-04 = 2.384. M2 minus M5 = 1.119.",
+  "volatility": "Henry Hub NYMEX futures, USD/MMBtu, quote date 2026-11-17: M1 (2026-12) 3.125; M2 (2027-01) 3.503; M3 (2027-02) 3.116; M4 (2027-03) 2.433; M5 (2027-04) 2.384; M6 (2027-05) 2.445; M7 (2027-06) 2.607; M8 (2027-07) 2.843; M9 (2027-08) 2.925; M10 (2027-09) 2.913; M11 (2027-10) 2.992; M12 (2027-11) 3.271. Engine regime label: CONTANGO (last contract minus first). M2 minus M1 = 0.378. M12 minus M1 = 0.146. Highest contract M2 (2027-01) 3.503; lowest M5 (2027-04) 2.384.",
+  "point_lineage": "M5 contract NGJ27.NYM (2027-04) delivering 2027-04: 2.384 USD/MMBtu. Source yahoo_finance_nymex, quality label 'delayed_quote_unverified' (a delayed quote from Yahoo Finance, not an official exchange settlement). Quote published 2026-11-17T07:19:37Z, retrieved and available to this system 2026-11-17T08:03:47Z.",
+  "propane_ratio": "Propane as a percent of WTI crude on 2026-11-11: 49.72 percent. WTI crude 89.62 USD/bbl. Formula: (propane cents/gal / 100 * 42) / WTI USD/bbl * 100. Implied propane price 106.1 cents/gal (1.061 USD/gal)."
+ },
+ "aggregate": {
+  "A": {
+   "n": 5,
+   "guard_pass": 5,
+   "with_ungrounded_numbers": 0,
+   "invalid_citations": 0,
+   "with_citation": 0,
+   "gold_hit": 9,
+   "gold_total": 15,
+   "errors": 0,
+   "avg_ms": 10105
+  },
+  "B": {
+   "n": 5,
+   "guard_pass": 2,
+   "with_ungrounded_numbers": 2,
+   "invalid_citations": 2,
+   "with_citation": 5,
+   "gold_hit": 12,
+   "gold_total": 15,
+   "errors": 0,
+   "avg_ms": 38063
+  },
+  "C": {
+   "n": 5,
+   "guard_pass": 4,
+   "with_ungrounded_numbers": 0,
+   "invalid_citations": 0,
+   "with_citation": 4,
+   "gold_hit": 7,
+   "gold_total": 12,
+   "errors": 1,
+   "avg_ms": 36995
+  }
+ },
+ "results": [
+  {
+   "subject": "curve_shape",
+   "cond": "A",
+   "question": "What does the shape of this forward curve tell a trader, and why does it look this way?",
+   "text": "This forward curve shows a contango structure with M2 (2027-01) at 3.503 being the highest price and M5 (2027-04) at 2.384 the lowest. Contango indicates rising prices for future delivery, suggesting increased demand or supply constraints in the near term. The curve slopes downward from M1 to M5, reflecting market expectations of lower prices as contracts move further out.",
+   "error": null,
+   "ms": 16898,
+   "prompt_chars": 837,
+   "sources": [],
+   "words": 59,
+   "ungrounded_numbers": [],
+   "citations": [],
+   "invalid_citations": [],
+   "gold_groups_hit": 1,
+   "gold_groups": 3,
+   "has_citation": false,
+   "passes_guard": true
+  },
+  {
+   "subject": "curve_shape",
+   "cond": "B",
+   "question": "What does the shape of this forward curve tell a trader, and why does it look this way?",
+   "text": "This forward curve shows a contango structure with the highest price at M2 (2027-01) and lowest at M5 (2027-04). The contango indicates increasing prices for future delivery, suggesting storage costs and seasonal demand patterns drive the curve. [doc_b5fa50dbe4:0016] [doc_867d7b318b:0085]",
+   "error": null,
+   "ms": 46894,
+   "prompt_chars": 4520,
+   "sources": [
+    {
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.7547,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0021",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.7196,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_867d7b318b:0085",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": 0.7164,
+     "via": null
+    }
+   ],
+   "words": 39,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_867d7b318b:0085",
+    "doc_b5fa50dbe4:0016"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  },
+  {
+   "subject": "curve_shape",
+   "cond": "C",
+   "question": "What does the shape of this forward curve tell a trader, and why does it look this way?",
+   "text": "This forward curve shows a contango structure with the highest price at M2 (2027-01) and lowest at M5 (2027-04). The contango indicates future prices are expected to be higher than current prices, suggesting potential for price increases as the contract matures. This pattern aligns with the inverse Box-Cox supply curve model where negative curvature implies volatility rises with price increases [doc_b5fa50dbe4:0017].",
+   "error": null,
+   "ms": 37755,
+   "prompt_chars": 5684,
+   "sources": [
+    {
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.7547,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_867d7b318b:0085",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": 0.7164,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0017",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": null,
+     "via": "next_chunk of doc_b5fa50dbe4:0016"
+    },
+    {
+     "chunk_id": "doc_867d7b318b:0086",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": null,
+     "via": "next_chunk of doc_867d7b318b:0085"
+    }
+   ],
+   "words": 61,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_b5fa50dbe4:0017"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 1,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  },
+  {
+   "subject": "winter_premium",
+   "cond": "A",
+   "question": "Why is the January contract priced above the April contract?",
+   "text": "Henry Hub futures: Jan (M2) = 3.503 USD/MMBtu, Apr (M5) = 2.384 USD/MMB: M2 - M5 = 1.119 USD/MMBtu. Higher Jan price reflects stronger near-term demand expectations.",
+   "error": null,
+   "ms": 7795,
+   "prompt_chars": 455,
+   "sources": [],
+   "words": 27,
+   "ungrounded_numbers": [],
+   "citations": [],
+   "invalid_citations": [],
+   "gold_groups_hit": 1,
+   "gold_groups": 3,
+   "has_citation": false,
+   "passes_guard": true
+  },
+  {
+   "subject": "winter_premium",
+   "cond": "B",
+   "question": "Why is the January contract priced above the April contract?",
+   "text": "The January contract is priced higher than the April contract due to seasonal demand differences. [doc_867d7b318b:0085] (European Natural Gas through the 2020s) indicates that cold winters and reduced generation lead to higher demand, increasing prices for near-term contracts. [doc_867d7b318b:0053] (European Natural Gas through the 2020s) shows that seasonal storage requirements also drive price spikes in winter months.",
+   "error": null,
+   "ms": 37137,
+   "prompt_chars": 4116,
+   "sources": [
+    {
+     "chunk_id": "doc_867d7b318b:0085",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": 0.7389,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_867d7b318b:0053",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": 0.6946,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.67,
+     "via": null
+    }
+   ],
+   "words": 57,
+   "ungrounded_numbers": [
+    "2020",
+    "2020"
+   ],
+   "citations": [
+    "doc_867d7b318b:0053",
+    "doc_867d7b318b:0085"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": false
+  },
+  {
+   "subject": "winter_premium",
+   "cond": "C",
+   "question": "Why is the January contract priced above the April contract?",
+   "text": "",
+   "error": "ValueError: model output truncated at num_predict=260 tokens",
+   "ms": 48315,
+   "prompt_chars": 5302,
+   "sources": [
+    {
+     "chunk_id": "doc_867d7b318b:0085",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": 0.7389,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0016",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.67,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_867d7b318b:0086",
+     "title": "European Natural Gas through the 2020s",
+     "similarity": null,
+     "via": "next_chunk of doc_867d7b318b:0085"
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0017",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": null,
+     "via": "next_chunk of doc_b5fa50dbe4:0016"
+    }
+   ],
+   "passes_guard": false
+  },
+  {
+   "subject": "volatility",
+   "cond": "A",
+   "question": "Why can small supply changes cause large price moves in this market?",
+   "text": "Henry Hub futures show CONTANGO (M2 > M1). Small supply shifts disrupt equilibrium, causing sharp price swings due to high volatility in natural gas markets. M2 (3.503) vs M1 (3.125) shows 0.378 difference.",
+   "error": null,
+   "ms": 6177,
+   "prompt_chars": 818,
+   "sources": [],
+   "words": 33,
+   "ungrounded_numbers": [],
+   "citations": [],
+   "invalid_citations": [],
+   "gold_groups_hit": 1,
+   "gold_groups": 3,
+   "has_citation": false,
+   "passes_guard": true
+  },
+  {
+   "subject": "volatility",
+   "cond": "B",
+   "question": "Why can small supply changes cause large price moves in this market?",
+   "text": "This is a tooltip for a natural gas pricing dashboard for a trader. The rules are: every number must be copied from FACTS; write no other number. Plain text, at most 70 words. After each sentence that relies on a source, add its id in square brackets exactly as listed, e.g. [doc_0123456789:0007]. Use only listed ids. Do not copy any number from SOURCES.",
+   "error": null,
+   "ms": 33752,
+   "prompt_chars": 4512,
+   "sources": [
+    {
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.7788,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0004",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.766,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_d38f5cd091:0045",
+     "title": "European electricity wholesale market integration",
+     "similarity": 0.7187,
+     "via": null
+    }
+   ],
+   "words": 63,
+   "ungrounded_numbers": [
+    "70"
+   ],
+   "citations": [
+    "doc_0123456789:0007",
+    "doc_b5fa50dbe4:0000",
+    "doc_b5fa50dbe4:0004",
+    "doc_d38f5cd091:0045"
+   ],
+   "invalid_citations": [
+    "doc_0123456789:0007"
+   ],
+   "gold_groups_hit": 0,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": false
+  },
+  {
+   "subject": "volatility",
+   "cond": "C",
+   "question": "Why can small supply changes cause large price moves in this market?",
+   "text": "Why can small supply changes cause large price moves in this market?",
+   "error": null,
+   "ms": 28157,
+   "prompt_chars": 5230,
+   "sources": [
+    {
+     "chunk_id": "doc_b5fa50dbe4:0000",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": 0.7788,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_d38f5cd091:0045",
+     "title": "European electricity wholesale market integration",
+     "similarity": 0.7187,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_b5fa50dbe4:0001",
+     "title": "A Supply and Demand Based Volatility Model for Energy Prices - the Relationship between Supply Curve Shape and Volatility",
+     "similarity": null,
+     "via": "next_chunk of doc_b5fa50dbe4:0000"
+    },
+    {
+     "chunk_id": "doc_d38f5cd091:0046",
+     "title": "European electricity wholesale market integration",
+     "similarity": null,
+     "via": "next_chunk of doc_d38f5cd091:0045"
+    }
+   ],
+   "words": 12,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_b5fa50dbe4:0000",
+    "doc_d38f5cd091:0045",
+    "doc_d38f5cd091:0046"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 0,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  },
+  {
+   "subject": "point_lineage",
+   "cond": "A",
+   "question": "Where does the M5 price come from and how much should I trust it?",
+   "text": "M5 price: Yahoo Finance delayed quote (unverified). 2.384 USD/MMBtu (2027-04). Source: yahoo_finance_nymex. Quality: 'delayed_quote_unverified'. Published 2026-11-17T07:19:37Z. Trust: low (not official settlement).",
+   "error": null,
+   "ms": 10453,
+   "prompt_chars": 659,
+   "sources": [],
+   "words": 21,
+   "ungrounded_numbers": [],
+   "citations": [],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": false,
+   "passes_guard": true
+  },
+  {
+   "subject": "point_lineage",
+   "cond": "B",
+   "question": "Where does the M5 price come from and how much should I trust it?",
+   "text": "M5 contract NGJ27.NYM (2027-04) delivering 2027-04: 2.384 USD/MMBtu. Source yahoo_finance_nymex, quality label 'delayed_quote_unverified' (a delayed quote from Yahoo Finance, not an official exchange settlement). Quote published 2026-11-17T07:19:37Z, retrieved and available to this system 2026-11-17T08:03:47Z.",
+   "error": null,
+   "ms": 45663,
+   "prompt_chars": 4364,
+   "sources": [
+    {
+     "chunk_id": "doc_0a09ca7ea5:0068",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "similarity": 0.6185,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_981ac8e9d5:0015",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "similarity": 0.6065,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_0a09ca7ea5:0029",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "similarity": 0.6043,
+     "via": null
+    }
+   ],
+   "words": 34,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_0a09ca7ea5:0029",
+    "doc_0a09ca7ea5:0068",
+    "doc_981ac8e9d5:0015"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  },
+  {
+   "subject": "point_lineage",
+   "cond": "C",
+   "question": "Where does the M5 price come from and how much should I trust it?",
+   "text": "M5 contract NGJ27.NYM (2027-04) delivering 2027-04: 2.384 USD/MMBtu. Source yahoo_finance_nymex, quality label 'delayed_quote_unverified' (a delayed quote from Yahoo Finance, not an official exchange settlement). Quote published 2026-11-17T07:19:37Z, retrieved and available to this system 2026-11-17T08:03:47Z.",
+   "error": null,
+   "ms": 37367,
+   "prompt_chars": 5550,
+   "sources": [
+    {
+     "chunk_id": "doc_0a09ca7ea5:0068",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "similarity": 0.6185,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_981ac8e9d5:0015",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "similarity": 0.6065,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_0a09ca7ea5:0069",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "similarity": null,
+     "via": "next_chunk of doc_0a09ca7ea5:0068"
+    },
+    {
+     "chunk_id": "doc_981ac8e9d5:0016",
+     "title": "Understanding World Commodity Prices - Returns, Volatility and Diversification",
+     "similarity": null,
+     "via": "next_chunk of doc_981ac8e9d5:0015"
+    }
+   ],
+   "words": 34,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_0a09ca7ea5:0068",
+    "doc_981ac8e9d5:0015"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  },
+  {
+   "subject": "propane_ratio",
+   "cond": "A",
+   "question": "What does the propane-to-WTI ratio measure and how is it computed?",
+   "text": "Propane-to-WTI ratio measures propane price relative to WTI crude. Computed as (propane cents/gal / 100 * 42) / WTI USD/bbl * 10:00. Implied propane price: 106.1 cents/gal (1.061 USD/gal).",
+   "error": null,
+   "ms": 9205,
+   "prompt_chars": 553,
+   "sources": [],
+   "words": 29,
+   "ungrounded_numbers": [],
+   "citations": [],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": false,
+   "passes_guard": true
+  },
+  {
+   "subject": "propane_ratio",
+   "cond": "B",
+   "question": "What does the propane-to-WTI ratio measure and how is it computed?",
+   "text": "The propane-to-WTI ratio measures propane's price relative to WTI crude. It is computed as (propane cents/gal / 100 * 42) / WTI USD/bbl * 100. [FACTS]",
+   "error": null,
+   "ms": 26873,
+   "prompt_chars": 3551,
+   "sources": [
+    {
+     "chunk_id": "doc_6e27a8e42f:0022",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "similarity": 0.6549,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_6e27a8e42f:0021",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "similarity": 0.6512,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_44a6b785e7:0010",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "similarity": 0.6487,
+     "via": null
+    }
+   ],
+   "words": 26,
+   "ungrounded_numbers": [],
+   "citations": [
+    "FACTS"
+   ],
+   "invalid_citations": [
+    "FACTS"
+   ],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": false
+  },
+  {
+   "subject": "propane_ratio",
+   "cond": "C",
+   "question": "What does the propane-to-WTI ratio measure and how is it computed?",
+   "text": "The propane-to-WTI ratio measures propane's price relative to WTI crude oil. It is computed as (propane cents/gal / 100 * 42) / WTI USD/bbl * 100. This formula converts propane price to USD/bbl and normalizes by WTI crude price [doc_6e27a8e42f:0022].",
+   "error": null,
+   "ms": 33382,
+   "prompt_chars": 4711,
+   "sources": [
+    {
+     "chunk_id": "doc_6e27a8e42f:0022",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "similarity": 0.6549,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_44a6b785e7:0010",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "similarity": 0.6487,
+     "via": null
+    },
+    {
+     "chunk_id": "doc_6e27a8e42f:0023",
+     "title": "Shocks from the Russian invasion of Ukraine on agricultural and energy commodities",
+     "similarity": null,
+     "via": "next_chunk of doc_6e27a8e42f:0022"
+    },
+    {
+     "chunk_id": "doc_44a6b785e7:0011",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "similarity": null,
+     "via": "next_chunk of doc_44a6b785e7:0010"
+    }
+   ],
+   "words": 40,
+   "ungrounded_numbers": [],
+   "citations": [
+    "doc_6e27a8e42f:0022"
+   ],
+   "invalid_citations": [],
+   "gold_groups_hit": 3,
+   "gold_groups": 3,
+   "has_citation": true,
+   "passes_guard": true
+  }
+ ]
+}
