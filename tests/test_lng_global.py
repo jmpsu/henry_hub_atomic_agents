@@ -40,6 +40,11 @@ def test_all_calculations_cover_m1_to_m24_with_ordered_scenario_bands():
             assert point["low"] <= point["p25"] <= point["base"] <= point["p75"] <= point["high"]
             assert point["ci_low"] <= point["base"] <= point["ci_high"]
             assert point["model_confidence"] > 0
+            assert point["observed_status"] in lg.POINT_PROVENANCE
+            assert point["provenance"] == lg.POINT_PROVENANCE[point["observed_status"]]
+        assert item["input_lineage"]["observed_quotes"] is not None
+        assert item["status"] and item["provenance"]
+
 
 
 def test_cpu_simulation_is_deterministic_for_a_fixed_seed():
@@ -53,19 +58,71 @@ def test_cpu_simulation_is_deterministic_for_a_fixed_seed():
         np.testing.assert_array_equal(left["arrays"][key], right["arrays"][key])
 
 
-def test_observed_inputs_are_pit_gated():
+def test_observed_inputs_are_pit_gated_and_require_lineage():
     months = lg._month_sequence(CUT)
-    fresh = {"value": 80.0, "available_timestamp": "2026-11-19T00:00:00Z"}
-    late = {"value": 9.0, "available_timestamp": "2026-11-21T00:00:00Z"}
-    payload = lg.build(hh_points=[{"delivery_month": months[0], "value": 3.0, "available_timestamp": None},
-                                  {"delivery_month": months[1], "value": 99.0, "available_timestamp": late["available_timestamp"]}],
-                       ttf_by_month={months[0]: fresh, months[1]: late}, fx_row=late, oil_row=late, cutoff=CUT, scenarios=256)
+    fresh = {"value": 80.0, "available_timestamp": "2026-11-19T00:00:00Z", "published_timestamp": "2026-11-18T00:00:00Z",
+             "source_id": "yahoo_finance_nymex", "series_id": "TTFZ26.NYM", "quality_status": "delayed_quote_unverified"}
+    late = {"value": 9.0, "available_timestamp": "2026-11-21T00:00:00Z", "published_timestamp": "2026-11-20T00:00:00Z",
+            "source_id": "yahoo_finance_nymex"}
+    payload = lg.build(hh_points=[{"delivery_month": months[0], "value": 3.0, "available_timestamp": None,
+                                   "published_timestamp": "2026-11-19T00:00:00Z"},
+                                  {"delivery_month": months[1], "value": 99.0, "available_timestamp": late["available_timestamp"],
+                                   "published_timestamp": late["published_timestamp"]}],
+                        ttf_by_month={months[0]: fresh, months[1]: late}, fx_row=late, oil_row=late, cutoff=CUT, scenarios=256)
     ttf = payload["calculations"]["ttf_forward"]["values"]
     hh = payload["calculations"]["hh_forward"]["values"]
-    assert hh[0]["observed"] == 3.0
-    assert hh[1]["observed"] is None
-    assert ttf[0]["observed"] == 80.0
-    assert ttf[1]["observed"] is None
+    assert hh[0]["observed"] is None and hh[0]["observed_status"] == "modeled"
+    assert hh[1]["observed"] is None and hh[1]["observed_status"] == "modeled"
+    assert ttf[0]["observed_status"] == "converted_observed" and ttf[0]["observed_native_value"] == 80.0
+    assert ttf[0]["observed_native_unit"] == "EUR/MWh" and ttf[0]["observed"] > 0
+    assert ttf[1]["observed"] is None and ttf[1]["observed_status"] == "modeled"
+    rejected = {r["quote_key"]: r["reason"] for r in payload["inputs"]["eligibility"]["rejected"]}
+    assert "available_timestamp" in rejected["hh_forward:" + months[0]]
+    assert "not available" in rejected["hh_forward:" + months[1]]
+    assert "not available" in rejected["fx_eurusd"] and "not available" in rejected["oil"]
+
+
+def test_quote_eligibility_applies_series_specific_freshness():
+    missing = lg._quote_eligibility({"value": 3.0, "published_timestamp": "2026-11-19T00:00:00Z"}, "hh_forward", CUT)
+    stale_hh = lg._quote_eligibility({"value": 3.0, "available_timestamp": "2026-11-19T00:00:00Z",
+                                      "published_timestamp": "2026-11-01T00:00:00Z"}, "hh_forward", CUT)
+    stale_ttf = lg._quote_eligibility({"value": 80.0, "available_timestamp": "2026-11-19T00:00:00Z",
+                                       "published_timestamp": "2026-11-15T00:00:00Z"}, "ttf_forward", CUT)
+    assert not missing["eligible"] and "available_timestamp" in missing["reason"]
+    assert not stale_hh["eligible"] and "limit 10" in stale_hh["reason"]
+    assert not stale_ttf["eligible"] and "limit 3" in stale_ttf["reason"]
+    assert lg.FRESHNESS_RULES["hh_forward"]["max_age_days"] == 10.0
+    assert lg.FRESHNESS_RULES["ttf_forward"]["max_age_days"] == 3.0
+
+
+def test_ttf_native_currency_and_fx_source_are_exposed():
+    months = lg._month_sequence(CUT)
+    ttf = {"value": 80.0, "available_timestamp": "2026-11-19T00:00:00Z", "published_timestamp": "2026-11-18T00:00:00Z",
+           "source_id": "yahoo_finance_nymex"}
+    fx = {"value": 1.1, "available_timestamp": "2026-11-19T00:00:00Z", "published_timestamp": "2026-11-18T00:00:00Z",
+          "source_id": "yahoo_finance_nymex"}
+    payload = lg.build(ttf_by_month={months[0]: ttf}, fx_row=fx, cutoff=CUT, scenarios=256)
+    conversion = payload["inputs"]["ttf_conversion"]
+    assert conversion["native_unit"] == "EUR/MWh" and conversion["output_unit"] == "USD/MMBtu"
+    assert conversion["mmbtu_per_mwh"] == lg.MMBTU_PER_MWH
+    assert conversion["ttf_quote_source"] == "measured_eur_mwh_quote" and conversion["fx_source"] == "measured_quote"
+    assert payload["calculations"]["ttf_forward"]["status"] == "observed_converted_and_modeled"
+    for item in payload["calculations"].values():
+        if item["id"] != "TTF forward curve":
+            assert item["status"] == "modeled"
+
+
+def test_brent_parity_labels_wti_as_a_proxy():
+    months = lg._month_sequence(CUT)
+    oil = {"value": 89.53, "available_timestamp": "2026-11-19T00:00:00Z", "published_timestamp": "2026-11-17T21:00:00Z",
+           "agent_id": "Agent_Crude_WTI_Spot", "source_id": "eia_dnav_pet", "quote_role": "wti_proxy"}
+    payload = lg.build(oil_row=oil, cutoff=CUT, scenarios=256)
+    item = payload["calculations"]["brent_linked_parity"]
+    assert item["status"] == "observed_proxy_and_modeled"
+    assert item["values"][0]["observed_status"] == "observed_proxy"
+    assert item["values"][0]["observed_native_value"] == 89.53
+    assert payload["inputs"]["oil_conversion"]["source"] == "measured_wti_quote_with_labelled_brent_premium"
+
 
 
 def test_future_calibration_is_ignored_at_an_earlier_cutoff(monkeypatch, tmp_path):
@@ -183,7 +240,11 @@ def test_market_state_exposes_global_lng_without_replacing_legacy_curve(monkeypa
     global_curve = state["curves"]["lng_global"]
     assert set(global_curve["calculations"]) == {key for key, _, _ in lg.CALCULATIONS}
     assert global_curve["delivery_months"] == lg._month_sequence("2026-11-20T12:00:00Z")
-    assert global_curve["status"] == "modeled" and global_curve["provenance"] == lg.PROVENANCE
+    assert global_curve["status"] == "observed_anchored_and_modeled"
+    assert global_curve["provenance"] == "mixed_measured_and_modeled"
+    assert "hh_forward:2026-12" in global_curve["inputs"]["eligibility"]["accepted"]
+    assert global_curve["calculations"]["hh_forward"]["values"][0]["lineage"][0]["source_id"] == "yahoo_finance_nymex"
+    assert global_curve["calculations"]["hh_forward"]["values"][0]["lineage"][0]["agent_id"] == "Agent_HH_M1"
     for item in global_curve["calculations"].values():
         assert len(item["values"]) == 24
         assert all(np.isfinite([v["low"], v["p25"], v["base"], v["p75"], v["high"]]).all() for v in item["values"])
@@ -196,7 +257,9 @@ def test_all_lng_metrics_are_documented_and_bound_to_the_dashboard():
     css = (ROOT / "web" / "app.css").read_text()
     assert 'id="lng-global"' in html and "Global LNG Forward Pricing" in html
     assert "renderLngGlobal(s)" in js and "lng-card-grid" in js and "lng-matrix" in js
+    assert "statusText" in js and "converted_observed" in js and "Quote lineage and freshness" in js
     assert "lng-card-grid" in css and "lng-matrix" in css
+    assert "td.observed.converted" in css
     assert docs["lng_global"]["params"]["delivery_months"] == lg.DELIVERY_COUNT
     assert docs["lng_global"]["params"]["model_version"] == lg.MODEL_VERSION
     for key, label, _ in lg.CALCULATIONS:
@@ -204,3 +267,55 @@ def test_all_lng_metrics_are_documented_and_bound_to_the_dashboard():
         assert docs[doc_id]["title"] == label
         assert docs[doc_id]["formula"] and docs[doc_id]["what"] and docs[doc_id]["caveat"]
         assert f'"{doc_id}"' in js
+    assert "observed" in docs["lng_global"]["read"].lower()
+    assert "freshness" in docs["lng_global"]["caveat"].lower()
+    assert "EUR/MWh" in docs["lng_ttf_forward"]["caveat"]
+
+
+def test_calibration_reads_only_pit_measured_rows():
+    db = str(Path(_scratch.mkdtemp()) / "cal.db")
+    init_db.migrate(db)
+    conn = sqlite3.connect(db)
+    ingest.record_observation(conn, agent_id="Agent_HH_M1", target_timestamp="2026-11-18T00:00:00Z",
+                               available_timestamp="2026-11-18T21:00:00Z", value=3.1, source_id="eia_dnav_ng",
+                               unit="USD/MMBtu", quality_status="historical_only_source_discontinued_2024-04")
+    ingest.record_observation(conn, agent_id="Agent_HH_M1", target_timestamp="2026-11-19T00:00:00Z",
+                               available_timestamp="2026-11-20T01:00:00Z", value=9.0, source_id="yahoo_finance_nymex",
+                               unit="USD/MMBtu", quality_status="delayed_quote_unverified")
+    ingest.record_observation(conn, agent_id="Agent_HH_M1", target_timestamp="2026-11-19T00:00:00Z",
+                               available_timestamp="2026-11-19T21:00:00Z", value=3.2, source_id="eia_dnav_ng",
+                               unit="USD/MMBtu", quality_status="historical_only_source_discontinued_2024-04")
+    ingest.record_observation(conn, agent_id="Agent_TTF_2026_12", target_timestamp="2026-11-19T00:00:00Z",
+                               available_timestamp="2026-11-20T01:57:10Z", value=84.45, source_id="yahoo_finance_nymex",
+                               unit="EUR/MWh", quality_status="delayed_quote_unverified")
+    conn.commit()
+    rows = cal._read_series(conn, "Agent_HH_M1", CUT)
+    ttf_rows = cal._read_ttf_series(conn, CUT, lg._month_sequence(CUT))
+    lineage = cal._series_lineage(conn, CUT)
+    conn.close()
+    assert rows == [("2026-11-19T00:00:00Z", 3.2), ("2026-11-18T00:00:00Z", 3.1)]
+    assert ttf_rows == []
+    assert lineage["Agent_HH_M1"]["available_range"] == ["2026-11-18T21:00:00Z", "2026-11-19T21:00:00Z"]
+    assert "historical_only_source_discontinued_2024-04" in lineage["Agent_HH_M1"]["quality_statuses"]
+
+
+def test_calibration_artifact_has_parameter_provenance_and_consistent_metadata(monkeypatch, tmp_path):
+    db = str(Path(_scratch.mkdtemp()) / "cal.db")
+    init_db.migrate(db)
+    out = tmp_path / "runtime"
+    out.mkdir()
+    monkeypatch.setattr(cal, "RUNTIME", out)
+    monkeypatch.setattr(cal, "FINAL_FILE", out / "lng_global_calibration.json")
+    monkeypatch.setattr(cal, "PARTIAL_FILE", out / "lng_global_calibration.partial.json")
+    monkeypatch.setattr(sys, "argv", ["calibrate", "--scenarios", "1024", "--batch", "1024", "--workers", "1", "--cutoff", CUT, "--db", db])
+    assert cal.main() == 0
+    doc = json.loads(cal.FINAL_FILE.read_text())
+    assert doc["scenario_count"] == 1024
+    assert doc["seed"] == 20261120
+    assert doc["diagnostics"]["scenario_count"] == 1024
+    assert doc["diagnostics"]["seed"] == 20261120
+    assert doc["diagnostics"]["seed_range"] == [20261120, 20261120]
+    assert doc["benchmark"]["seed_range"] == [20261120, 20261120]
+    assert doc["pit_filter"]["available_at_or_before_cutoff"] is True
+    assert set(doc["parameter_provenance"]) == set(lg.PARAM_DEFAULTS)
+    assert doc["parameter_provenance"]["hh_base"]["source"] == "labelled_assumption"

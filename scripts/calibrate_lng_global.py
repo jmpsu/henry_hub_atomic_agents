@@ -70,10 +70,56 @@ def _environment(use_gpu: bool = False) -> dict:
             "accelerator": accelerator, "numpy": np.__version__}
 
 
-def _read_series(conn: sqlite3.Connection, agent: str, years: int = 12) -> list[tuple[str, float]]:
-    rows = conn.execute("select target_timestamp, value from pit_market_data where agent_id=? and value is not null "
-                        "and provenance!='unverified_seed' order by target_timestamp desc limit ?", (agent, years * 400)).fetchall()
+def _backup_existing(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    target = path.with_name(f"{path.stem}.pre_provenance_{int(time.time())}.json")
+    shutil.copy2(path, target)
+    return str(target)
+
+
+def _read_series(conn: sqlite3.Connection, agent: str, cutoff: str, years: int = 12) -> list[tuple[str, float]]:
+    rows = conn.execute(
+        "SELECT p.target_timestamp, p.value FROM pit_market_data p WHERE p.agent_id=? AND p.value IS NOT NULL AND p.available_timestamp<=? "
+        "AND COALESCE(p.provenance,'measured')='measured' AND COALESCE(p.quality_status,'')<>'unverified_seed' "
+        "AND p.source_id IS NOT NULL AND p.source_id<>'' "
+        "AND p.available_timestamp=(SELECT MAX(q.available_timestamp) FROM pit_market_data q WHERE q.agent_id=p.agent_id "
+        "AND q.target_timestamp=p.target_timestamp AND q.available_timestamp<=? AND COALESCE(q.provenance,'measured')='measured' "
+        "AND COALESCE(q.quality_status,'')<>'unverified_seed' AND q.source_id IS NOT NULL AND q.source_id<>'') "
+        "ORDER BY p.target_timestamp DESC LIMIT ?", (agent, cutoff, cutoff, years * 400)).fetchall()
     return [(str(ts), float(v)) for ts, v in rows if ts and str(ts)[:4].isdigit()]
+
+
+def _read_ttf_series(conn: sqlite3.Connection, cutoff: str, months: list[str]) -> list[dict]:
+    rows = conn.execute(
+        "SELECT p.agent_id,p.target_timestamp,p.available_timestamp,p.value,p.unit,p.source_id,p.quality_status,p.provenance,p.published_timestamp,p.raw_payload_hash "
+        "FROM pit_market_data p WHERE p.agent_id LIKE 'Agent_TTF_%' AND p.value IS NOT NULL AND p.available_timestamp<=? "
+        "AND COALESCE(p.provenance,'measured')='measured' AND COALESCE(p.quality_status,'')<>'unverified_seed' "
+        "AND p.source_id IS NOT NULL AND p.source_id<>'' "
+        "AND p.available_timestamp=(SELECT MAX(q.available_timestamp) FROM pit_market_data q WHERE q.agent_id=p.agent_id "
+        "AND q.target_timestamp=p.target_timestamp AND q.available_timestamp<=? AND COALESCE(q.provenance,'measured')='measured' "
+        "AND COALESCE(q.quality_status,'')<>'unverified_seed' AND q.source_id IS NOT NULL AND q.source_id<>'') "
+        "ORDER BY p.target_timestamp DESC,p.agent_id", (cutoff, cutoff)).fetchall()
+    out = []
+    for agent, target, available, value, unit, source, quality, provenance, published, payload in rows:
+        month = agent.replace("Agent_TTF_", "").replace("_", "-")
+        if len(month) != 7 or month not in months or any(existing["month"] == month for existing in out):
+            continue
+        out.append({"agent_id": agent, "month": month, "target_timestamp": str(target), "available_timestamp": str(available),
+                    "value": float(value), "unit": unit, "source_id": source, "quality_status": quality,
+                    "provenance": provenance or "measured", "published_timestamp": published, "raw_payload_hash": payload})
+    return out
+
+
+def _series_lineage(conn: sqlite3.Connection, cutoff: str) -> dict:
+    rows = conn.execute(
+        "SELECT agent_id,COUNT(*),MIN(target_timestamp),MAX(target_timestamp),MIN(available_timestamp),MAX(available_timestamp),"
+        "GROUP_CONCAT(DISTINCT source_id),GROUP_CONCAT(DISTINCT quality_status) FROM pit_market_data "
+        "WHERE available_timestamp<=? AND COALESCE(provenance,'measured')='measured' AND COALESCE(quality_status,'')<>'unverified_seed' "
+        "AND source_id IS NOT NULL AND source_id<>'' GROUP BY agent_id", (cutoff,)).fetchall()
+    return {row[0]: {"rows": row[1], "target_range": [row[2], row[3]], "available_range": [row[4], row[5]],
+                     "source_ids": sorted([x for x in (row[6] or "").split(",") if x]),
+                     "quality_statuses": sorted([x for x in (row[7] or "").split(",") if x])} for row in rows}
 
 
 def _seasonal_fit(rows: list[tuple[str, float]]) -> dict:
@@ -163,6 +209,42 @@ def _aggregate_partials(partials: list[dict], weights: list[int]) -> dict:
     return out
 
 
+def _parameter_provenance(params: dict, seasonal: dict, backtest: dict, hh_rows: list, oil_rows: list, ttf_rows: list,
+                          fx_rows: list, lineage: dict) -> dict:
+    out = {key: {"value": value, "source": "labelled_assumption", "reason": "hard-coded default; no calibrated observation supplied"}
+           for key, value in params.items()}
+    hh_meta = lineage.get("Agent_HH_M1", {})
+    for key in ("hh_base", "hh_season_amp", "hh_phase", "hh_mean_reversion", "hh_vol"):
+        if key in seasonal and key in out:
+            out[key] = {"value": seasonal[key], "source": "calibrated_from_pit_series", "agent_id": "Agent_HH_M1",
+                        "method": "seasonal least squares and residual volatility" if key != "hh_mean_reversion" else "grid search over mean-reversion coefficients",
+                        "observations": seasonal.get("observations"), "target_range": hh_meta.get("target_range"),
+                        "available_range": hh_meta.get("available_range"), "source_ids": hh_meta.get("source_ids"),
+                        "quality_statuses": hh_meta.get("quality_statuses"), "seasonal_fit_rmse": seasonal.get("seasonal_fit_rmse")}
+    meta = lineage.get("Agent_Crude_WTI_Spot", {})
+    if oil_rows:
+        for key, method in (("oil_base", "mean of latest 36 PIT WTI observations"), ("oil_vol", "standard deviation of latest 252 PIT WTI observations divided by oil_base")):
+            out[key] = {"value": params[key], "source": "calibrated_from_pit_series", "agent_id": "Agent_Crude_WTI_Spot", "method": method,
+                        "observations": len(oil_rows), "target_range": meta.get("target_range"), "available_range": meta.get("available_range"),
+                        "source_ids": meta.get("source_ids"), "quality_statuses": meta.get("quality_statuses")}
+    meta = lineage.get("Agent_FX_EURUSD", {})
+    if fx_rows:
+        out["fx_base"] = {"value": params["fx_base"], "source": "calibrated_from_pit_series", "agent_id": "Agent_FX_EURUSD",
+                         "method": "mean of latest 10 PIT EUR/USD observations", "observations": len(fx_rows),
+                         "target_range": meta.get("target_range"), "available_range": meta.get("available_range"),
+                         "source_ids": meta.get("source_ids"), "quality_statuses": meta.get("quality_statuses")}
+    if ttf_rows:
+        out["ttf_base_eur_mwh"] = {"value": params["ttf_base_eur_mwh"], "source": "calibrated_from_pit_series",
+                                    "agent_ids": [row["agent_id"] for row in ttf_rows], "method": "mean of eligible PIT TTF month quotes",
+                                    "observations": len(ttf_rows), "months": [row["month"] for row in ttf_rows],
+                                    "source_ids": sorted({row["source_id"] for row in ttf_rows if row["source_id"]}),
+                                    "quality_statuses": sorted({row["quality_status"] for row in ttf_rows if row["quality_status"]})}
+    if backtest.get("selected") in ("seasonal_naive", "ridge_seasonal"):
+        out["hh_mean_reversion"] = {**out["hh_mean_reversion"], "value": params["hh_mean_reversion"], "source": "model_selection_adjustment",
+                                    "method": f"backtest winner {backtest['selected']} added 0.02 to the fitted coefficient, capped at 0.35"}
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenarios", type=int, default=50000)
@@ -184,13 +266,14 @@ def main() -> int:
                 raise RuntimeError("CUDA unavailable")
         except (ImportError, AssertionError, RuntimeError) as exc:
             raise SystemExit(f"GPU backend unavailable: {exc}")
+    months = lg._month_sequence(cutoff)
     conn = sqlite3.connect(f"file:{args.db}?mode=ro", uri=True)
     try:
-        hh_rows = _read_series(conn, "Agent_HH_M1")
-        oil_rows = _read_series(conn, "Agent_Crude_WTI_Spot")
-        ttf_rows = conn.execute("select agent_id, value from pit_market_data where agent_id like 'Agent_TTF_%' and value is not null "
-                                "order by target_timestamp desc limit 24").fetchall()
-        fx_rows = _read_series(conn, "Agent_FX_EURUSD")
+        hh_rows = _read_series(conn, "Agent_HH_M1", cutoff)
+        oil_rows = _read_series(conn, "Agent_Crude_WTI_Spot", cutoff)
+        fx_rows = _read_series(conn, "Agent_FX_EURUSD", cutoff)
+        ttf_rows = _read_ttf_series(conn, cutoff, months)
+        lineage = _series_lineage(conn, cutoff)
     finally:
         conn.close()
     seasonal = _seasonal_fit(hh_rows)
@@ -203,13 +286,13 @@ def main() -> int:
         params["oil_base"] = float(np.mean([v for _, v in oil_rows[-36:]]))
         params["oil_vol"] = float(np.std([v for _, v in oil_rows[-252:]]) / max(params["oil_base"], 1.0))
     if ttf_rows:
-        params["ttf_base_eur_mwh"] = float(np.mean([float(v) for _, v in ttf_rows]))
+        params["ttf_base_eur_mwh"] = float(np.mean([row["value"] for row in ttf_rows]))
     if fx_rows:
         params["fx_base"] = float(np.mean([v for _, v in fx_rows[-10:]]))
     if backtest.get("selected") in ("seasonal_naive", "ridge_seasonal"):
         params["hh_mean_reversion"] = min(0.35, params["hh_mean_reversion"] + 0.02)
+    parameter_provenance = _parameter_provenance(params, seasonal, backtest, hh_rows, oil_rows, ttf_rows, fx_rows, lineage)
 
-    months = lg._month_sequence(cutoff)
     hh_observed = {}
     ttf_observed = {}
     fx = None
@@ -217,9 +300,7 @@ def main() -> int:
     if hh_rows:
         hh_observed[months[0]] = hh_rows[0][1]
     for row in ttf_rows:
-        m = row[0].replace("Agent_TTF_", "").replace("_", "-")
-        if m in months and m not in ttf_observed:
-            ttf_observed[m] = float(row[1])
+        ttf_observed[row["month"]] = row["value"]
     if fx_rows:
         fx = fx_rows[0][1]
     if oil_rows:
@@ -232,7 +313,8 @@ def main() -> int:
         batch = max(50000, min(int(args.batch), 250000))
     total = max(batch, int(args.scenarios))
     jobs = []
-    seed = 20261120
+    seed_start = 20261120
+    seed = seed_start
     remaining = total
     while remaining > 0:
         n = min(batch, remaining)
@@ -241,6 +323,7 @@ def main() -> int:
         seed += 1
         remaining -= n
 
+    partial_backup = _backup_existing(PARTIAL_FILE)
     started = time.perf_counter()
     partials, weights, batch_times, diagnostics = [], [], [], {}
     use_pool = backend == "cpu" and workers > 1 and len(jobs) > 1
@@ -270,16 +353,29 @@ def main() -> int:
             PARTIAL_FILE.write_text(json.dumps({"available_timestamp": _utc(), "status": "partial", "completed_scenarios": sum(weights), "total_scenarios": total}, indent=2, sort_keys=True))
     elapsed = time.perf_counter() - started
     aggregated = _aggregate_partials(partials, weights)
+    diagnostics = dict(diagnostics)
+    diagnostics["scenario_count"] = int(sum(weights))
+    diagnostics["seed"] = seed_start
+    diagnostics["seed_range"] = [seed_start, seed - 1]
+    diagnostics["batch_count"] = len(jobs)
+    diagnostics["aggregated_batch_diagnostics"] = True
     benchmark = {"elapsed_seconds": round(elapsed, 4), "scenarios": int(sum(weights)), "scenarios_per_second": round(sum(weights) / max(elapsed, 1e-9), 1),
-                  "backend": backend, "device_name": diagnostics.get("device_name"), "batch_size": batch, "workers": workers, "batch_times_seconds": batch_times, "environment": env,
+                  "backend": backend, "device_name": diagnostics.get("device_name"), "batch_size": batch, "workers": workers, "batch_times_seconds": batch_times,
+                  "environment": env, "seed": seed_start, "seed_range": [seed_start, seed - 1], "batch_count": len(jobs),
                  "memory_after": _meminfo(), "peak_rss_mb": round(float(__import__("resource").getrusage(__import__("resource").RUSAGE_SELF).ru_maxrss) / 1024, 1),
                  "batch_summaries": {k: {"p10": [round(float(v), 4) for v in values[1]], "p50": [round(float(v), 4) for v in values[2]],
                                          "p90": [round(float(v), 4) for v in values[3]]} for k, values in aggregated.items()}}
+    final_backup = _backup_existing(FINAL_FILE)
     doc = {"model_version": lg.MODEL_VERSION, "available_timestamp": _utc(), "cutoff": cutoff, "status": "complete",
-           "params": params, "seasonal_fit": seasonal, "backtest": backtest, "scenario_count": int(sum(weights)),
-           "seed": 20261120, "benchmark": benchmark, "diagnostics": diagnostics}
+           "params": params, "parameter_provenance": parameter_provenance, "seasonal_fit": seasonal, "backtest": backtest,
+           "scenario_count": int(sum(weights)), "seed": seed_start, "benchmark": benchmark, "diagnostics": diagnostics,
+           "pit_filter": {"available_at_or_before_cutoff": True, "unverified_seed_excluded": True, "measured_provenance_required": True,
+                          "source_id_required": True, "latest_vintage_per_target": True},
+           "input_lineage": {"hh": lineage.get("Agent_HH_M1", {}), "oil": lineage.get("Agent_Crude_WTI_Spot", {}),
+                             "fx": lineage.get("Agent_FX_EURUSD", {}), "ttf": ttf_rows},
+           "artifact_backups": {"final": final_backup, "partial": partial_backup}}
     FINAL_FILE.write_text(json.dumps(doc, indent=2, sort_keys=True))
-    print(json.dumps({"final_file": str(FINAL_FILE), "scenarios": sum(weights), "seconds": benchmark["elapsed_seconds"],
+    print(json.dumps({"final_file": str(FINAL_FILE), "backup": final_backup, "scenarios": sum(weights), "seconds": benchmark["elapsed_seconds"],
                       "scenarios_per_second": benchmark["scenarios_per_second"], "backend": backend, "device": diagnostics.get("device_name"),
                       "workers": workers, "batch": batch, "backtest": backtest.get("selected"), "memory": _meminfo()}, indent=2, sort_keys=True))
     return 0

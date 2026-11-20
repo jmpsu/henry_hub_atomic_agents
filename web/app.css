@@ -320,6 +320,8 @@ tr.has-tip:hover td, .drv-row.has-tip:hover, .levels > div.has-tip:hover { backg
 .lng-matrix .lng-row-h { text-align: left; position: sticky; left: 0; background: var(--panel, #111); color: var(--text); z-index: 2; min-width: 210px; }
 .lng-matrix td { color: var(--text); }
 .lng-matrix td.observed { color: var(--gold); }
+.lng-matrix td.observed.converted { color: var(--gold); border-bottom: 1px dashed var(--gold); }
+.lng-matrix td.observed.proxy { color: #c8c1a5; border-bottom: 1px dotted #c8c1a5; }
 .lng-matrix tbody tr:hover td, .lng-matrix tbody tr:hover th { background: rgba(215, 169, 74, .07); }
 .lng-global-foot { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--dim); font-size: 11px; }
 .lng-assumptions { max-height: 260px; overflow: auto; border: 1px solid var(--hair); padding: 8px; color: var(--dim); font: 11px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }
