@@ -18,7 +18,7 @@ if not DB_PATH or not os.path.isabs(DB_PATH) or not os.path.isfile(DB_PATH):
     raise RuntimeError("DB_PATH must be set to an existing absolute path (see .env)")
 
 _HERE = os.path.dirname(os.path.realpath(__file__))
-chroma_client = chromadb.PersistentClient(path=os.path.join(_HERE, "chroma_pit_kb"))
+chroma_client = chromadb.PersistentClient(path=os.environ.get("CHROMA_PATH") or os.path.join(_HERE, "chroma_pit_kb"))
 kb_collection = chroma_client.get_or_create_collection(name="henry_hub_alpha_graph")
 
 class CommandRequest(BaseModel):
@@ -530,3 +530,23 @@ async def handle_remote_command(req: CommandRequest):
     result["new_vector_node_id"] = new_node_id
     result["total_knowledge_nodes"] = kb_collection.count()
     return result
+
+
+# --- Coordinated release version reporting ---
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from release.version import get_release_info as _get_release_info
+
+@app.middleware("http")
+async def _inject_release_version(request: Request, call_next):
+    resp = await call_next(request)
+    if request.url.path in ("/health", "/api/health") and resp.status_code == 200 and "application/json" in resp.headers.get("content-type", ""):
+        body = b"".join([chunk async for chunk in resp.body_iterator])
+        try:
+            data = json.loads(body.decode("utf-8"))
+            if isinstance(data, dict):
+                data.update(_get_release_info())
+                return JSONResponse(content=data, status_code=resp.status_code)
+        except Exception:
+            pass
+    return resp

@@ -2,7 +2,7 @@
  "schema": "requirements/1",
  "source": "artifacts/Ultimate_Goal.md",
  "source_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
- "count": 422,
+ "count": 427,
  "requirements": [
   {
    "id": "R1-05b19d29",
@@ -3801,6 +3801,51 @@
    "kind": "list_item",
    "text": "Source Availability Transparency: Live table of agent freshness, available_timestamp, provenance, and quality_status, plus keyboard/CLI flags to switch product, timeframe, and refresh interval against ngl.joeysvault.app/api/state.json (or local http://127.0.0.1:8095/api/state.json).",
    "context": "ngl-term.py MUST include:"
+  },
+  {
+   "id": "R13-e1",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 1. Architectural Baseline",
+   "section_no": "13",
+   "line": 1,
+   "kind": "prose",
+   "text": "Inspect kb_ingest.py, agents/memory.py, agents/llm.py, agents/workers.py, command_hub.py, scripts/acceptance.py; run the baseline acceptance tests; keep SQLite and Chroma compatibility.",
+   "context": "source: QUANT_HUB_SPEC.md section 1"
+  },
+  {
+   "id": "R13-e2",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 2. LlamaIndex Multi-Engine Retrieval Hub",
+   "section_no": "13",
+   "line": 1,
+   "kind": "prose",
+   "text": "Implement agents/retrieval_hub.py: ingestion of news articles, scientific journals and reports; a unified interface with 6 query engine modalities (1. KG vector-based entity retrieval [default], 2. KG keyword-based entity retrieval, 3. Raw vector index retrieval, 4. custom combo engine [vector + KG entity retrieval], 5. KnowledgeGraphQueryEngine, 6. KnowledgeGraphRAGRetriever) behind the factory get_query_engine(engine_type='kg_vector', **kwargs); PIT-filtered retrieval at as_of.",
+   "context": "source: QUANT_HUB_SPEC.md section 2"
+  },
+  {
+   "id": "R13-e3",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 3. Power, Natural Gas & Cross-Commodity Modeling",
+   "section_no": "13",
+   "line": 1,
+   "kind": "prose",
+   "text": "Implement agents/quant_commodities.py: Henry Hub spot & forward curve analysis; basis differentials vs Waha, Houston Ship Channel, Transco Zone 6; spark/clean-spark/dark spread economics; regional ISO/RTO nodes (ERCOT, PJM, MISO, CAISO, NYISO); EIA storage cycles, pipeline flows, LNG export terminal demand; cross-commodity exposure (WTI/Brent, refined products, carbon allowances).",
+   "context": "source: QUANT_HUB_SPEC.md section 3"
+  },
+  {
+   "id": "R13-e4",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 4. Quantitative Risk Management Engine",
+   "section_no": "13",
+   "line": 1,
+   "kind": "prose",
+   "text": "Implement agents/quant_risk.py: parametric, historical simulation and Monte Carlo VaR plus expected shortfall (CVaR); winter storm Uri freeze, pipeline outage shock and multi-factor commodity price shift scenarios; initial/variation margin modeling and liquidity buffer estimation; all from PIT HH spot series.",
+   "context": "source: QUANT_HUB_SPEC.md section 4"
+  },
+  {
+   "id": "R13-e5",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 5. Integration & Acceptance Testing",
+   "section_no": "13",
+   "line": 1,
+   "kind": "prose",
+   "text": "Connect the retrieval engine into agents/memory.search and the risk engine into agents/workers.py (QuantRiskAgent); add acceptance coverage to scripts/acceptance.py: ingestion and querying across all 6 engine types, spark spread and basis differential calculations, parametric/historical/Monte Carlo VaR execution; run python scripts/acceptance.py and commit to the quant-hub-build branch.",
+   "context": "source: QUANT_HUB_SPEC.md section 5"
   }
  ]
 }

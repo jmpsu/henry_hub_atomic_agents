@@ -1,407 +1,472 @@
 [
- {
-  "agent_id": "Agent_HH_Cash_Midpoint",
-  "series": "Daily volume-weighted cash index ($/MMBtu)",
-  "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=AVG)"
- },
- {
-  "agent_id": "Agent_HH_Cash_High",
-  "series": "Intraday physical trade ceiling ($/MMBtu)",
-  "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=HIGH)"
- },
- {
-  "agent_id": "Agent_HH_Cash_Low",
-  "series": "Intraday physical trade floor ($/MMBtu)",
-  "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=LOW)"
- },
- {
-  "agent_id": "Agent_HH_Cash_Volume",
-  "series": "Daily physical volume traded (MMBtu)",
-  "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=VOL)"
- },
- {
-  "agent_id": "Agent_HH_M1",
-  "series": "Prompt Month (Month 1) NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M1)"
- },
- {
-  "agent_id": "Agent_HH_M2",
-  "series": "Month 2 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M2)"
- },
- {
-  "agent_id": "Agent_HH_M3",
-  "series": "Month 3 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M3)"
- },
- {
-  "agent_id": "Agent_HH_M4",
-  "series": "Month 4 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M4)"
- },
- {
-  "agent_id": "Agent_HH_M5",
-  "series": "Month 5 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M5)"
- },
- {
-  "agent_id": "Agent_HH_M6",
-  "series": "Month 6 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M6)"
- },
- {
-  "agent_id": "Agent_HH_M7",
-  "series": "Month 7 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M7)"
- },
- {
-  "agent_id": "Agent_HH_M8",
-  "series": "Month 8 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M8)"
- },
- {
-  "agent_id": "Agent_HH_M9",
-  "series": "Month 9 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M9)"
- },
- {
-  "agent_id": "Agent_HH_M10",
-  "series": "Month 10 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M10)"
- },
- {
-  "agent_id": "Agent_HH_M11",
-  "series": "Month 11 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M11)"
- },
- {
-  "agent_id": "Agent_HH_M12",
-  "series": "Month 12 NYMEX daily settle",
-  "source": "CME Group Henry Hub Quotes (#NG_M12)"
- },
- {
-  "agent_id": "Agent_Prod_Appalachia",
-  "series": "Marcellus & Utica dry gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=Appalachia)"
- },
- {
-  "agent_id": "Agent_Prod_Permian",
-  "series": "Permian Basin associated gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=Permian)"
- },
- {
-  "agent_id": "Agent_Prod_Haynesville",
-  "series": "Haynesville Shale dry gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=Haynesville)"
- },
- {
-  "agent_id": "Agent_Prod_EagleFord",
-  "series": "Eagle Ford Shale gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=EagleFord)"
- },
- {
-  "agent_id": "Agent_Prod_Bakken",
-  "series": "Bakken Formation associated gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=Bakken)"
- },
- {
-  "agent_id": "Agent_Prod_DJBasin",
-  "series": "Niobrara / DJ Basin gas output (Bcf/d)",
-  "source": "EIA Natural Gas Data (#basin=Niobrara)"
- },
- {
-  "agent_id": "Agent_Flow_Kingsgate",
-  "series": "Eastport/Kingsgate ID-BC border flow (Dth/d)",
-  "source": "TC Energy GTN EBB (?meter=KINGSGATE)"
- },
- {
-  "agent_id": "Agent_Flow_Emerson",
-  "series": "Noyes/Emerson MN-MB border flow (Dth/d)",
-  "source": "TC Energy Great Lakes EBB (?meter=EMERSON)"
- },
- {
-  "agent_id": "Agent_Flow_Waddington",
-  "series": "Waddington NY-ON border flow (Dth/d)",
-  "source": "Iroquois Gas Transmission EBB (?meter=WADDINGTON)"
- },
- {
-  "agent_id": "Agent_LNG_SabinePass_Flow",
-  "series": "Creole Trail / SPLNG feedgas nominations (Dth/d)",
-  "source": "Cheniere Creole Trail EBB (?point=SPLNG)"
- },
- {
-  "agent_id": "Agent_LNG_CorpusChristi_Flow",
-  "series": "Corpus Christi Pipeline feedgas nominations (Dth/d)",
-  "source": "Cheniere Corpus Christi EBB (?point=CCPL)"
- },
- {
-  "agent_id": "Agent_LNG_Freeport_Flow",
-  "series": "Gulf South Stratton Ridge LNG feedgas (Dth/d)",
-  "source": "BWP GasQuest Gulf South EBB (?point=FREEPORT)"
- },
- {
-  "agent_id": "Agent_LNG_Cameron_Flow",
-  "series": "Cameron Interstate feedgas nominations (Dth/d)",
-  "source": "Cameron Interstate EBB (?point=CAMERON_LNG)"
- },
- {
-  "agent_id": "Agent_LNG_CalcasieuPass_Flow",
-  "series": "TransCameron feedgas nominations (Dth/d)",
-  "source": "Venture Global TransCameron (?point=CALCASIEU)"
- },
- {
-  "agent_id": "Agent_LNG_CovePoint_Flow",
-  "series": "Cove Point LNG terminal receipts (Dth/d)",
-  "source": "BHE GT&S Cove Point EBB (?point=COVEPOINT)"
- },
- {
-  "agent_id": "Agent_LNG_ElbaIsland_Flow",
-  "series": "Elba Express LNG feedgas nominations (Dth/d)",
-  "source": "Kinder Morgan Elba Express EBB (?code=EEC&point=ELBA)"
- },
- {
-  "agent_id": "Agent_LNG_Plaquemines_Flow",
-  "series": "Gator Express LNG feedgas nominations (Dth/d)",
-  "source": "Venture Global Gator Express (?point=PLAQUEMINES)"
- },
- {
-  "agent_id": "Agent_Flow_NET_Mexico",
-  "series": "Agua Dulce to Mexico border flow (Dth/d)",
-  "source": "Kinder Morgan NET Mexico EBB (?point=47226)"
- },
- {
-  "agent_id": "Agent_Flow_ValleyCrossing",
-  "series": "Brownsville offshore Mexico border flow (Dth/d)",
-  "source": "Enbridge LINK Valley Crossing (?pipe=VCP&point=BORDER)"
- },
- {
-  "agent_id": "Agent_Demand_PowerBurn",
-  "series": "Daily U.S. gas-fired power generation (MWh/Bcf)",
-  "source": "EIA Hourly Electric Grid Monitor (?fuel=NG)"
- },
- {
-  "agent_id": "Agent_Demand_Industrial",
-  "series": "Daily metered industrial gas deliveries (Bcf/d)",
-  "source": "EIA Natural Gas Monthly Table 2 (#sector=IND)"
- },
- {
-  "agent_id": "Agent_Demand_ResComm",
-  "series": "Daily residential & commercial citygate load (Bcf/d)",
-  "source": "EIA Natural Gas Monthly Table 2 (#sector=RESCOMM)"
- },
- {
-  "agent_id": "Agent_Weather_Actual_HDD",
-  "series": "Observed CONUS population-weighted HDD",
-  "source": "NOAA CPC Degree Days (?type=HDD&period=DAILY)"
- },
- {
-  "agent_id": "Agent_Weather_Actual_CDD",
-  "series": "Observed CONUS population-weighted CDD",
-  "source": "NOAA CPC Degree Days (?type=CDD&period=DAILY)"
- },
- {
-  "agent_id": "Agent_Weather_30YrNormal_HDD",
-  "series": "30-year climatological normal daily HDD",
-  "source": "NOAA CPC Degree Days (?type=HDD&period=NORMAL)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day1",
-  "series": "GFS 00z run Day +1 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f024)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day2",
-  "series": "GFS 00z run Day +2 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f048)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day3",
-  "series": "GFS 00z run Day +3 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f072)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day4",
-  "series": "GFS 00z run Day +4 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f096)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day5",
-  "series": "GFS 00z run Day +5 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f120)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day6",
-  "series": "GFS 00z run Day +6 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f144)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day7",
-  "series": "GFS 00z run Day +7 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f168)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day8",
-  "series": "GFS 00z run Day +8 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f192)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day9",
-  "series": "GFS 00z run Day +9 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f216)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day10",
-  "series": "GFS 00z run Day +10 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f240)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day11",
-  "series": "GFS 00z run Day +11 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f264)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day12",
-  "series": "GFS 00z run Day +12 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f288)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day13",
-  "series": "GFS 00z run Day +13 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f312)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day14",
-  "series": "GFS 00z run Day +14 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f336)"
- },
- {
-  "agent_id": "Agent_GFS_00z_HDD_Day15",
-  "series": "GFS 00z run Day +15 forecast HDD",
-  "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f360)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day1",
-  "series": "ECMWF IFS 00z run Day +1 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step24.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day2",
-  "series": "ECMWF IFS 00z run Day +2 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step48.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day3",
-  "series": "ECMWF IFS 00z run Day +3 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step72.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day4",
-  "series": "ECMWF IFS 00z run Day +4 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step96.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day5",
-  "series": "ECMWF IFS 00z run Day +5 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step120.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day6",
-  "series": "ECMWF IFS 00z run Day +6 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step144.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day7",
-  "series": "ECMWF IFS 00z run Day +7 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step168.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day8",
-  "series": "ECMWF IFS 00z run Day +8 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step192.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day9",
-  "series": "ECMWF IFS 00z run Day +9 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step216.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day10",
-  "series": "ECMWF IFS 00z run Day +10 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step240.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day11",
-  "series": "ECMWF IFS 00z run Day +11 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step264.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day12",
-  "series": "ECMWF IFS 00z run Day +12 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step288.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day13",
-  "series": "ECMWF IFS 00z run Day +13 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step312.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day14",
-  "series": "ECMWF IFS 00z run Day +14 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step336.grib2)"
- },
- {
-  "agent_id": "Agent_ECMWF_00z_HDD_Day15",
-  "series": "ECMWF IFS 00z run Day +15 forecast HDD",
-  "source": "ECMWF Open Data Portal (ifs_00z_step360.grib2)"
- },
- {
-  "agent_id": "Agent_Storage_East",
-  "series": "East Region working gas in storage (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=EAST)"
- },
- {
-  "agent_id": "Agent_Storage_Midwest",
-  "series": "Midwest Region working gas in storage (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=MIDWEST)"
- },
- {
-  "agent_id": "Agent_Storage_Mountain",
-  "series": "Mountain Region working gas in storage (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=MOUNTAIN)"
- },
- {
-  "agent_id": "Agent_Storage_Pacific",
-  "series": "Pacific Region working gas in storage (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=PACIFIC)"
- },
- {
-  "agent_id": "Agent_Storage_SouthCentral_Salt",
-  "series": "South Central Salt cavern working gas (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=SC_SALT)"
- },
- {
-  "agent_id": "Agent_Storage_SouthCentral_NonSalt",
-  "series": "South Central Non-Salt reservoir working gas (Bcf)",
-  "source": "EIA Weekly Natural Gas Storage (#region=SC_NONSALT)"
- },
- {
-  "agent_id": "Agent_Coal_PRB_SpotPrice",
-  "series": "Powder River Basin 8,800 Btu coal price ($/ton)",
-  "source": "EIA Coal Markets Report (#basin=PRB)"
- },
- {
-  "agent_id": "Agent_Coal_CAPP_SpotPrice",
-  "series": "Central Appalachia 12,500 Btu coal price ($/ton)",
-  "source": "EIA Coal Markets Report (#basin=CAPP)"
- },
- {
-  "agent_id": "Agent_Coal_Rail_TransportRate",
-  "series": "Coal rail transport rate to power plants ($/ton)",
-  "source": "EIA Coal Data Browser (#metric=RAIL_TARIFF)"
- },
- {
-  "agent_id": "Agent_Power_CO2_AllowancePrice",
-  "series": "RGGI CO2 allowance clearing/secondary price ($/ton)",
-  "source": "RGGI CO2 Allowance Results (#metric=CLEARING_PRICE)"
- }
+  {
+    "agent_id": "Agent_HH_Cash_Midpoint",
+    "series": "Daily volume-weighted cash index ($/MMBtu)",
+    "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=AVG)"
+  },
+  {
+    "agent_id": "Agent_HH_Cash_High",
+    "series": "Intraday physical trade ceiling ($/MMBtu)",
+    "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=HIGH)"
+  },
+  {
+    "agent_id": "Agent_HH_Cash_Low",
+    "series": "Intraday physical trade floor ($/MMBtu)",
+    "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=LOW)"
+  },
+  {
+    "agent_id": "Agent_HH_Cash_Volume",
+    "series": "Daily physical volume traded (MMBtu)",
+    "source": "NGI Daily Gas Price Index (?hub=HENRY&metric=VOL)"
+  },
+  {
+    "agent_id": "Agent_HH_M1",
+    "series": "Prompt Month (Month 1) NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M1)"
+  },
+  {
+    "agent_id": "Agent_HH_M2",
+    "series": "Month 2 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M2)"
+  },
+  {
+    "agent_id": "Agent_HH_M3",
+    "series": "Month 3 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M3)"
+  },
+  {
+    "agent_id": "Agent_HH_M4",
+    "series": "Month 4 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M4)"
+  },
+  {
+    "agent_id": "Agent_HH_M5",
+    "series": "Month 5 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M5)"
+  },
+  {
+    "agent_id": "Agent_HH_M6",
+    "series": "Month 6 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M6)"
+  },
+  {
+    "agent_id": "Agent_HH_M7",
+    "series": "Month 7 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M7)"
+  },
+  {
+    "agent_id": "Agent_HH_M8",
+    "series": "Month 8 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M8)"
+  },
+  {
+    "agent_id": "Agent_HH_M9",
+    "series": "Month 9 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M9)"
+  },
+  {
+    "agent_id": "Agent_HH_M10",
+    "series": "Month 10 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M10)"
+  },
+  {
+    "agent_id": "Agent_HH_M11",
+    "series": "Month 11 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M11)"
+  },
+  {
+    "agent_id": "Agent_HH_M12",
+    "series": "Month 12 NYMEX daily settle",
+    "source": "CME Group Henry Hub Quotes (#NG_M12)"
+  },
+  {
+    "agent_id": "Agent_Prod_Appalachia",
+    "series": "Marcellus & Utica dry gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=Appalachia)"
+  },
+  {
+    "agent_id": "Agent_Prod_Permian",
+    "series": "Permian Basin associated gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=Permian)"
+  },
+  {
+    "agent_id": "Agent_Prod_Haynesville",
+    "series": "Haynesville Shale dry gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=Haynesville)"
+  },
+  {
+    "agent_id": "Agent_Prod_EagleFord",
+    "series": "Eagle Ford Shale gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=EagleFord)"
+  },
+  {
+    "agent_id": "Agent_Prod_Bakken",
+    "series": "Bakken Formation associated gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=Bakken)"
+  },
+  {
+    "agent_id": "Agent_Prod_DJBasin",
+    "series": "Niobrara / DJ Basin gas output (Bcf/d)",
+    "source": "EIA Natural Gas Data (#basin=Niobrara)"
+  },
+  {
+    "agent_id": "Agent_Flow_Kingsgate",
+    "series": "Eastport/Kingsgate ID-BC border flow (Dth/d)",
+    "source": "TC Energy GTN EBB (?meter=KINGSGATE)"
+  },
+  {
+    "agent_id": "Agent_Flow_Emerson",
+    "series": "Noyes/Emerson MN-MB border flow (Dth/d)",
+    "source": "TC Energy Great Lakes EBB (?meter=EMERSON)"
+  },
+  {
+    "agent_id": "Agent_Flow_Waddington",
+    "series": "Waddington NY-ON border flow (Dth/d)",
+    "source": "Iroquois Gas Transmission EBB (?meter=WADDINGTON)"
+  },
+  {
+    "agent_id": "Agent_LNG_SabinePass_Flow",
+    "series": "Creole Trail / SPLNG feedgas nominations (Dth/d)",
+    "source": "Cheniere Creole Trail EBB (?point=SPLNG)"
+  },
+  {
+    "agent_id": "Agent_LNG_CorpusChristi_Flow",
+    "series": "Corpus Christi Pipeline feedgas nominations (Dth/d)",
+    "source": "Cheniere Corpus Christi EBB (?point=CCPL)"
+  },
+  {
+    "agent_id": "Agent_LNG_Freeport_Flow",
+    "series": "Gulf South Stratton Ridge LNG feedgas (Dth/d)",
+    "source": "BWP GasQuest Gulf South EBB (?point=FREEPORT)"
+  },
+  {
+    "agent_id": "Agent_LNG_Cameron_Flow",
+    "series": "Cameron Interstate feedgas nominations (Dth/d)",
+    "source": "Cameron Interstate EBB (?point=CAMERON_LNG)"
+  },
+  {
+    "agent_id": "Agent_LNG_CalcasieuPass_Flow",
+    "series": "TransCameron feedgas nominations (Dth/d)",
+    "source": "Venture Global TransCameron (?point=CALCASIEU)"
+  },
+  {
+    "agent_id": "Agent_LNG_CovePoint_Flow",
+    "series": "Cove Point LNG terminal receipts (Dth/d)",
+    "source": "BHE GT&S Cove Point EBB (?point=COVEPOINT)"
+  },
+  {
+    "agent_id": "Agent_LNG_ElbaIsland_Flow",
+    "series": "Elba Express LNG feedgas nominations (Dth/d)",
+    "source": "Kinder Morgan Elba Express EBB (?code=EEC&point=ELBA)"
+  },
+  {
+    "agent_id": "Agent_LNG_Plaquemines_Flow",
+    "series": "Gator Express LNG feedgas nominations (Dth/d)",
+    "source": "Venture Global Gator Express (?point=PLAQUEMINES)"
+  },
+  {
+    "agent_id": "Agent_Flow_NET_Mexico",
+    "series": "Agua Dulce to Mexico border flow (Dth/d)",
+    "source": "Kinder Morgan NET Mexico EBB (?point=47226)"
+  },
+  {
+    "agent_id": "Agent_Flow_ValleyCrossing",
+    "series": "Brownsville offshore Mexico border flow (Dth/d)",
+    "source": "Enbridge LINK Valley Crossing (?pipe=VCP&point=BORDER)"
+  },
+  {
+    "agent_id": "Agent_Demand_PowerBurn",
+    "series": "Daily U.S. gas-fired power generation (MWh/Bcf)",
+    "source": "EIA Hourly Electric Grid Monitor (?fuel=NG)"
+  },
+  {
+    "agent_id": "Agent_Demand_Industrial",
+    "series": "Daily metered industrial gas deliveries (Bcf/d)",
+    "source": "EIA Natural Gas Monthly Table 2 (#sector=IND)"
+  },
+  {
+    "agent_id": "Agent_Demand_ResComm",
+    "series": "Daily residential & commercial citygate load (Bcf/d)",
+    "source": "EIA Natural Gas Monthly Table 2 (#sector=RESCOMM)"
+  },
+  {
+    "agent_id": "Agent_Weather_Actual_HDD",
+    "series": "Observed CONUS population-weighted HDD",
+    "source": "NOAA CPC Degree Days (?type=HDD&period=DAILY)"
+  },
+  {
+    "agent_id": "Agent_Weather_Actual_CDD",
+    "series": "Observed CONUS population-weighted CDD",
+    "source": "NOAA CPC Degree Days (?type=CDD&period=DAILY)"
+  },
+  {
+    "agent_id": "Agent_Weather_30YrNormal_HDD",
+    "series": "30-year climatological normal daily HDD",
+    "source": "NOAA CPC Degree Days (?type=HDD&period=NORMAL)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day1",
+    "series": "GFS 00z run Day +1 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f024)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day2",
+    "series": "GFS 00z run Day +2 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f048)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day3",
+    "series": "GFS 00z run Day +3 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f072)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day4",
+    "series": "GFS 00z run Day +4 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f096)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day5",
+    "series": "GFS 00z run Day +5 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f120)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day6",
+    "series": "GFS 00z run Day +6 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f144)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day7",
+    "series": "GFS 00z run Day +7 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f168)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day8",
+    "series": "GFS 00z run Day +8 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f192)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day9",
+    "series": "GFS 00z run Day +9 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f216)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day10",
+    "series": "GFS 00z run Day +10 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f240)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day11",
+    "series": "GFS 00z run Day +11 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f264)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day12",
+    "series": "GFS 00z run Day +12 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f288)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day13",
+    "series": "GFS 00z run Day +13 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f312)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day14",
+    "series": "GFS 00z run Day +14 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f336)"
+  },
+  {
+    "agent_id": "Agent_GFS_00z_HDD_Day15",
+    "series": "GFS 00z run Day +15 forecast HDD",
+    "source": "NOAA NCEP NOMADS GFS (gfs.t00z.pgrb2.0p25.f360)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day1",
+    "series": "ECMWF IFS 00z run Day +1 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step24.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day2",
+    "series": "ECMWF IFS 00z run Day +2 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step48.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day3",
+    "series": "ECMWF IFS 00z run Day +3 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step72.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day4",
+    "series": "ECMWF IFS 00z run Day +4 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step96.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day5",
+    "series": "ECMWF IFS 00z run Day +5 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step120.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day6",
+    "series": "ECMWF IFS 00z run Day +6 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step144.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day7",
+    "series": "ECMWF IFS 00z run Day +7 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step168.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day8",
+    "series": "ECMWF IFS 00z run Day +8 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step192.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day9",
+    "series": "ECMWF IFS 00z run Day +9 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step216.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day10",
+    "series": "ECMWF IFS 00z run Day +10 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step240.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day11",
+    "series": "ECMWF IFS 00z run Day +11 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step264.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day12",
+    "series": "ECMWF IFS 00z run Day +12 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step288.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day13",
+    "series": "ECMWF IFS 00z run Day +13 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step312.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day14",
+    "series": "ECMWF IFS 00z run Day +14 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step336.grib2)"
+  },
+  {
+    "agent_id": "Agent_ECMWF_00z_HDD_Day15",
+    "series": "ECMWF IFS 00z run Day +15 forecast HDD",
+    "source": "ECMWF Open Data Portal (ifs_00z_step360.grib2)"
+  },
+  {
+    "agent_id": "Agent_Storage_East",
+    "series": "East Region working gas in storage (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=EAST)"
+  },
+  {
+    "agent_id": "Agent_Storage_Midwest",
+    "series": "Midwest Region working gas in storage (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=MIDWEST)"
+  },
+  {
+    "agent_id": "Agent_Storage_Mountain",
+    "series": "Mountain Region working gas in storage (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=MOUNTAIN)"
+  },
+  {
+    "agent_id": "Agent_Storage_Pacific",
+    "series": "Pacific Region working gas in storage (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=PACIFIC)"
+  },
+  {
+    "agent_id": "Agent_Storage_SouthCentral_Salt",
+    "series": "South Central Salt cavern working gas (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=SC_SALT)"
+  },
+  {
+    "agent_id": "Agent_Storage_SouthCentral_NonSalt",
+    "series": "South Central Non-Salt reservoir working gas (Bcf)",
+    "source": "EIA Weekly Natural Gas Storage (#region=SC_NONSALT)"
+  },
+  {
+    "agent_id": "Agent_Coal_PRB_SpotPrice",
+    "series": "Powder River Basin 8,800 Btu coal price ($/ton)",
+    "source": "EIA Coal Markets Report (#basin=PRB)"
+  },
+  {
+    "agent_id": "Agent_Coal_CAPP_SpotPrice",
+    "series": "Central Appalachia 12,500 Btu coal price ($/ton)",
+    "source": "EIA Coal Markets Report (#basin=CAPP)"
+  },
+  {
+    "agent_id": "Agent_Coal_Rail_TransportRate",
+    "series": "Coal rail transport rate to power plants ($/ton)",
+    "source": "EIA Coal Data Browser (#metric=RAIL_TARIFF)"
+  },
+  {
+    "agent_id": "Agent_Power_CO2_AllowancePrice",
+    "series": "RGGI CO2 allowance clearing/secondary price ($/ton)",
+    "source": "RGGI CO2 Allowance Results (#metric=CLEARING_PRICE)"
+  },
+  {
+    "agent_id": "Agent_LNGExports_SabinePass",
+    "series": "Sabine Pass, LA LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YSPL-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_CorpusChristi",
+    "series": "Corpus Christi, TX LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YCRP-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_Freeport",
+    "series": "Freeport, TX LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YFPT-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_Cameron",
+    "series": "Cameron, LA LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YCAM-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_CalcasieuPass",
+    "series": "Calcasieu Pass (Cameron), LA LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YCCPL-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_CovePoint",
+    "series": "Cove Point, MD LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YCPT-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_ElbaIsland",
+    "series": "Elba Island, GA LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YELBA-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_LNGExports_Plaquemines",
+    "series": "Plaquemines, LA LNG exports, all countries (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENG_YPLAQ-Z00_MMCF.M); monthly total exports, not daily feedgas"
+  },
+  {
+    "agent_id": "Agent_BorderFlow_Eastport_FromCanada",
+    "series": "Eastport, ID (Kingsgate) pipeline imports from Canada (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NA1277_YEPRT-NCA_2.M); monthly, the named EIA crossing for the Kingsgate meter"
+  },
+  {
+    "agent_id": "Agent_BorderFlow_Noyes_FromCanada",
+    "series": "Noyes, MN (Emerson) pipeline imports from Canada (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NA1277_YNOYS-NCA_2.M); monthly, the named EIA crossing for the Emerson meter"
+  },
+  {
+    "agent_id": "Agent_BorderFlow_Waddington_FromCanada",
+    "series": "Waddington, NY pipeline imports from Canada (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NA1277_YWADD-NCA_2.M); monthly, the named EIA crossing for the Waddington meter"
+  },
+  {
+    "agent_id": "Agent_BorderFlow_RioGrande_ToMexico",
+    "series": "Rio Grande, TX pipeline exports to Mexico (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENP_YGRAN-NMX_MMCF.M); nearest published crossing to the NET Mexico corridor (MAPPING INFERRED, EIA has no NET Mexico series)"
+  },
+  {
+    "agent_id": "Agent_BorderFlow_Brownsville_ToMexico",
+    "series": "Brownsville, TX pipeline exports to Mexico (MMcf per MONTH, EIA)",
+    "source": "EIA Natural Gas Monthly via NG.zip (NG.NGM_EPG0_ENP_YBROWN-NMX_MMCF.M); nearest published crossing to the Valley Crossing corridor (MAPPING INFERRED, EIA has no Valley Crossing series)"
+  }
 ]

@@ -1,150 +1,65 @@
-name: Unified Production Release
+name: Production Release
 
 on:
+  push:
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version, e.g. v1.0.0"
+        description: "Semantic version without leading v (e.g. 1.0.1)"
         required: true
-        type: string
-      expected_commit:
-        description: "Exact approved Git commit SHA"
-        required: true
-        type: string
-
-permissions:
-  contents: write
-
-concurrency:
-  group: henry-hub-production-release
-  cancel-in-progress: false
 
 jobs:
-  build:
-    name: Test and build both artifacts
+  build-and-publish:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      actions: write
     steps:
-      - name: Checkout approved release commit
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.expected_commit }}
-          fetch-depth: 0
-
-      - name: Verify release identity
-        env:
-          VERSION: ${{ inputs.version }}
-          EXPECTED: ${{ inputs.expected_commit }}
-        run: |
-          set -euo pipefail
-          [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          ACTUAL="$(git rev-parse HEAD)"
-          TAG="$(git rev-parse "${VERSION}^{commit}")"
-          test "$ACTUAL" = "$EXPECTED"
-          test "$TAG" = "$EXPECTED"
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
-
-      - name: Run automated tests
-        run: |
-          pytest -q \
-            --ignore=tests/test_ollama_live.py
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      - name: Validate Cloudflare Worker
+      - name: Install validation dependencies
         run: |
-          npx --yes wrangler@4.146.0 deploy --dry-run
-
-      - name: Build versioned Linux and Worker artifacts
-        env:
-          VERSION: ${{ inputs.version }}
-          COMMIT: ${{ inputs.expected_commit }}
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest jsonschema
+      - name: Gate on tests and Worker validation
         run: |
-          set -euo pipefail
-          mkdir -p dist/linux dist/worker
-
-          git archive --format=tar.gz \
-            --prefix="henry-hub-${VERSION}/" \
-            HEAD > "dist/henry-hub-linux-${VERSION}.tar.gz"
-
-          tar -czf "dist/henry-hub-worker-${VERSION}.tar.gz" \
-            worker.js wrangler.toml
-
-          python - <<'PY'
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-
-          version = os.environ["VERSION"]
-          commit = os.environ["COMMIT"]
-          files = [
-              Path(f"dist/henry-hub-linux-{version}.tar.gz"),
-              Path(f"dist/henry-hub-worker-{version}.tar.gz"),
-          ]
-
-          artifacts = []
-          for path in files:
-              digest = hashlib.sha256(path.read_bytes()).hexdigest()
-              artifacts.append({
-                  "filename": path.name,
-                  "sha256": digest,
-                  "size_bytes": path.stat().st_size,
-              })
-
-          manifest = {
-              "version": version,
-              "commit": commit,
-              "artifacts": artifacts,
-              "database_migration_policy": "backup-before-migration; additive migrations only",
-              "deployment_status": "built-not-deployed",
-          }
-
-          Path("dist/release-manifest.json").write_text(
-              json.dumps(manifest, indent=2) + "\n"
-          )
-          PY
-
-          cd dist
-          sha256sum \
-            "henry-hub-linux-${VERSION}.tar.gz" \
-            "henry-hub-worker-${VERSION}.tar.gz" \
-            release-manifest.json > SHA256SUMS
-
-      - name: Upload immutable build outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-release-${{ inputs.version }}
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 90
-
-      - name: Publish GitHub Release and artifacts
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.version }}
+          if [ -d tests ]; then pytest -q --ignore=tests/test_ollama_live.py; fi
+          node --input-type=module --check < worker.js
+          npx --yes wrangler@4 deploy --dry-run --outdir /tmp/worker-dryrun
+      - name: Build and verify coordinated release artifacts
+        id: build
         run: |
-          set -euo pipefail
-
-          if gh release view "$VERSION" >/dev/null 2>&1; then
-            echo "Release already exists; refusing to overwrite it."
+          VER="${{ github.event.inputs.version || '' }}"
+          if [ -z "$VER" ]; then VER="${GITHUB_REF_NAME#v}"; fi
+          CODE_VER="$(python3 -c 'import sys; sys.path.insert(0, "release"); import version; print(version.VERSION)')"
+          if [ "$VER" != "$CODE_VER" ]; then
+            echo "ERROR: release/version.py ($CODE_VER) does not match requested release ($VER)" >&2
             exit 1
           fi
-
-          gh release create "$VERSION" dist/* \
-            --verify-tag \
-            --title "Henry Hub ${VERSION}" \
-            --notes "Unified Linux and Cloudflare Worker artifacts built from commit $GITHUB_SHA. See release-manifest.json and SHA256SUMS for artifact identity and integrity."
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
+          bash scripts/build_release.sh "$VER" "${GITHUB_SHA}" "dist/$VER"
+          bash scripts/verify_release.sh "dist/$VER" "v$VER"
+      - name: Publish approved GitHub Release and dispatch production deploy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER="${{ steps.build.outputs.version }}"
+          TAG="${{ steps.build.outputs.tag }}"
+          gh release create "$TAG" \
+            "dist/$VER/quant-hub-${VER}-linux.tar.gz" \
+            "dist/$VER/quant-gateway-${VER}-worker.tar.gz" \
+            "dist/$VER/release-manifest-${VER}.json" \
+            "dist/$VER/SHA256SUMS" \
+            "dist/$VER/RELEASE_NOTES.md" \
+            --title "$TAG" \
+            --notes-file "dist/$VER/RELEASE_NOTES.md"
+          DEFAULT_BRANCH="$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)"
+          gh workflow run production-deploy.yml --ref "$DEFAULT_BRANCH" -f release_tag="$TAG" || true

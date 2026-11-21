@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-14T02:16:43Z",
+ "generated_at": "2026-11-20T07:28:41Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
- "requirements": 422,
+ "requirements": 427,
  "totals": {
-  "passed": 328,
-  "failed": 0,
-  "blocked": 94,
+  "passed": 268,
+  "failed": 2,
+  "blocked": 157,
   "unverified": 0
  },
  "checks": {
@@ -14,59 +14,54 @@
    "evidence": "/execute 403, /ingest 403",
    "desc": "quant.joeysvault.app refuses requests without an Access service token",
    "blocked_by": null,
-   "seconds": 4.8,
+   "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agent_unit": {
    "status": "passed",
-   "evidence": "31 passed in 2.17s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "agent layer unit tests: config, retries, timeouts, fallbacks, bus, memory, PIT, validation, self-heal hand-off",
    "blocked_by": null,
-   "seconds": 2.4,
+   "seconds": 10.3,
    "block_category": null,
    "block_reason": null
   },
   "agents_live_run": {
    "status": "passed",
-   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 109, 'data_quality': 4, 'synthesis': 16}; embedding ok calls 62",
+   "evidence": "ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 75, 'data_quality': 1, 'synthesis': 6}; embedding ok calls 36",
    "desc": "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_scheduled": {
    "status": "passed",
-   "evidence": "timer enabled; ExecStopPost run_agents.py=True; /ingest trigger=True",
+   "evidence": "timer deployment unit (systemctl unavailable in this runner); ExecStopPost run_agents.py=True; /ingest trigger=True",
    "desc": "agents run after every scheduled collection (timer ExecStopPost and the hub's /ingest trigger)",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "agents_share_knowledge": {
    "status": "passed",
-   "evidence": "22 cross-agent message reads {'data_quality': 1, 'pipeline_event': 1}; 21 findings, 13 linked to source/data evidence, 15 finding->finding links (later runs build on earlier findings); 21 mirrored in Chroma",
+   "evidence": "7 cross-agent message reads {'anomaly': 1, 'incident': 1, 'pipeline_event': 1}; 19 findings, 9 linked to source/data evidence, 11 finding->finding links (later runs build on earlier findings); 19 mirrored in Chroma",
    "desc": "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "alert_delivery": {
-   "status": "passed",
-   "evidence": "incident issues [(3, 'CLOSED')]; event streams ['[data-quality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre']",
+   "status": "blocked",
+   "evidence": "incident issues []; event streams []",
    "desc": "incidents (open on failure, close on recovery) and event streams reach the owner as GitHub issues",
-   "blocked_by": null,
-   "seconds": 1.2,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "blocked_by": "GitHub CLI credentials are unavailable in this runner; incident wiring is covered locally",
+   "seconds": 0.1,
+   "block_category": "external_credentials",
+   "block_reason": "gh auth is unavailable in this runner"
   },
   "architecture_doc": {
    "status": "passed",
@@ -75,48 +70,43 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "audit_gists": {
-   "status": "passed",
-   "evidence": "5 recent hub gists",
+   "status": "blocked",
+   "evidence": "0 recent hub gists",
    "desc": "audit gists are created for /execute calls (gh authenticated, recent gist present)",
-   "blocked_by": null,
-   "seconds": 0.6,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "blocked_by": "GitHub CLI credentials are unavailable in this runner; audit logging implementation is covered locally",
+   "seconds": 0.0,
+   "block_category": "external_credentials",
+   "block_reason": "gh auth is unavailable in this runner"
   },
   "backtest_unit": {
    "status": "passed",
-   "evidence": "11 passed in 0.43s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "walk-forward PIT backtester, chronological splits, costs, regime/drawdown metrics",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 1.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "branch_protection": {
    "status": "blocked",
-   "evidence": "{\"message\":\"Upgrade to GitHub Pro or make this repository public to enable this feature.\",\"documentation_url\":\"https://d",
+   "evidence": "Welcome to GitHub CLI!\n\nTo authenticate, please run `gh auth login`.",
    "desc": "main is protected on GitHub",
    "blocked_by": "owner decision (GitHub settings)",
-   "seconds": 0.3,
+   "seconds": 0.0,
    "block_category": "platform_limit",
-   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo",
-   "carried_over": true
+   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
   },
   "branch_pushed": {
-   "status": "passed",
-   "evidence": "## quant-hub-build...origin/quant-hub-build",
+   "status": "failed",
+   "evidence": "## quant-hub-build...origin/quant-hub-build [ahead 1]",
    "desc": "local HEAD is pushed to origin",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_freshness": {
    "status": "passed",
@@ -125,18 +115,16 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collector_schedule": {
    "status": "passed",
-   "evidence": "timer enabled; worker crons ['crons = [\"30 13 * * *\", \"45 15 * * THU\"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbers Sunday as 1']",
+   "evidence": "timer deployment unit (systemctl unavailable in this runner); worker crons ['crons = [\"30 13 * * *\", \"45 15 * * THU\"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbers Sunday as 1']",
    "desc": "local systemd timer and Worker cron triggers are installed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "collectors_run": {
    "status": "passed",
@@ -148,63 +136,57 @@
   },
   "cross_domain_sources": {
    "status": "blocked",
-   "evidence": "have ['agent_finding', 'alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
+   "evidence": "have ['agent_finding', 'backtest', 'entity', 'fundamentals', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage']; missing ['ferc', 'lng_notice', 'ngl_fractionation', 'petchem_outage']",
    "desc": "FERC filings, LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products are ingested",
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
    "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds",
-   "carried_over": true
+   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds"
   },
   "db_integrity": {
    "status": "passed",
    "evidence": "ok",
    "desc": "SQLite integrity_check returns ok",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "edge_collection": {
-   "status": "passed",
-   "evidence": "edge sources with successful runs: ['cpc_heating', 'eia_hh_spot', 'eia_storage']",
+   "status": "blocked",
+   "evidence": "edge sources with successful runs: []",
    "desc": "Cloudflare Workers fetch source data at the edge and forward payload + fetch metadata through Access",
-   "blocked_by": null,
+   "blocked_by": "Worker edge fetching is deployed outside this runner; local whitelist/ingest path is covered by edge_ingest_unit",
    "seconds": 0.0,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_category": "external_credentials",
+   "block_reason": "Worker edge fetching is deployed outside this runner"
   },
   "edge_ingest_unit": {
    "status": "passed",
-   "evidence": "3 passed in 0.63s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 0.9,
+   "seconds": 2.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "env_locked": {
    "status": "passed",
    "evidence": "mode 0o600; ignored True; tracked secret files: none",
    "desc": ".env is mode 600 and git-ignored; no secrets tracked",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 0.3,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "execute_sandbox_tests": {
    "status": "passed",
-   "evidence": "11 passed in 0.18s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "/execute SQL sandbox, as_of normalisation, scenario arithmetic, thesis sign check",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 0.9,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiment_endpoint": {
    "status": "passed",
@@ -213,157 +195,142 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "experiments_recorded": {
    "status": "passed",
-   "evidence": "38 experiments, 0 incomplete",
+   "evidence": "24 experiments, 0 incomplete",
    "desc": "every experiment (including rejected) is recorded with periods, data version and baseline",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "full_test_suite": {
    "status": "passed",
-   "evidence": "175 passed in 26.58s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 26.9,
+   "seconds": 34.4,
    "block_category": null,
    "block_reason": null
   },
   "gatekeeper": {
    "status": "passed",
-   "evidence": "3 passed in 0.09s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hub_health": {
    "status": "passed",
-   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":245}",
+   "evidence": "{\"ok\":true,\"db\":\"henry_hub_pit.db\",\"vector_nodes\":193,\"version\":\"1.0.5\",\"release_version\":\"1.0.5\",\"release_commit\":\"dev\"",
    "desc": "privileged hub answers locally on 127.0.0.1:8090",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_evaluated_live": {
    "status": "passed",
-   "evidence": "finding verdicts {'evaluated': 2, 'rejected': 6, 'superseded': 3, 'valid': 7}; evaluated_by edges 2; memos 1",
+   "evidence": "finding verdicts {'evaluated': 2, 'rejected': 1, 'valid': 2}; evaluated_by edges 2; memos 2",
    "desc": "an agent hypothesis was evaluated by the PIT walk-forward backtester and a complete 5.4 memo was persisted",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "hypothesis_memo": {
    "status": "passed",
-   "evidence": "5 passed in 0.01s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "alpha hypotheses carry every required field and are rejected without out-of-sample, cost-inclusive backtests",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "indicators": {
    "status": "passed",
-   "evidence": "9 passed in 0.07s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "triangles, Bollinger squeeze, 50/200 crossovers, RSI/MACD divergence, Fibonacci, frac spread, WTI ratio",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.6,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "kb_chunking": {
    "status": "passed",
-   "evidence": "tests 2 passed in 0.15s; 17 part_of edges in the production library",
+   "evidence": "tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)); 11 part_of edges in the production library",
    "desc": "long source documents are chunked so their whole text is embedded, with part_of edges",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 3.8,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer": {
    "status": "passed",
-   "evidence": "/knowledge 200; graph 245 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=6; tests 7 passed in 0.37s",
+   "evidence": "/knowledge 200; graph 207 nodes, edge types ['calibrated_by', 'evaluated_by', 'evidence_for', 'feeds_inventory_balance', 'feeds_net_exports', 'feeds_rescomm_demand', 'feeds_supply', 'mentions', 'modifies_dry_gas_supply', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges=3; tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "graphical explorer /knowledge serves the graph with agent findings, node inspector with provenance, PIT filtering",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 4.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_explorer_browser": {
    "status": "passed",
-   "evidence": "251 nodes, 340 edges, 22 agent findings drawn, console errors=0",
+   "evidence": "213 nodes, 242 edges, 20 agent findings drawn, console errors=0",
    "desc": "the /knowledge page renders the interactive graph in headless Chrome with no console errors",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 1.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_library": {
    "status": "passed",
-   "evidence": "245 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 2, 'evidence_for': 38, 'part_of': 17, 'previous_in_series': 185, 'same_period': 24, 'semantic_neighbor': 234}, 0 missing PIT metadata",
+   "evidence": "207 nodes, 9 domains, edges {'calibrated_by': 1, 'evaluated_by': 2, 'evidence_for': 26, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_demand': 1, 'feeds_supply': 1, 'mentions': 30, 'modifies_dry_gas_supply': 1, 'part_of': 11, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "knowledge_search_pit": {
    "status": "passed",
    "evidence": "old cutoff -> 0 results; now -> 8",
    "desc": "semantic search returns nothing that was unavailable at the cutoff",
    "blocked_by": null,
-   "seconds": 0.8,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "leaderboard_versioned": {
    "status": "passed",
-   "evidence": "tracked=True; 38/38 experiments listed",
+   "evidence": "tracked=True; 24/24 experiments listed",
    "desc": "LEADERBOARD.md exists, matches the experiments table and is tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "main_site_link": {
-   "status": "blocked",
-   "evidence": "HTTP 200, link present=False",
+   "status": "passed",
+   "evidence": "HTTP 200, link present=True",
    "desc": "https://joeysvault.app links to markets.joeysvault.app",
    "blocked_by": "deploy after the public routes serve",
-   "seconds": 2.2,
-   "block_category": "owner_action",
-   "block_reason": "deployed by wrangler right after the public routes serve (depends on public_markets)",
-   "carried_over": true
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
   },
   "markets_local": {
    "status": "passed",
    "evidence": "state 200 ngl-state/1, /execute 404, / 200",
    "desc": "read-only markets hub serves state.json, UI and refuses privileged routes",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "multi_feature_experiments": {
    "status": "passed",
@@ -372,18 +339,16 @@
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ngl_term": {
    "status": "passed",
-   "evidence": "exit 0, 794 braille cells",
+   "evidence": "exit 0, 789 braille cells",
    "desc": "ngl-term.py renders the same state.json with a Braille map",
    "blocked_by": null,
-   "seconds": 0.3,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
@@ -392,58 +357,52 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "observations_reference_payloads": {
    "status": "passed",
-   "evidence": "92844/92844 measured rows reference an archived payload",
+   "evidence": "60132/60132 measured rows reference an archived payload",
    "desc": "measured rows from collectors cite an archived raw payload",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_live_integration": {
    "status": "passed",
-   "evidence": "4 passed in 23.67s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "real local Ollama calls (no mocks): models installed, embeddings, schema-constrained extraction, agent run",
    "blocked_by": null,
-   "seconds": 23.9,
+   "seconds": 12.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_models": {
    "status": "passed",
-   "evidence": "['nomic-embed-text:latest', 'qwen3:4b']",
+   "evidence": "['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen2.5:7b', 'qwen3:4b']",
    "desc": "local Ollama serves qwen3:4b and nomic-embed-text",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "ollama_only_local": {
    "status": "passed",
    "evidence": "none",
    "desc": "no production code calls an external AI API; inference is local Ollama",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 0.1,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "pit_tests": {
    "status": "passed",
-   "evidence": "23 passed in 0.96s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 1.1,
+   "seconds": 3.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "promotion_gate": {
    "status": "passed",
@@ -452,78 +411,115 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "provenance_labels": {
    "status": "passed",
    "evidence": "0 unlabelled rows",
-   "desc": "every row is labelled measured / extracted_estimate / synthetic_scenario / model_hypothesis / unverified_seed",
+   "desc": "every row is labelled with a documented provenance (measured / extracted_estimate / synthetic_scenario / model_hypothesis / bootstrapped_physical_proxy / unverified_seed)",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "public_markets": {
-   "status": "blocked",
-   "evidence": "markets.joeysvault.app 404, ngl.joeysvault.app 404",
+   "status": "passed",
+   "evidence": "markets.joeysvault.app 200, ngl.joeysvault.app 200",
    "desc": "markets.joeysvault.app and ngl.joeysvault.app serve /api/state.json publicly",
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
-   "seconds": 4.4,
-   "block_category": "owner_action",
-   "block_reason": "root must add the ingress rule: sudo bash deploy/add_markets_ingress.sh",
-   "carried_over": true
+   "seconds": 0.6,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_retrieval": {
+   "status": "passed",
+   "evidence": "ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok",
+   "desc": "retrieval hub: ingest news/journal/report; query all 6 engines; PIT filter; save/load persistence",
+   "blocked_by": null,
+   "seconds": 2.7,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_spark_basis": {
+   "status": "passed",
+   "evidence": "HH spot 3.87; forward curve 91 pts",
+   "desc": "Spark spread & basis differentials (pure math + PIT data functions)",
+   "blocked_by": null,
+   "seconds": 0.1,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_stress": {
+   "status": "passed",
+   "evidence": "winter_storm_uri_freeze_scenario: 31 pts, pipeline_outage_shock: 8 pts, multi_factor_shift: 36 pts",
+   "desc": "Stress scenarios (Uri freeze, pipeline outage, multi-factor) + capital & margin estimation",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
+  },
+  "quant_hub_var": {
+   "status": "passed",
+   "evidence": "parametric: VaR 0.362, ES 0.473; historical: VaR 0.365, ES 0.473; montecarlo: VaR 0.366, ES 0.447",
+   "desc": "Parametric / historical / Monte Carlo VaR + expected shortfall execution",
+   "blocked_by": null,
+   "seconds": 0.0,
+   "block_category": null,
+   "block_reason": null
   },
   "queue_dispatch": {
-   "status": "passed",
-   "evidence": "│ d112469c13294f588a1ba71d09dcc8f0 │ quant-backtest-jobs │ 2026-11-13T13:20:59.57274Z  │ 2026-11-13T13:20:59.57274Z  │ 1         │ 1        ",
+   "status": "blocked",
+   "evidence": "/bin/sh: 1: wrangler: not found\n",
    "desc": "Cloudflare Queue producer/consumer bound on the Worker",
-   "blocked_by": null,
-   "seconds": 1.4,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "blocked_by": "wrangler/Cloudflare deployment is unavailable in this runner",
+   "seconds": 0.0,
+   "block_category": "external_credentials",
+   "block_reason": "wrangler/Cloudflare deployment is unavailable in this runner"
   },
   "raw_payloads_verified": {
    "status": "passed",
-   "evidence": "179/179 verified",
+   "evidence": "94/94 verified",
    "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
    "blocked_by": null,
-   "seconds": 1.0,
+   "seconds": 0.7,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "research_log_live": {
-   "status": "passed",
-   "evidence": "5\tOPEN\tAlpha hypothesis: [REJECTED] Rising US shale gas output (3-month change, six basins) pre\talpha-hypothesis\t2026-11",
+   "status": "blocked",
+   "evidence": "Welcome to GitHub CLI!\n\nTo authenticate, please run `gh auth login`.",
    "desc": "alpha memos are published with gh issue create",
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
-   "seconds": 0.4,
+   "seconds": 0.0,
+   "block_category": "none",
+   "block_reason": "resolved when a memo issue exists"
+  },
+  "rich_tooltips_browser": {
+   "status": "passed",
+   "evidence": "loaded=True hover=True pin=True keyboard=True deep=True errors=0",
+   "desc": "rich tooltips render, pin, respond to keyboard focus and open from deep links in headless Chrome",
+   "blocked_by": null,
+   "seconds": 7.4,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "roster_81": {
    "status": "passed",
-   "evidence": "81 unique",
+   "evidence": "94 unique (81 baseline agents plus quant extensions)",
    "desc": "the roster defines 81 unique atomic agents",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "roster_all_collected": {
    "status": "blocked",
-   "evidence": "50/81 with real data; missing 31: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, ECMWF_00z_HDD_Day10, ECMWF_00z_HDD_Day11, ECMWF_00z_HDD_Day12, ECMWF_00z_HDD_Day13, ECMWF_00z_HDD_Day14, ECMWF_00z_HDD_Day15",
+   "evidence": "61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi_Flow, LNG_Freeport_Flow, LNG_Cameron_Flow, LNG_CalcasieuPass_Flow, LNG_CovePoint_Flow, LNG_ElbaIsland_Flow, LNG_Plaquemines_Flow, Flow_NET_Mexico, Flow_ValleyCrossing, Weather_30YrNormal_HDD, ECMWF_00z_HDD_Day15, Power_CO2_AllowancePrice",
    "desc": "every roster agent has real (non-seed) data",
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
-   "seconds": 1.8,
+   "seconds": 3.7,
    "block_category": "external_data",
-   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed",
-   "carried_over": true
+   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
   },
   "schema_16_columns": {
    "status": "passed",
@@ -532,88 +528,79 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_live_ollama": {
    "status": "passed",
    "evidence": "{'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]}",
    "desc": "qwen3:4b proposes a selector that passes fixtures (live local Ollama)",
    "blocked_by": null,
-   "seconds": 7.0,
+   "seconds": 6.9,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "selfheal_pr_live": {
-   "status": "passed",
-   "evidence": "self-heal PRs: [(2, 'MERGED')]",
+   "status": "blocked",
+   "evidence": "self-heal PRs: []",
    "desc": "a validated, test-passing repair opens a real GitHub pull request (never merged automatically)",
-   "blocked_by": null,
-   "seconds": 0.7,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "blocked_by": "GitHub CLI credentials are unavailable in this runner; local PR gating is covered by selfheal_unit",
+   "seconds": 0.0,
+   "block_category": "external_credentials",
+   "block_reason": "gh auth is unavailable in this runner"
   },
   "selfheal_unit": {
    "status": "passed",
-   "evidence": "12 passed in 0.02s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "failure diagnosis, LLM selector repair proposal, fixture validation, PR gating",
    "blocked_by": null,
-   "seconds": 0.2,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "snapshots_versioned": {
    "status": "passed",
-   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14']; scheduled=True",
+   "evidence": "tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True (/root/henry_hub_atomic_agents/deploy/hh-collect-cpc.service)",
    "desc": "deterministic snapshot manifests are exported daily and tracked in git",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "state_schema_contract": {
    "status": "passed",
-   "evidence": "13 passed in 0.24s",
+   "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "state.json carries every section the UI and terminal render, with explicit provenance",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 1.2,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "unstructured_sources": {
    "status": "passed",
-   "evidence": "documents {'noaa_discussion': 2, 'pipeline_notice': 383}; indexed in knowledge library {'noaa_discussion': 19, 'pipeline_notice': 91}",
+   "evidence": "documents {'noaa_discussion': 1, 'pipeline_notice': 376}; indexed in knowledge library {'noaa_discussion': 12, 'pipeline_notice': 85}",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "web_ui_browser": {
    "status": "passed",
-   "evidence": "18 map nodes, panels=True, console errors=0",
+   "evidence": "18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 1.4,
+   "seconds": 2.9,
    "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "block_reason": null
   },
   "webhook_recovery": {
-   "status": "passed",
-   "evidence": "GitHub deliveries accepted after signature check: 3 of 3; reruns verified+ok=2, forged refused=1",
+   "status": "blocked",
+   "evidence": "GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0",
    "desc": "GitHub webhook -> Worker HMAC check -> hub verifies the merged commit on the base branch and reruns the collector",
-   "blocked_by": null,
-   "seconds": 0.6,
-   "block_category": null,
-   "block_reason": null,
-   "carried_over": true
+   "blocked_by": "no GitHub webhook deliveries or Worker deployment exist in this runner",
+   "seconds": 0.0,
+   "block_category": "external_credentials",
+   "block_reason": "no GitHub webhook deliveries or Worker deployment in this runner"
   },
   "worker_gateway_e2e": {
    "status": "passed",
@@ -885,7 +872,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-568e4dd8",
@@ -898,7 +888,10 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-4a0ec542",
@@ -912,7 +905,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-79b4fa66",
@@ -925,7 +921,10 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-8e92a39d",
@@ -938,7 +937,10 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-9b7d461a",
@@ -990,7 +992,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-643ab18c",
@@ -1003,7 +1008,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-2ce58f4b",
@@ -1016,7 +1024,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-d6fb9a7f",
@@ -1029,7 +1040,10 @@
     "hub_health",
     "full_test_suite"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-42dd3747",
@@ -1042,7 +1056,10 @@
     "queue_dispatch",
     "hub_health"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R2-64ac65b8",
@@ -1083,6 +1100,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1099,6 +1117,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1116,6 +1135,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1133,6 +1153,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1152,6 +1173,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1171,6 +1193,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1190,6 +1213,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1207,6 +1231,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1228,6 +1253,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1245,6 +1271,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1262,6 +1289,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1292,6 +1320,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1307,7 +1336,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-81a4d839",
@@ -1325,6 +1357,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1340,7 +1373,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-fa6b555a",
@@ -1354,7 +1390,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-873b3767",
@@ -1368,7 +1407,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-a95205e8",
@@ -1382,7 +1424,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-91b8b6d3",
@@ -1396,7 +1441,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-7856bc0f",
@@ -1410,7 +1458,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.2-d700c127",
@@ -1424,7 +1475,10 @@
     "access_protects_hub",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R3.3-6a26807a",
@@ -1463,6 +1517,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -1696,10 +1751,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R3.5-fa8bfa50",
@@ -1712,10 +1764,7 @@
     "branch_pushed",
     "branch_protection"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "platform_limit"
-   ]
+   "status": "failed"
   },
   {
    "id": "R4-e0489c13",
@@ -2072,7 +2121,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-333bdf25",
@@ -2084,7 +2136,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-f69ec027",
@@ -2096,7 +2151,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-02d45091",
@@ -2108,7 +2166,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-5aedbcff",
@@ -2120,7 +2181,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-2781b5c3",
@@ -2132,7 +2196,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-f06a7416",
@@ -2144,7 +2211,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-44c2a840",
@@ -2156,7 +2226,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-a113ed48",
@@ -2168,7 +2241,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-d78818ad",
@@ -2180,7 +2256,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.4-afc642da",
@@ -2192,7 +2271,10 @@
     "selfheal_unit",
     "selfheal_pr_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.5-34636c2d",
@@ -2203,7 +2285,10 @@
    "checks": [
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R4.5-81c63eb3",
@@ -2214,7 +2299,10 @@
    "checks": [
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R5-ee5ec77f",
@@ -3100,7 +3188,10 @@
     "hypothesis_memo",
     "research_log_live"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "none"
+   ]
   },
   {
    "id": "R6-104ed187",
@@ -3126,7 +3217,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-935d4351",
@@ -3139,7 +3233,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-145227b9",
@@ -3152,7 +3249,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-79761076",
@@ -3165,7 +3265,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-6eb6b2fb",
@@ -3178,7 +3281,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-eee2811d",
@@ -3191,7 +3297,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-8d00578a",
@@ -3204,7 +3313,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-ad5bf78c",
@@ -3217,7 +3329,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-c491e8d0",
@@ -3230,7 +3345,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-9c71df28",
@@ -3243,7 +3361,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-c7db39af",
@@ -3256,7 +3377,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-94f23cad",
@@ -3269,7 +3393,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-360db41e",
@@ -3282,7 +3409,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-2ac160e8",
@@ -3295,7 +3425,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-30a88cfd",
@@ -3308,7 +3441,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.1-95616166",
@@ -3321,7 +3457,10 @@
     "multi_feature_experiments",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.2-d4023761",
@@ -3334,7 +3473,10 @@
     "experiment_endpoint",
     "experiments_recorded"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.2-0a994e96",
@@ -3348,7 +3490,10 @@
     "experiments_recorded",
     "backtest_unit"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R6.3-8c3316a3",
@@ -4432,7 +4577,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-40eaa3f5",
@@ -4444,7 +4592,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-92e67c77",
@@ -4456,7 +4607,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-1e4e243f",
@@ -4468,7 +4622,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-0b23f89c",
@@ -4480,7 +4637,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-037320b0",
@@ -4492,7 +4652,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-559b279e",
@@ -4504,7 +4667,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-a6215bca",
@@ -4516,7 +4682,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-0b7265d4",
@@ -4528,7 +4697,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-62f4a68f",
@@ -4540,7 +4712,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-cd216305",
@@ -4552,7 +4727,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-b77ca20d",
@@ -4564,7 +4742,10 @@
     "audit_gists",
     "worker_gateway_e2e"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R7.5-205221b1",
@@ -4575,7 +4756,10 @@
    "checks": [
     "alert_delivery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R8-97616259",
@@ -4594,6 +4778,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4614,6 +4799,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4634,6 +4820,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4654,6 +4841,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4674,6 +4862,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4694,6 +4883,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4714,6 +4904,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4734,6 +4925,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4754,6 +4946,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4774,6 +4967,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4794,6 +4988,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4814,6 +5009,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4834,6 +5030,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4854,6 +5051,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4874,6 +5072,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4894,6 +5093,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -4914,6 +5114,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5219,7 +5420,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R9-319a765e",
@@ -5236,7 +5440,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R9-e22e92b1",
@@ -5250,7 +5457,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R9-6ec4b921",
@@ -5264,7 +5474,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R9-7dfd4af1",
@@ -5278,7 +5491,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R9-a93f59cd",
@@ -5292,7 +5508,10 @@
     "execute_sandbox_tests",
     "webhook_recovery"
    ],
-   "status": "passed"
+   "status": "blocked",
+   "block_categories": [
+    "external_credentials"
+   ]
   },
   {
    "id": "R10-cf8a2b74",
@@ -5378,6 +5597,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5397,6 +5617,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5472,6 +5693,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5490,6 +5712,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5508,6 +5731,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5526,6 +5750,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5544,6 +5769,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5562,6 +5788,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5582,6 +5809,7 @@
    ],
    "status": "blocked",
    "block_categories": [
+    "external_credentials",
     "external_data"
    ]
   },
@@ -5943,6 +6171,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -5955,6 +6184,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -5967,6 +6197,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -5979,6 +6210,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -5991,6 +6223,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6003,6 +6236,7 @@
    "context": null,
    "checks": [
     "web_ui_browser",
+    "rich_tooltips_browser",
     "ngl_term"
    ],
    "status": "passed"
@@ -6019,10 +6253,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-817681e4",
@@ -6036,10 +6267,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-01eef309",
@@ -6053,10 +6281,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.2-e5fa8809",
@@ -6070,10 +6295,7 @@
     "access_protects_hub",
     "markets_local"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "owner_action"
-   ]
+   "status": "passed"
   },
   {
    "id": "R12.3-b24434ad",
@@ -6085,6 +6307,7 @@
     "knowledge_library",
     "knowledge_search_pit",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "knowledge_explorer",
     "knowledge_explorer_browser",
     "agents_share_knowledge"
@@ -6101,6 +6324,7 @@
     "knowledge_library",
     "knowledge_search_pit",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "knowledge_explorer",
     "knowledge_explorer_browser",
     "agents_share_knowledge"
@@ -6115,7 +6339,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6127,7 +6352,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6140,6 +6366,7 @@
    "checks": [
     "state_schema_contract",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6155,7 +6382,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6167,7 +6395,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6180,6 +6409,7 @@
    "checks": [
     "state_schema_contract",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6195,7 +6425,8 @@
    "context": null,
    "checks": [
     "state_schema_contract",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6208,6 +6439,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6224,6 +6456,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6240,6 +6473,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6256,6 +6490,7 @@
    "checks": [
     "indicators",
     "web_ui_browser",
+    "rich_tooltips_browser",
     "roster_all_collected"
    ],
    "status": "blocked",
@@ -6271,7 +6506,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6283,7 +6519,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6295,7 +6532,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6307,7 +6545,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6319,7 +6558,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6331,7 +6571,8 @@
    "context": null,
    "checks": [
     "indicators",
-    "web_ui_browser"
+    "web_ui_browser",
+    "rich_tooltips_browser"
    ],
    "status": "passed"
   },
@@ -6402,6 +6643,67 @@
    "context": "ngl-term.py MUST include:",
    "checks": [
     "ngl_term"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e1",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 1. Architectural Baseline",
+   "line": 1,
+   "text": "Inspect kb_ingest.py, agents/memory.py, agents/llm.py, agents/workers.py, command_hub.py, scripts/acceptance.py; run the baseline acceptance tests; keep SQLite and Chroma compatibility.",
+   "context": "source: QUANT_HUB_SPEC.md section 1",
+   "checks": [
+    "db_integrity",
+    "pit_tests",
+    "full_test_suite"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e2",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 2. LlamaIndex Multi-Engine Retrieval Hub",
+   "line": 1,
+   "text": "Implement agents/retrieval_hub.py: ingestion of news articles, scientific journals and reports; a unified interface with 6 query engine modalities (1. KG vector-based entity retrieval [default], 2. KG keyword-based entity retrieval, 3. Raw vector index retrieval, 4. custom combo engine [vector + KG entity retrieval], 5. KnowledgeGraphQueryEngine, 6. KnowledgeGraphRAGRetriever) behind the factory get_query_engine(engine_type='kg_vector', **kwargs); PIT-filtered retrieval at as_of.",
+   "context": "source: QUANT_HUB_SPEC.md section 2",
+   "checks": [
+    "quant_hub_retrieval"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e3",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 3. Power, Natural Gas & Cross-Commodity Modeling",
+   "line": 1,
+   "text": "Implement agents/quant_commodities.py: Henry Hub spot & forward curve analysis; basis differentials vs Waha, Houston Ship Channel, Transco Zone 6; spark/clean-spark/dark spread economics; regional ISO/RTO nodes (ERCOT, PJM, MISO, CAISO, NYISO); EIA storage cycles, pipeline flows, LNG export terminal demand; cross-commodity exposure (WTI/Brent, refined products, carbon allowances).",
+   "context": "source: QUANT_HUB_SPEC.md section 3",
+   "checks": [
+    "quant_hub_spark_basis"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e4",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 4. Quantitative Risk Management Engine",
+   "line": 1,
+   "text": "Implement agents/quant_risk.py: parametric, historical simulation and Monte Carlo VaR plus expected shortfall (CVaR); winter storm Uri freeze, pipeline outage shock and multi-factor commodity price shift scenarios; initial/variation margin modeling and liquidity buffer estimation; all from PIT HH spot series.",
+   "context": "source: QUANT_HUB_SPEC.md section 4",
+   "checks": [
+    "quant_hub_var",
+    "quant_hub_stress"
+   ],
+   "status": "passed"
+  },
+  {
+   "id": "R13-e5",
+   "section": "QUANT HUB SPEC (QUANT_HUB_SPEC.md) > 5. Integration & Acceptance Testing",
+   "line": 1,
+   "text": "Connect the retrieval engine into agents/memory.search and the risk engine into agents/workers.py (QuantRiskAgent); add acceptance coverage to scripts/acceptance.py: ingestion and querying across all 6 engine types, spark spread and basis differential calculations, parametric/historical/Monte Carlo VaR execution; run python scripts/acceptance.py and commit to the quant-hub-build branch.",
+   "context": "source: QUANT_HUB_SPEC.md section 5",
+   "checks": [
+    "quant_hub_retrieval",
+    "quant_hub_spark_basis",
+    "quant_hub_var",
+    "quant_hub_stress"
    ],
    "status": "passed"
   }
@@ -6647,7 +6949,7 @@
  ],
  "blocked_by_cause": {
   "external_data": 88,
-  "platform_limit": 2,
-  "owner_action": 4
+  "external_credentials": 108,
+  "none": 1
  }
 }

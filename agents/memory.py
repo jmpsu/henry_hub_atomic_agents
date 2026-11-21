@@ -26,7 +26,7 @@ import kb_ingest
 
 FINDING_DOMAIN = "agent_finding"
 FINDING_PROVENANCE = ("model_hypothesis", "extracted_estimate", "backtest_result")
-KINDS = ("repair_proposal", "data_quality", "hypothesis", "evaluation", "memo", "anomaly", "diagnosis", "finding")   # series_key = agent_<agent>_<kind>
+KINDS = ("repair_proposal", "data_quality", "hypothesis", "evaluation", "memo", "anomaly", "diagnosis", "finding", "risk_alert")   # series_key = agent_<agent>_<kind>
 
 
 def ensure(conn: sqlite3.Connection) -> None:
@@ -86,8 +86,23 @@ def keyword_search(conn, query: str, as_of: str, limit: int = 8) -> list:
              "raw_payload_hash": r[6], "provenance": r[7], "similarity": round(s, 4), "retrieval": "keyword_fallback"} for s, r in scored[:limit]]
 
 
-def search(conn, llm, query: str, as_of: str, limit: int = 8, domains: list | None = None) -> list:
-    """PIT semantic retrieval; deterministic keyword retrieval if the embedding model is unavailable."""
+def search(conn, llm, query: str, as_of: str, limit: int = 8, domains: list | None = None, hub=None) -> list:
+    """PIT retrieval. With `hub` (an agents.retrieval_hub.RetrievalHub): LlamaIndex engine retrieval, falling back
+    to the SQLite/keyword path when the hub returns nothing or fails. Without: semantic retrieval with the
+    deterministic keyword fallback when the embedding model is unavailable."""
+    if hub is not None:
+        try:
+            hits = hub.search(query, as_of=as_of, limit=limit * 4 if domains else limit)
+        except Exception:  # noqa: BLE001
+            hits = []
+        hits = [{**h, "domain": h.get("source_kind", "document"), "document": h.get("text", "")} for h in hits
+                if h.get("available_timestamp") and kb_ingest.epoch(h["available_timestamp"]) <= kb_ingest.epoch(as_of)]
+        if domains:
+            hits = [h for h in hits if h["domain"] in domains]
+        if hits:
+            for h in hits:
+                h["retrieval"] = "kg_vector"
+            return hits[:limit]
     try:
         vec = llm.embed(query)
         hits = kb_ingest.search(conn, vec, kb_ingest.epoch(as_of), limit * 4 if domains else limit)

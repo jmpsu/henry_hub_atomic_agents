@@ -1,0 +1,310 @@
+{
+ "generated_at": "2026-11-17T08:22:53Z",
+ "summary": {
+  "threshold": 0.72,
+  "holdout_n": 6,
+  "supported_when_expected": "3/3",
+  "abstained_when_expected": "2/3",
+  "all_quotes_verbatim": true,
+  "avg_ms": 739,
+  "total_s": 4.4
+ },
+ "rows": [
+  {
+   "split": "holdout3",
+   "subject": "eu_power_integration",
+   "question": "How does market integration affect electricity price convergence in Europe?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 1320,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "Market integration strengthens the resilience and efficiency of the European electricity system.",
+     "similarity": 0.7575,
+     "chunk_id": "doc_d38f5cd091:0016",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7534
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "Market integration strengthens the resilience and efficiency of the European electricity system.",
+     "similarity": 0.7575,
+     "chunk_id": "doc_d38f5cd091:0016",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7534
+    },
+    {
+     "quote": "Complementing these efforts, the European Commission introduced the Target Electricity Model to facilitate market coupling and increase interconnection capacity, thereby promoting the efficient allocation of electricity across re\u00ad gions (Matsumoto et al., 2018; Newbery et al., 2016).",
+     "similarity": 0.6888,
+     "chunk_id": "doc_0a09ca7ea5:0002",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.7353
+    },
+    {
+     "quote": "Introduction The liberalization of the electricity market across European economies, initiated in the 1990s, represents a cornerstone of the European Union's (EU) energy strategy to establish an integrated internal electricity market.",
+     "similarity": 0.6874,
+     "chunk_id": "doc_0a09ca7ea5:0002",
+     "doc_id": "doc_0a09ca7ea5",
+     "title": "Good and bad volatility - Asymmetric spillovers and cost transmission in European electricity markets",
+     "available_timestamp": "2026-11-17T08:11:24Z",
+     "chunk_similarity": 0.7353
+    },
+    {
+     "quote": "Transparent and competitive EU electricity markets are a cornerstone of the energy transition.",
+     "similarity": 0.6733,
+     "chunk_id": "doc_d38f5cd091:0047",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7533
+    },
+    {
+     "quote": "The internal electricity market allows for the activation of the cheapest units to meet electricity demand across the whole of the EU, combining the bids and offers of all coupled bidding zones, provided that sufficient cross-zonal capacity is made available by EU TSOs.",
+     "similarity": 0.6714,
+     "chunk_id": "doc_d38f5cd091:0047",
+     "doc_id": "doc_d38f5cd091",
+     "title": "European electricity wholesale market integration",
+     "available_timestamp": "2026-11-17T08:10:48Z",
+     "chunk_similarity": 0.7533
+    }
+   ],
+   "chunks_considered": 4
+  },
+  {
+   "split": "holdout3",
+   "subject": "visibility_graph",
+   "question": "What does visibility graph clustering do for time series?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 749,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "This paper proposes a precise and e\ufb00icient time series segmentation method that integrates the visibility graph(VG), spectral clustering, and modularity optimization to more accurately identify market states and reveal their evolutionary mechanisms.",
+     "similarity": 0.8423,
+     "chunk_id": "doc_8fb1627a9e:0000",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.8473
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "This paper proposes a precise and e\ufb00icient time series segmentation method that integrates the visibility graph(VG), spectral clustering, and modularity optimization to more accurately identify market states and reveal their evolutionary mechanisms.",
+     "similarity": 0.8423,
+     "chunk_id": "doc_8fb1627a9e:0000",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.8473
+    },
+    {
+     "quote": "Then, with modularity as the optimization objective, spectral clustering is applied to perform community detection on the network, thereby partitioning the time series into internally consistent consecutive phases, each corresponding to a distinct market state.",
+     "similarity": 0.7276,
+     "chunk_id": "doc_8fb1627a9e:0000",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.8473
+    },
+    {
+     "quote": "In contrast, spectral clustering, as a graph-based clustering technique, overcomes this limitation by converting the network partitioning problem into a low-dimensional embedding task through the eigenvalue decomposition of the Laplacian matrix [35].",
+     "similarity": 0.7065,
+     "chunk_id": "doc_8fb1627a9e:0010",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.7742
+    },
+    {
+     "quote": "is to transform a time series into a complex network through the visibility rule.",
+     "similarity": 0.692,
+     "chunk_id": "doc_8fb1627a9e:0005",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.7875
+    },
+    {
+     "quote": "Time series segmentation is a key research direction in time series analysis, aiming to identify underlying regular patterns or significant segments within data.",
+     "similarity": 0.6847,
+     "chunk_id": "doc_8fb1627a9e:0000",
+     "doc_id": "doc_8fb1627a9e",
+     "title": "A time series segmentation algorithm based on visibility graph spectral clustering and modularity optimization",
+     "available_timestamp": "2026-11-17T08:09:07Z",
+     "chunk_similarity": 0.8473
+    }
+   ],
+   "chunks_considered": 3
+  },
+  {
+   "split": "holdout3",
+   "subject": "eu_russian_gas",
+   "question": "How did Europe reduce its reliance on Russian gas?",
+   "expect_support": true,
+   "abstained": false,
+   "ms": 1067,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "By 2024, Russia still supplied 18% of the EU\u2019s natural gas imports (through a mix of pipeline and LNG), however this was a dramatic reduction from 41% in 2021.123 The gap was filled by US LNG and Norwegian pipeline gas: 25% and 50% respectively, with the remainder coming from North Africa and Azerbaijan.",
+     "similarity": 0.7612,
+     "chunk_id": "doc_867d7b318b:0080",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7861
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "By 2024, Russia still supplied 18% of the EU\u2019s natural gas imports (through a mix of pipeline and LNG), however this was a dramatic reduction from 41% in 2021.123 The gap was filled by US LNG and Norwegian pipeline gas: 25% and 50% respectively, with the remainder coming from North Africa and Azerbaijan.",
+     "similarity": 0.7612,
+     "chunk_id": "doc_867d7b318b:0080",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7861
+    },
+    {
+     "quote": "INTRODUCTION The EU\u2019s response to Russia\u2019s invasion of Ukraine in February 2022 and the subsequent Nord Stream gas pipeline sabotage meant the EU had to turn to a more expensive liquified natural gas (LNG) on spot markets, while LNG import terminals quickly reached their regasification capacity, with dramatic impact on prices (Figure ES-1).",
+     "similarity": 0.7513,
+     "chunk_id": "doc_867d7b318b:0025",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7571
+    },
+    {
+     "quote": "Firstly, European investment in LNG and gas infrastructure to replace Russian gas and, secondly, gas contracting and the effect both contracting and investment could have on the EU\u2019s gas consumption long-term.",
+     "similarity": 0.7367,
+     "chunk_id": "doc_867d7b318b:0080",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7861
+    },
+    {
+     "quote": "The EU mobilised its financial and political resources to fast-track the expansion of LNG infrastructure and targeted a 15% reduction in gas consumption.",
+     "similarity": 0.7349,
+     "chunk_id": "doc_867d7b318b:0080",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7861
+    },
+    {
+     "quote": "Following Russia\u2019s invasion of Ukraine and the sabotage of the Nord Stream gas pipelines, the EU faced an urgent need to diversify imports, compounded by the planned closure of a major gas field in Groningen, the Netherlands.",
+     "similarity": 0.7236,
+     "chunk_id": "doc_867d7b318b:0080",
+     "doc_id": "doc_867d7b318b",
+     "title": "European Natural Gas through the 2020s",
+     "available_timestamp": "2026-11-17T08:09:43Z",
+     "chunk_similarity": 0.7861
+    }
+   ],
+   "chunks_considered": 3
+  },
+  {
+   "split": "holdout3",
+   "subject": "brent_today",
+   "question": "What is the current price of Brent crude today?",
+   "expect_support": false,
+   "abstained": false,
+   "ms": 1178,
+   "all_verbatim": true,
+   "quotes": [
+    {
+     "quote": "According to the ICE, the current applied margin rate for Brent crude oil varies between 1668.9 and 5310.",
+     "similarity": 0.8094,
+     "chunk_id": "doc_44a6b785e7:0010",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7334
+    }
+   ],
+   "top_candidates": [
+    {
+     "quote": "According to the ICE, the current applied margin rate for Brent crude oil varies between 1668.9 and 5310.",
+     "similarity": 0.8094,
+     "chunk_id": "doc_44a6b785e7:0010",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7334
+    },
+    {
+     "quote": "The Brent Crude futures contract is a global benchmark in oil trading and is used to price over three-quarters of the world\u2019s traded oil.",
+     "similarity": 0.7833,
+     "chunk_id": "doc_44a6b785e7:0005",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.733
+    },
+    {
+     "quote": "Our analysis is based on high-frequency data of Brent Crude oil futures from January 2010 to October 2021.",
+     "similarity": 0.7364,
+     "chunk_id": "doc_44a6b785e7:0006",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7575
+    },
+    {
+     "quote": "investigates this question using high-frequency data for Brent Crude oil futures obtained from the ICE in London.",
+     "similarity": 0.7083,
+     "chunk_id": "doc_44a6b785e7:0005",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.733
+    },
+    {
+     "quote": "From the raw Brent Crude data (approximately 130 GB), we constructed equally-spaced one-minute data using the previous-tick interpolation method.",
+     "similarity": 0.6922,
+     "chunk_id": "doc_44a6b785e7:0006",
+     "doc_id": "doc_44a6b785e7",
+     "title": "Intra-day Seasonality and Abnormal Returns in the Brent Crude Oil Futures Market",
+     "available_timestamp": "2026-11-17T08:11:51Z",
+     "chunk_similarity": 0.7575
+    }
+   ],
+   "chunks_considered": 3
+  },
+  {
+   "split": "holdout3",
+   "subject": "ngl_frac_spread",
+   "question": "How is the NGL fractionation spread calculated at Mont Belvieu?",
+   "expect_support": false,
+   "abstained": true,
+   "ms": 34,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  },
+  {
+   "split": "holdout3",
+   "subject": "pipeline_tariff",
+   "question": "What are the pipeline tariffs for Transco zone 6?",
+   "expect_support": false,
+   "abstained": true,
+   "ms": 86,
+   "all_verbatim": true,
+   "quotes": [],
+   "top_candidates": [],
+   "chunks_considered": 0
+  }
+ ]
+}

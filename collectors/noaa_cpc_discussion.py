@@ -38,18 +38,24 @@ def parse(text: str) -> dict:
         raise ValueError(f"expected one <pre> block, found {len(pre)}")
     body = html.unescape(re.sub(r"<[^>]+>", "", pre[0])).replace("\r", "")
     body = "\n".join(l.rstrip() for l in body.strip().splitlines())
-    if not body.startswith("Prognostic Discussion for 6 to 10 and 8 to 14 day outlooks"):
+    if not re.match(r"^Prognostic Discussion for 6 to 10 and 8 to 14 Day Outlooks\s*$", body.splitlines()[0] if body else "", re.I):
         raise ValueError("unexpected discussion header")
-    m = re.search(r"^(\d{1,4}) (AM|PM) (EST|EDT) \w{3} (\w+) (\d{1,2}) (\d{4})\s*$", body, re.M)
+    m = re.search(r"^(\d{1,4}(?::\d{2})?) (AM|PM) (EST|EDT) \w{3} (\w+) (\d{1,2}) (\d{4})\s*$", body, re.M)
     if not m:
         raise ValueError("issuance time line not found")
     hhmm, ampm, tz, mon, day, year = m.groups()
-    hh, mm = (int(hhmm) // 100, int(hhmm) % 100) if len(hhmm) > 2 else (int(hhmm), 0)
+    if ":" in hhmm:
+        parts = hhmm.split(":")
+        hh, mm = int(parts[0]), int(parts[1])
+    elif len(hhmm) > 2:
+        hh, mm = int(hhmm) // 100, int(hhmm) % 100
+    else:
+        hh, mm = int(hhmm), 0
     hh = hh % 12 + (12 if ampm == "PM" else 0)
     local = datetime.strptime(f"{year} {mon} {day} {hh}:{mm}", "%Y %B %d %H:%M")
     issued = (local - timedelta(hours=TZ[tz])).replace(tzinfo=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    p6 = re.search(r"6-10 DAY OUTLOOK FOR ([A-Z]{3} \d{1,2} - (?:[A-Z]{3} )?\d{1,2} \d{4})", body)
-    p8 = re.search(r"8-14 DAY OUTLOOK FOR ([A-Z]{3} \d{1,2} - (?:[A-Z]{3} )?\d{1,2} \d{4})", body)
+    p6 = re.search(r"6-10 Day Outlook for (.+)$", body, re.I | re.M)
+    p8 = re.search(r"8-14 Day Outlook for (.+)$", body, re.I | re.M)
     return {"issued": issued, "body": body, "period_6_10": p6.group(1) if p6 else None, "period_8_14": p8.group(1) if p8 else None}
 
 

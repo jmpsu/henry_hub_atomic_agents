@@ -1,0 +1,8 @@
+{
+  "production_root": "/opt/quant-hub",
+  "github_repo": "jmpsu/henry_hub_atomic_agents",
+  "linux_services": ["quant_hub.service", "quant_markets.service"],
+  "worker_name": "quant-gateway",
+  "worker_url": "https://quant-gateway.joe-metz-psu.workers.dev",
+  "markets_asgi": "markets_hub:app"
+}

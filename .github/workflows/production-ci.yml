@@ -1,0 +1,39 @@
+name: Production CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, quant-hub-build]
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Python dependencies & security/test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest jsonschema bandit
+      - name: Run Python unit & integration tests
+        run: |
+          python -m py_compile command_hub.py release/version.py migrations/migrate.py
+          if [ -d tests ]; then pytest -q --ignore=tests/test_ollama_live.py; fi
+      - name: Security checks (bandit + secret scan)
+        run: |
+          bandit -q -ll -r command_hub.py release migrations || true
+          ! grep -RInE 'MOBILE_COMMAND_SECRET\s*=\s*["'\''][^"'\'']{8,}' worker.js wrangler.toml command_hub.py
+      - name: Validate Worker syntax & Wrangler config
+        run: |
+          node --input-type=module --check < worker.js
+          npx --yes wrangler@4 deploy --dry-run --outdir /tmp/worker-dryrun
+      - name: Validate release build & manifest schema
+        run: |
+          VER="$(python3 -c 'import sys; sys.path.insert(0, "release"); import version; print(version.VERSION)')"
+          bash scripts/build_release.sh "$VER" "${GITHUB_SHA}" /tmp/test-release
+          bash scripts/verify_release.sh /tmp/test-release "v$VER"

@@ -7,6 +7,14 @@ RANGES = {  # agent_id prefix -> (min, max, unit)
     "Agent_Crude_": (-50.0, 300.0, "USD/bbl"),
     "Agent_NGL_": (0.0, 600.0, "cents/gal"),
     "Agent_Prod_": (0.0, 60.0, "Bcf/d"),
+    "Agent_LNGExports_": (0.0, 300_000.0, "MMcf/month"),   # EIA monthly terminal exports (largest terminal ~120k); distinct from the daily Agent_LNG_*_Flow agents
+    "Agent_BorderFlow_": (0.0, 300_000.0, "MMcf/month"),
+    "Agent_TTF_": (0.0, 1000.0, "EUR/MWh"),                 # Dutch TTF monthly futures
+    "Agent_FX_": (0.3, 3.0, "USD/EUR"),                     # EUR/USD spot (units of USD per EUR)   # EIA monthly border-point pipeline volumes
+    "Agent_AmbientTemp_": (-60.0, 60.0, "degC"),             # METAR near the LNG terminals
+    "Agent_AmbientDew_": (-60.0, 45.0, "degC"),
+    "Agent_AmbientPress_": (850.0, 1090.0, "hPa"),
+    "Agent_LNGFeedgas_": (0.0, 40.0, "Bcf/d"),               # modelled US LNG feedgas percentiles (lng_feedgas.py)
     "Agent_Demand_PowerBurn": (0.0, 20_000_000.0, "MWh/day"),   # checked before the Bcf/d demand family
     "Agent_Demand_": (0.0, 80.0, "Bcf/d"),
     "Agent_ECMWF_": (0.0, 80.0, "approx HDD"),
