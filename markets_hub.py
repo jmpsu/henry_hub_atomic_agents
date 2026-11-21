@@ -99,6 +99,18 @@ def health():
     return {"ok": True, "service": "markets_hub", "read_only": True, "schema": me.SCHEMA_VERSION, "pit_rows": rows, "knowledge_nodes": k["nodes"]}
 
 
+@app.get("/api/series-catalog")
+def series_catalog_endpoint(domain: str | None = Query(None, max_length=64), active_only: bool = Query(True)):
+    conn = _ro()
+    try:
+        from series_catalog import list_series
+        rows = list_series(conn, domain=domain, active_only=active_only)
+        domains = sorted({r["domain"] for r in rows})
+        return {"count": len(rows), "domains": domains, "series": rows}
+    finally:
+        conn.close()
+
+
 @app.get("/api/knowledge-graph")
 def knowledge_graph(limit: int = Query(300, ge=1, le=600), as_of: str | None = Query(None, max_length=40), domain: str | None = Query(None, max_length=32)):
     cutoff = _cutoff(as_of)
