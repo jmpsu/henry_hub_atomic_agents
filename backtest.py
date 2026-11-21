@@ -32,6 +32,11 @@ def ar1(history, features):
     return v[-1] + (num / den) * d[-1]
 
 
+def catalog_domain_series(conn, domain: str, as_of: str, since: str, measured_only: bool = True) -> dict:
+    from series_catalog import active_agents
+    return {a: pit_series(conn, a, as_of, since, measured_only=measured_only) for a in active_agents(conn, domain=domain)}
+
+
 def pit_series(conn, agent_id, as_of, since, measured_only=True):
     """{YYYY-MM-DD: value} for one agent as known at as_of (latest vintage with available_timestamp <= as_of), target >= since."""
     as_of = ingest.utc_iso(as_of)

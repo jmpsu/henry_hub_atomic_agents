@@ -156,7 +156,11 @@ class DataQualityAgent:
         cutoff = _dt(as_of)
         rows = conn.execute("SELECT agent_id, source_id, MIN(COALESCE(quality_status,'')) FROM pit_market_data WHERE available_timestamp<=? "
                             "AND COALESCE(provenance,'measured')='measured' AND source_id IS NOT NULL AND source_id<>'' GROUP BY agent_id", (as_of,)).fetchall()
+        from series_catalog import active_agents, agent_cadence_days, has_catalog
+        cat_active = set(active_agents(conn)) if has_catalog(conn) else None
         for agent, src, q in rows:
+            if cat_active is not None and agent not in cat_active:
+                continue
             latest_q = conn.execute("SELECT quality_status FROM pit_market_data WHERE agent_id=? AND available_timestamp<=? ORDER BY available_timestamp DESC "
                                     "LIMIT 1", (agent, as_of)).fetchone()[0] or ""
             if latest_q.startswith(self.SKIP_QUALITY):
@@ -165,7 +169,7 @@ class DataQualityAgent:
                                                 "ORDER BY 1 DESC LIMIT 41", (agent, as_of))]
             if len(avail) >= 6:
                 gaps = [(_dt(a) - _dt(b)).total_seconds() / 86400 for a, b in zip(avail, avail[1:])]
-                cadence = max(statistics.median(gaps), 0.5)
+                cadence = max(statistics.median(gaps), agent_cadence_days(conn, agent) or 0.5, 0.5)
                 age = (cutoff - _dt(avail[0])).total_seconds() / 86400
                 if age > max(3 * cadence, cadence + 4):
                     issues.append({"type": "stale", "agent": agent, "source_id": src, "ref": f"stale:{agent}:{avail[0][:10]}",

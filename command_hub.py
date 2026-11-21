@@ -466,6 +466,21 @@ async def list_experiments(limit: int = 25):
     return {"experiments": [{"id": r[0], "created": r[1], "config": json.loads(r[2]), "promoted": bool(r[3]), "result": r[4]} for r in await asyncio.to_thread(q)]}
 
 
+@app.get("/series-catalog")
+@app.get("/api/series-catalog")
+async def get_series_catalog(domain: str | None = None, active_only: bool = True):
+    def q():
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
+        try:
+            from series_catalog import list_series
+            rows = list_series(conn, domain=domain, active_only=active_only)
+            domains = sorted({r["domain"] for r in rows})
+            return {"count": len(rows), "domains": domains, "series": rows}
+        finally:
+            conn.close()
+    return await asyncio.to_thread(q)
+
+
 @app.get("/health")
 async def health():
     return {"ok": True, "db": os.path.basename(DB_PATH), "vector_nodes": kb_collection.count()}
