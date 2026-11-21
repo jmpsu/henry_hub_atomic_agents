@@ -322,51 +322,51 @@
   },
   "Agent_Prod_Appalachia": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "cc68aeaacef0cb84108241132441f62e510eeabeffd0d2689bda5c2af44277dc",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "dacd04b31f9cb3f9913fb28f08eae5c4e7538ea1ed04fdada6c04707bca78eba",
+   "targets": 321
   },
   "Agent_Prod_Bakken": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "e9203ad5ff90b47c6968bf61657bcb1ccf682a6f4dbe4a981bfb3d098abe15a9",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "3c6ba7b932f72bab8c50d7e07e841aa5de9c566c31ae80c94cda216e4a19862b",
+   "targets": 321
   },
   "Agent_Prod_DJBasin": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "5fe7ee97f94691e6637b0bd8da7012632bea7a6465a27c2f050b6b2ed79d2cfb",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "44c15f7ba4a7a237045f4d5cf8edb3189f7671331e94c8a6f649d73b99a870d9",
+   "targets": 321
   },
   "Agent_Prod_EagleFord": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "fd22a438082c489bf387cd98b8aff06841d4d4247a0d05ef187ed12a5b87c107",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "252beead95e9b90ebffdc3fab1441f07ccbaa9e88da0ee9636d1de705adf9a49",
+   "targets": 321
   },
   "Agent_Prod_Haynesville": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "b9f15ee78f40825d1ec46aba1f3e2735851a10b1812b3cbc967ff2079a769d5f",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "7fe95748b5c8e74670a8e517e3c9f6e47a86752564264dffdfae60a3c371aef6",
+   "targets": 321
   },
   "Agent_Prod_Permian": {
    "first_target": "2000-01-01T00:00:00Z",
-   "last_available": "2026-11-15T17:00:00Z",
-   "last_target": "2026-10-01T00:00:00Z",
-   "rows": 322,
-   "rows_sha256": "d55a6db43a3ee2454e6d6899f7b4327d7cfbe680405fef3ba76acad3e0f384a9",
-   "targets": 322
+   "last_available": "2026-10-15T17:00:00Z",
+   "last_target": "2026-09-01T00:00:00Z",
+   "rows": 321,
+   "rows_sha256": "3d10eb0794308cb72dd6ce5f46cc1eab27b59acc90d02ee86277db6b26b3a9b3",
+   "targets": 321
   },
   "Agent_Storage_East": {
    "first_target": "2026-10-30T00:00:00Z",
@@ -442,9 +442,9 @@
   }
  },
  "agents_with_rows": 55,
- "as_of": "2026-11-15T22:43:13Z",
- "database_rows_sha256": "d778cf978340b62271bf0d8e41bd77721c18ba038acd5e40e22e6599bd979ec3",
- "pit_rows": 106415,
+ "as_of": "2026-11-15T14:33:13Z",
+ "database_rows_sha256": "b0e57953cdb74cd1723a3320f4adb82df042a8b890ec66e5cd30ac12b523d9b1",
+ "pit_rows": 106409,
  "roster_agents": 81,
  "roster_agents_with_real_data": [
   "Agent_Coal_CAPP_SpotPrice",

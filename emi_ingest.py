@@ -209,14 +209,14 @@ def _title(rel: str, text: str) -> str:
 def ingest_file(conn, path: Path, rel: str, embedder, now: str) -> dict:
     data = path.read_bytes()
     sha = hashlib.sha256(data).hexdigest()
-    known = conn.execute("SELECT doc_id, path, superseded_epoch FROM lit_docs WHERE sha256=?", (sha,)).fetchone()
+    known = conn.execute("SELECT doc_id, path, superseded_epoch FROM lit_docs WHERE sha256=? AND superseded_epoch IS NULL", (sha,)).fetchone()
     if known:
         return {"status": "known", "doc_id": known[0], "chunks": 0}
     text, pages = read(path)
     chunks = chunk_layout(text)
     if not chunks:
         return {"status": "empty", "doc_id": None, "chunks": 0}
-    doc_id, ep = "doc_" + sha[:10], lk.epoch(now)
+    doc_id, ep = "doc_" + hashlib.sha256(f"{sha}|{now}|{rel}".encode()).hexdigest()[:10], lk.epoch(now)
     rows = [(f"{doc_id}:{i:04d}", doc_id, i, c, ep, np.asarray(embedder(lk.DOC_PREFIX + c), dtype=np.float32).tobytes()) for i, c in enumerate(chunks)]   # embed first: a failure leaves nothing half-written
     conn.execute("INSERT INTO lit_docs(doc_id,title,kind,path,sha256,pages,words,available_timestamp,available_epoch) VALUES (?,?,?,?,?,?,?,?,?)",
                  (doc_id, _title(rel, text), KIND, rel, sha, pages, len(text.split()), now, ep))

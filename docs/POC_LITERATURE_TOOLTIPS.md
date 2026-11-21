@@ -53,6 +53,3 @@ cd /home/joey/Projects/henry_hub_atomic_agents
 .venv/bin/python scripts/poc_literature_tooltips.py evidence_v4  # results in docs/poc/*.json
 ```
 Raw outputs: `docs/poc/literature_tooltips_results.json`, `literature_evidence_results.json`, `literature_evidence_v3_results.json`, `literature_evidence_v4_results.json`.
-
-## Model decision (2026-11-17)
-Installed models are `qwen3:4b` and `nomic-embed-text` only; no larger model was pulled. Generative literature tooltips on `qwen3:4b` did not deliver what a user needs (reliable, supportable explanations): 2/5 passed the number/citation guard, citations were frequently unsupportive, one output echoed its prompt and one was truncated. Rather than download a larger model without evidence it would fix citation laundering, the approach was changed so that no generated prose is shown from the literature: **`nomic-embed-text` embeddings only, verbatim verified quotes with abstention.** Deterministic code (`curve_shape`) produces the explanatory numbers and structure shown in the shipped tooltip. The extractive literature evidence is **not wired into the public service** (it has no Ollama dependency by design, and the false-positive case "Brent today" means it needs a labelled, opt-in UI first).

@@ -44,6 +44,7 @@ CONFIG = {  # task kind -> model, num_predict, timeout seconds
     "classify": {"model": REASONING_MODEL, "num_predict": 120, "timeout": _env("HH_CLASSIFY_TIMEOUT", 60.0)},
     "interpret": {"model": REASONING_MODEL, "num_predict": 260, "timeout": _env("HH_INTERPRET_TIMEOUT", 90.0)},
     "investigate": {"model": REASONING_MODEL, "num_predict": 220, "timeout": _env("HH_INVESTIGATE_TIMEOUT", 90.0)},
+    "triage": {"model": REASONING_MODEL, "num_predict": 120, "timeout": _env("HH_TRIAGE_TIMEOUT", 60.0)},
     "synthesize": {"model": REASONING_MODEL, "num_predict": _env("HH_SYNTH_TOKENS", 700), "timeout": _env("HH_SYNTH_TIMEOUT", 240.0)},
     "diagnose": {"model": REASONING_MODEL, "num_predict": 200, "timeout": _env("HH_DIAGNOSE_TIMEOUT", 60.0)},
     "embed": {"model": EMBED_MODEL, "num_predict": 0, "timeout": _env("HH_EMBED_TIMEOUT", 30.0)},

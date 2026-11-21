@@ -30,9 +30,33 @@ DEFAULT_DB = str(BASE_DIR / "runtime" / "literature_kb.db")
 DOC_PREFIX, QUERY_PREFIX = "search_document: ", "search_query: "   # nomic-embed-text task prefixes
 
 
+def _migrate_lit_docs_sha_unique(conn: sqlite3.Connection) -> None:
+    """Allow superseded revisions of the same content; keep at most one ACTIVE row per sha256 (PIT-safe, data-preserving)."""
+    legacy = [r[1] for r in conn.execute("PRAGMA index_list(lit_docs)") if r[2] and r[3] == "u"]
+    if not legacy:
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS lit_docs_active_sha ON lit_docs(sha256) WHERE superseded_epoch IS NULL")
+        conn.execute("CREATE INDEX IF NOT EXISTS lit_docs_path ON lit_docs(path)")
+        return
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(lit_docs)")]
+    names = ", ".join(cols)
+    try:
+        conn.execute("BEGIN")
+        conn.execute("ALTER TABLE lit_docs RENAME TO lit_docs_legacy_sha")
+        conn.execute("""CREATE TABLE lit_docs(doc_id TEXT PRIMARY KEY, title TEXT, kind TEXT, path TEXT, sha256 TEXT NOT NULL, pages INTEGER, words INTEGER,
+            available_timestamp TEXT, available_epoch INTEGER, provenance TEXT DEFAULT 'source_document', superseded_epoch INTEGER)""")
+        conn.execute(f"INSERT INTO lit_docs({names}) SELECT {names} FROM lit_docs_legacy_sha")
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS lit_docs_active_sha ON lit_docs(sha256) WHERE superseded_epoch IS NULL")
+        conn.execute("CREATE INDEX IF NOT EXISTS lit_docs_path ON lit_docs(path)")
+        conn.execute("DROP TABLE lit_docs_legacy_sha")
+    except Exception:
+        conn.rollback()
+        raise
+    conn.commit()
+
+
 def ensure(conn: sqlite3.Connection) -> None:
     conn.executescript("""
-    CREATE TABLE IF NOT EXISTS lit_docs(doc_id TEXT PRIMARY KEY, title TEXT, kind TEXT, path TEXT, sha256 TEXT UNIQUE, pages INTEGER, words INTEGER,
+    CREATE TABLE IF NOT EXISTS lit_docs(doc_id TEXT PRIMARY KEY, title TEXT, kind TEXT, path TEXT, sha256 TEXT NOT NULL, pages INTEGER, words INTEGER,
         available_timestamp TEXT, available_epoch INTEGER, provenance TEXT DEFAULT 'source_document');
     CREATE TABLE IF NOT EXISTS lit_chunks(chunk_id TEXT PRIMARY KEY, doc_id TEXT, ord INTEGER, text TEXT, available_epoch INTEGER, embedding BLOB);
     CREATE TABLE IF NOT EXISTS lit_edges(src TEXT, dst TEXT, type TEXT, weight REAL, PRIMARY KEY(src, dst, type));
@@ -40,6 +64,7 @@ def ensure(conn: sqlite3.Connection) -> None:
     """)
     if "superseded_epoch" not in [r[1] for r in conn.execute("PRAGMA table_info(lit_docs)")]:      # a changed or removed source file supersedes its older document (additive, PIT-safe)
         conn.execute("ALTER TABLE lit_docs ADD COLUMN superseded_epoch INTEGER")
+    _migrate_lit_docs_sha_unique(conn)
 
 
 def epoch(ts: str) -> int:
@@ -73,7 +98,7 @@ def ingest_pdf(conn: sqlite3.Connection, path: str, kind: str, embedder, now: st
     raw, pages = extract_text(path)
     text = clean_text(raw)
     chunks = kb_ingest.chunk_text(text)
-    doc_id = "doc_" + sha[:10]
+    doc_id = "doc_" + hashlib.sha256(f"{sha}|{now}|{path}".encode()).hexdigest()[:10]
     ep = epoch(now)
     rows, prev = [], None
     for i, c in enumerate(chunks):

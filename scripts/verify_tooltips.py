@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -68,8 +69,10 @@ def main() -> int:
     if shots:
         shots.mkdir(parents=True, exist_ok=True)
     prof = tempfile.mkdtemp()
-    chrome = subprocess.Popen(["google-chrome", "--headless=new", f"--remote-debugging-port={a.port}", f"--user-data-dir={prof}", "--no-first-run",
-                               "--hide-scrollbars", "--window-size=1500,1200", "about:blank"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    chrome_bin = os.environ.get("CHROME_PATH", "google-chrome")
+    chrome = subprocess.Popen([chrome_bin, "--headless=new", "--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+                               f"--remote-debugging-port={a.port}", f"--user-data-dir={prof}", "--no-first-run", "--hide-scrollbars",
+                               "--window-size=1500,1200", "about:blank"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     fails, notes = [], []
     try:
         for _ in range(50):
@@ -120,6 +123,7 @@ def main() -> int:
             return c.js("(() => { const t = document.getElementById('ngl-tip'); return t && !t.hidden ? t.innerText : null; })()")
 
         def hover(name, js_el, must, shot=None, dx=0.5, dy=0.5):
+            c.js("(() => { NGLTip.hide(); return 1; })()")
             r = center(js_el)
             if not r:
                 check(f"hover {name}", False, "element not found")
@@ -129,13 +133,15 @@ def main() -> int:
             r = center(js_el)
             x, y = r[0] - r[2] / 2 + r[2] * dx, r[1] - r[3] / 2 + r[3] * dy
             mouse(5, 5)
+            time.sleep(0.2)
             mouse(x - 6, y - 3)
             mouse(x, y)
             time.sleep(0.5)
             c.drain(0.1)
             t = tiptext()
             miss = [m for m in must if not t or m.lower() not in t.lower()]
-            check(f"hover {name}", t is not None and not miss, f"missing={miss}" if miss else (t or "")[:90].replace("\n", " | "))
+            hit = c.js(f"(() => {{ const e = {js_el}; const b = e.getBoundingClientRect(); const h = document.elementFromPoint({x}, {y}); const t = document.getElementById('ngl-tip'); return [b.left+b.width/2,b.top+b.height/2,b.width,b.height,h ? h.className : null,t && t.hidden,((spec)=>spec&&spec.title)(NGLTip.specOf(e))]; }})()")
+            check(f"hover {name}", t is not None and not miss, f"missing={miss} got={(t or '')[:160]!r} point={[round(x,1),round(y,1)]} rect/hit={hit}" if miss else (t or "")[:90].replace("\n", " | "))
             if shot and shots and t:
                 png = c.send("Page.captureScreenshot", format="png")["data"]
                 (shots / f"{shot}.png").write_bytes(base64.b64decode(png))
@@ -154,7 +160,10 @@ def main() -> int:
         hover("LNG export row (monthly, EIA)", "[...document.querySelectorAll('.drv-row')].find(r => /LNGExports SabinePass/.test(r.innerText))", ["MMcf", "EIA", "Available (PIT)", "month"], "tip_lng_export")
         hover("border flow row (inferred mapping)", "[...document.querySelectorAll('.drv-row')].find(r => /RioGrande ToMexico/.test(r.innerText))", ["INFERRED", "Rio Grande"], None)
         check("LNG exports and border panels are populated", bool(c.js("(() => { const t = document.getElementById('drivers').innerText; return /LNG EXPORTS BY TERMINAL/i.test(t) && /PIPELINE VOLUMES AT BORDER/i.test(t) && /118,889|118889/.test(t); })()")))
-        check("map terminal labels show monthly exports", bool(c.js("[...document.querySelectorAll('.node-label')].some(l => /Sabine Pass/.test(l.innerText) && /118,889/.test(l.innerText))")) or True)
+        check("map initialized with a WebGL canvas", bool(c.js("(() => { const e = document.querySelector('#map canvas.maplibregl-canvas'); if (!e) return false; const gl = e.getContext('webgl2') || e.getContext('webgl'); return !!gl && e.width > 100 && e.height > 100 && gl.drawingBufferWidth > 100 && gl.drawingBufferHeight > 100; })()")))
+        check("map markers are rendered by MapLibre", c.js("document.querySelectorAll('#map .maplibregl-marker').length") == 18)
+        check("map does not show an unavailable fallback", not bool(c.js("/MAP UNAVAILABLE/i.test(document.getElementById('map').innerText)")))
+        check("map terminal labels show monthly exports", bool(c.js("[...document.querySelectorAll('.node-label')].some(l => /Sabine Pass/.test(l.innerText) && /118,889/.test(l.innerText))")))
         check("LNG forward panel is populated (curve markers present)", bool(c.js("(() => { const b = document.getElementById('lng-chart'); return !!b && b.querySelectorAll('.mk-hit').length >= 1; })()")))
         hover("LNG forward point M1", "document.querySelector('#lng-chart .mk-hit')", ["FOB cost", "Calculation", "Henry Hub futures", "Data lineage"], "tip_lng_point")
         check("LNG panel states where k and L come from", bool(c.js("(() => { const t = document.getElementById('lng-chart').parentElement.innerText; return /k \\(HH multiplier\\)/.test(t) && /L \\(liquefaction fee\\)/.test(t) && /assumption|knowledge library/.test(t); })()")))
@@ -290,6 +299,10 @@ def main() -> int:
         time.sleep(0.3)
         check("Escape closes the pinned tooltip", bool(c.js("document.getElementById('ngl-tip').hidden")))
         # keyboard focus
+        mouse(5, 5)
+        mouse(5, 5, "mousePressed", button="left", clickCount=1)
+        mouse(5, 5, "mouseReleased", button="left", clickCount=1)
+        time.sleep(0.2)
         c.js("document.querySelectorAll('#levels > div')[1].focus()")
         time.sleep(0.4)
         t = tiptext()

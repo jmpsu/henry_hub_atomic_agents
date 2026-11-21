@@ -21,6 +21,7 @@ from typing import Any
 import numpy as np
 
 import lng_forward
+import lng_global
 
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_VERSION = "ngl-state/1"
@@ -547,10 +548,12 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
             if r and r["provenance"] == "measured":
                 sid = r.get("series_id") or ""
                 dm = sid[sid.rfind("(") + 1:-1] if sid.endswith(")") and "(" in sid else None   # "NGZ26.NYM (2026-12)" -> "2026-12"
-                fwd.append({"contract": f"M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10], "available_timestamp": r["available_timestamp"],
-                            "unit": r["unit"], "series_id": sid, "delivery_month": dm, "source_id": r["source_id"], "quality_status": r["quality_status"],
+                fwd.append({"contract": f"M{m_}", "agent_id": f"Agent_HH_M{m_}", "value": r["value"], "date": r["latest_target_timestamp"][:10],
+                            "available_timestamp": r["available_timestamp"], "unit": r["unit"], "series_id": sid, "delivery_month": dm,
+                            "source_id": r["source_id"], "quality_status": r["quality_status"], "provenance": r.get("provenance"),
                             "published_timestamp": r.get("published_timestamp") or None, "retrieved_timestamp": r["retrieved_timestamp"],
                             "raw_payload_hash": r["raw_payload_hash"]})
+
         fwd_dates = {p["date"] for p in fwd}
         fwd_age = _age_days(max(p["available_timestamp"] for p in fwd), cutoff) if fwd else None
         fwd_stale = bool(fwd) and (len(fwd_dates) > 1 or (fwd_age is not None and fwd_age > 10))
@@ -558,13 +561,29 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
             r = latest.get(agent)
             if not r or r.get("provenance") != "measured":
                 return None
-            return {"value": r["value"], "published_timestamp": r.get("published_timestamp") or None, "available_timestamp": r["available_timestamp"],
-                    "latest_target_timestamp": r["latest_target_timestamp"], "series_id": r.get("series_id"), "quality_status": r["quality_status"], "raw_payload_hash": r["raw_payload_hash"]}
+            return {"value": r["value"], "unit": r.get("unit"), "published_timestamp": r.get("published_timestamp") or None,
+                    "available_timestamp": r["available_timestamp"], "latest_target_timestamp": r["latest_target_timestamp"],
+                    "target_timestamp": r["latest_target_timestamp"], "retrieved_timestamp": r.get("retrieved_timestamp"),
+                    "agent_id": agent, "source_id": r.get("source_id"), "series_id": r.get("series_id"),
+                    "quality_status": r["quality_status"], "provenance": r.get("provenance"), "raw_payload_hash": r["raw_payload_hash"]}
         ttf_agents = {p["delivery_month"]: "Agent_TTF_" + p["delivery_month"].replace("-", "_") for p in fwd if p.get("delivery_month")}
+        for agent in latest:
+            if agent.startswith("Agent_TTF_") and agent not in ttf_agents.values():
+                m = agent.replace("Agent_TTF_", "").replace("_", "-")
+                if len(m) == 7 and m[4] == "-":
+                    ttf_agents[m] = agent
+        ttf_quotes = {m: q for m, a in ttf_agents.items() if (q := _q(a))}
         import lng_evidence
-        lng = lng_forward.build(fwd, {m: _q(a) for m, a in ttf_agents.items() if _q(a)}, _q("Agent_FX_EURUSD"), cutoff, lng_evidence.validated(lng_evidence.load(cutoff)))
+        lng_params = lng_evidence.validated(lng_evidence.load(cutoff))
+        lng = lng_forward.build(fwd, ttf_quotes, _q("Agent_FX_EURUSD"), cutoff, lng_params)
+        brent_quote = _q("Agent_Crude_Brent_Spot")
+        oil_quote = brent_quote or _q("Agent_Crude_WTI_Spot")
+        if oil_quote and not brent_quote:
+            oil_quote = {**oil_quote, "quote_role": "wti_proxy"}
+        lng_global_payload = lng_global.build(fwd, ttf_quotes, _q("Agent_FX_EURUSD"), oil_quote, cutoff, lng_params)
         curves = {
             "lng_forward": lng,
+            "lng_global": lng_global_payload,
             "ngl_to_wti_pct": {"formula": "(cents/gal / 100 * 42) / WTI_usd_bbl * 100", "wti": {"status": "measured" if wti else PENDING,
                                "value": wti[-1][1] if wti else None, "date": wti[-1][0] if wti else None, "unit": "USD/bbl"},
                                "propane": pct_curve("propane"), "normal_butane": pct_curve("normal_butane"), "natural_gasoline": pct_curve("natural_gasoline")},

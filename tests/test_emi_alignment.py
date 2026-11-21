@@ -69,6 +69,42 @@ def test_the_tables_own_label_rule_is_checked_and_a_document_without_a_row_is_re
     assert al.apply(db, str(tsv))["indexed_documents_without_a_row"] == 1
 
 
+def test_superseded_content_can_be_reindexed_at_its_current_path(tmp_path):
+    root = tmp_path / "emi"
+    root.mkdir()
+    (root / "a.md").write_text("# Ethane\n\nEthane rejection happens when the frac spread is negative and ethane stays in the gas stream for sale.\n")
+    db = str(tmp_path / "lit.db")
+    emi.sync(db, emb, root, now="2026-11-01T00:00:00Z")
+    c = sqlite3.connect(db)
+    old_id = c.execute("SELECT doc_id FROM lit_docs").fetchone()[0]
+    c.execute("UPDATE lit_docs SET superseded_epoch=? WHERE doc_id=?", (lk.epoch("2026-11-02T00:00:00Z"), old_id))
+    c.commit()
+    c.close()
+    out = emi.sync(db, emb, root, now="2026-11-03T00:00:00Z")
+    assert out["new"] == 1
+    c = sqlite3.connect(db)
+    active = c.execute("SELECT doc_id, path FROM lit_docs WHERE superseded_epoch IS NULL").fetchall()
+    assert len(active) == 1 and active[0][1] == "a.md" and active[0][0] != old_id
+    assert c.execute("SELECT COUNT(*) FROM lit_docs").fetchone()[0] == 2
+    c.close()
+    assert emi.coverage(db, root)["coverage_pct"] == 100.0
+
+
+def test_legacy_unique_sha_schema_is_migrated_without_data_loss(tmp_path):
+    db = str(tmp_path / "legacy.db")
+    c = sqlite3.connect(db)
+    c.executescript("""CREATE TABLE lit_docs(doc_id TEXT PRIMARY KEY, title TEXT, kind TEXT, path TEXT, sha256 TEXT UNIQUE, pages INTEGER, words INTEGER,
+        available_timestamp TEXT, available_epoch INTEGER, provenance TEXT DEFAULT 'source_document');
+        INSERT INTO lit_docs VALUES ('doc_old','Old','research','old/a.md','same-sha',1,5,'2026-11-01T00:00:00Z',1,'source_document');""")
+    c.commit()
+    lk.ensure(c)
+    c.execute("INSERT INTO lit_docs VALUES ('doc_new','New','research','new/a.md','same-sha',1,5,'2026-11-02T00:00:00Z',2,'source_document',1)")
+    c.commit()
+    assert c.execute("SELECT COUNT(*) FROM lit_docs").fetchone()[0] == 2
+    assert any(r[1] == "lit_docs_active_sha" for r in c.execute("PRAGMA index_list(lit_docs)"))
+    c.close()
+
+
 def test_a_malformed_table_is_refused(tmp_path):
     bad = tmp_path / "bad.tsv"
     bad.write_text("file\tlabel\nx.md\toverlaps library\n")

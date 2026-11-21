@@ -47,11 +47,11 @@ Relationship quality in HH (S: `EDGE_LEGEND`, `kb_ingest.py` header): `semantic_
 
 **No benefit has been measured, and none can be from the evidence found.** There is no retrieval-evaluation set, no baseline precision figure and no A/B harness in the files inspected (U: not exhaustively searched). Claims of improved precision, reasoning or "substantially better intelligence" are unsupported. The testable hypotheses, if the quarantined adapter is ever built, are: (a) agents given concept notes cite fewer unsupported domain terms in findings; (b) retrieval of definitional queries (e.g. "what is keep-whole settlement") improves with the notes; (c) no change in retrieval for measured-data queries. Each needs a fixed query set and a before/after run.
 
-## 5. KB revision defect (reproduced, fixed in 1.0.3)
+## 5. KB revision defect (reproduced; fix withdrawn)
 
-**KB-PIT-REV: revised observations erased earlier-known knowledge nodes.** (E, reproduced on a temp DB against the original `kb_ingest.py`) `ingest()` used `INSERT OR REPLACE INTO kb_nodes` keyed on `domain:series:period`, and `_latest()` takes `MAX(available_timestamp)` per target. After EIA storage week 2026-01-02 was revised (600 -> 660 Bcf), a query with `as_of` between the vintages returned no node. Lost history, not look-ahead leakage: the read side never returned a node unavailable at `as_of`.
+**KB-PIT-REV: revised observations erase earlier-known knowledge nodes.** (E, reproduced on a temp DB with `kb_ingest.py` at HEAD) `ingest()` uses `INSERT OR REPLACE INTO kb_nodes` keyed on `domain:series:period`, and `_latest()` takes `MAX(available_timestamp)` per target. After EIA storage week 2026-01-02 was revised (600 -> 660 Bcf), a query with `as_of` between the vintages returned no node. This is lost history, not look-ahead leakage: the read side never returned a node unavailable at `as_of`.
 
-Fix (commit `c126f31`, `kb_ingest.py`): additive table `kb_node_versions` and view `kb_nodes_all`; `_archive()` keeps the outgoing row only when the new vintage is strictly later; `graph`, `node_detail`, `search`, `summary` select the latest version with `available_epoch <= as_of` and fall back to plain `kb_nodes` on databases without the archive. Tests: `tests/test_kb_pit_revisions.py` (8). The patch was briefly withdrawn on request and re-applied when the owner confirmed it should stay. Limitation: versions already overwritten in the live DB cannot be recovered from `kb_nodes`; `pit_market_data` keeps vintages, so a backfill is possible but not implemented. `agents/memory.py:75,106,122` still read `kb_nodes` directly (current only).
+A patch for this was written, tested (17 passed) and then **withdrawn at the owner's request; `kb_ingest.py` is restored to HEAD and its test deleted**. The defect is therefore **open**. Any redo should keep reads working on DBs without new tables (the public service opens the DB read-only) and should be reviewed before activation. Nothing in this section was applied to the live database.
 
 ## 6. Evidence matrix (KB subsystem, items actually inspected)
 
@@ -62,8 +62,8 @@ Fix (commit `c126f31`, `kb_ingest.py`): additive table `kb_node_versions` and vi
 | KB-03 | Embedding `embed` (Ollama `nomic-embed-text`) | `kb_ingest.py:211` | Implemented, unverified against live Ollama | Ollama process running (E); no live embed call made. Tests use a stub embedder |
 | KB-04 | Node/edge store | `kb_ingest.py:ensure`, `henry_hub_pit.db` | Implemented and verified | 363 / 950 rows (E) |
 | KB-05 | Edge derivation `rebuild_edges` | `kb_ingest.py` | Implemented, partially verified | Edge counts observed (E); semantic edges are similarity only |
-| KB-06 | PIT read side `graph/node_detail/search/summary` | `kb_ingest.py` | Implemented and verified (version-aware since 1.0.3) | 17 KB tests passed (E) |
-| KB-07 | Version archive (`kb_node_versions`, `kb_nodes_all`) | `kb_ingest.py` | Implemented and verified on temp DBs; created in the live DB by the first ingest after the 1.0.3 install | `tests/test_kb_pit_revisions.py` (E) |
+| KB-06 | PIT read side `graph/node_detail/search/summary` | `kb_ingest.py` | Implemented; read-side `available_epoch <= as_of` filter verified by source; revision history loss open (section 5) | 9 pre-existing KB tests passed before the patch (E) |
+| KB-07 | Version archive | none | **MISSING** (patch withdrawn) | see section 5 |
 | KB-08 | Agent memory `agents/memory.py` | `agents/memory.py` | Implemented, unverified | Read only; direct `kb_nodes` reads noted above |
 | KB-09 | Hub vector mirror (Chroma `henry_hub_alpha_graph`) | `command_hub.py:22,196,413` | Implemented, unverified | Collection contents not counted (U) |
 | KB-10 | Public API `/api/knowledge-graph`, node, search | `markets_hub.py:96-168` | Implemented, unverified end to end | Source read; running 1.0.1 build not queried (U) |
@@ -93,7 +93,7 @@ Solid arrows are implemented; the dotted arrow is a proposal that this assessmen
 
 ## 8. Recommended sequence
 
-1. Done: KB-PIT-REV fix (section 5), live in 1.0.3.
+1. KB-PIT-REV (section 5) is open; redo only after the owner says what was wrong with the first patch.
 2. Next (HH only): a vintage backfill from `pit_market_data` and a provenance-exclusion filter in `search()` and `agents/memory.py`. This is useful with or without EMI.
 3. Gate for any EMI path: build a fixed query set and baseline retrieval score first. Proceed only if definitional-query precision rises with no change on measured-data queries.
 

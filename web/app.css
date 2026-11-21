@@ -305,3 +305,23 @@ tr.has-tip:hover td, .drv-row.has-tip:hover, .levels > div.has-tip:hover { backg
 .chart-hit { fill: transparent; cursor: crosshair; }
 @media (hover: none) { .ngl-tip { pointer-events: auto; } }
 @media print { .ngl-tip { display: none !important; } .tip-hint { display: none; } }
+.lng-global { display: grid; gap: 10px; }
+.lng-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.lng-card { border: 1px solid var(--hair); padding: 8px 9px 5px; min-height: 92px; display: grid; grid-template-columns: 1fr 132px; grid-template-rows: auto auto auto; column-gap: 8px; align-items: start; }
+.lng-card-h { grid-column: 1; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--dim); }
+.lng-card-v { grid-column: 1; color: var(--gold); font-size: 18px; margin-top: 4px; }
+.lng-card-r { grid-column: 1; color: var(--mute); font-size: 10.5px; margin-top: 4px; }
+.lng-spark { grid-column: 2; grid-row: 1 / 4; align-self: center; opacity: .9; }
+.lng-matrix-wrap { overflow-x: auto; border: 1px solid var(--hair); }
+.lng-matrix { border-collapse: collapse; width: 100%; font-size: 11px; font-variant-numeric: tabular-nums; }
+.lng-matrix th, .lng-matrix td { padding: 5px 6px; border-bottom: 1px solid var(--faint); border-right: 1px solid var(--faint); text-align: right; white-space: nowrap; }
+.lng-matrix th:last-child, .lng-matrix td:last-child { border-right: 0; }
+.lng-matrix thead th { position: sticky; top: 0; background: var(--panel, #111); color: var(--dim); font-weight: 400; letter-spacing: .04em; z-index: 1; }
+.lng-matrix .lng-row-h { text-align: left; position: sticky; left: 0; background: var(--panel, #111); color: var(--text); z-index: 2; min-width: 210px; }
+.lng-matrix td { color: var(--text); }
+.lng-matrix td.observed { color: var(--gold); }
+.lng-matrix td.observed.converted { color: var(--gold); border-bottom: 1px dashed var(--gold); }
+.lng-matrix td.observed.proxy { color: #c8c1a5; border-bottom: 1px dotted #c8c1a5; }
+.lng-matrix tbody tr:hover td, .lng-matrix tbody tr:hover th { background: rgba(215, 169, 74, .07); }
+.lng-global-foot { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--dim); font-size: 11px; }
+.lng-assumptions { max-height: 260px; overflow: auto; border: 1px solid var(--hair); padding: 8px; color: var(--dim); font: 11px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace; }

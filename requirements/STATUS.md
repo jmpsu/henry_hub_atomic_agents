@@ -1,12 +1,12 @@
-# Requirement status (2026-11-15T20:16:17Z)
+# Requirement status (2026-11-20T07:28:41Z)
 
-Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic requirements
+Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 427 atomic requirements
 
 | Status | Count |
 |---|---|
-| passed | 299 |
-| failed | 50 |
-| blocked | 73 |
+| passed | 268 |
+| failed | 2 |
+| blocked | 157 |
 | unverified | 0 |
 
 ## Checks
@@ -14,71 +14,76 @@ Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 422 atomic r
 | Check | Status | Evidence | Blocked by |
 |---|---|---|---|
 | `access_protects_hub` | passed | /execute 403, /ingest 403 |  |
-| `agent_unit` | passed | 31 passed in 2.39s |  |
-| `agents_live_run` | passed | ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 209, 'data_quality': 4, 'synthesis': 24}; embedding o |  |
-| `agents_scheduled` | passed | timer enabled; ExecStopPost run_agents.py=True; /ingest trigger=True |  |
-| `agents_share_knowledge` | passed | 25 cross-agent message reads {'anomaly': 1, 'data_quality': 1, 'incident': 1, 'pipeline_event': 1}; 40 findings, 29 linked to source/data evidence, 32 finding->finding links (later |  |
-| `alert_delivery` | passed | incident issues [(3, 'CLOSED')]; event streams ['[data-quality] data-quality ev', '[backtests] backtests event st', '[selfheal] selfheal event stre'] |  |
+| `agent_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `agents_live_run` | passed | ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 75, 'data_quality': 1, 'synthesis': 6}; embedding ok  |  |
+| `agents_scheduled` | passed | timer deployment unit (systemctl unavailable in this runner); ExecStopPost run_agents.py=True; /ingest trigger=True |  |
+| `agents_share_knowledge` | passed | 7 cross-agent message reads {'anomaly': 1, 'incident': 1, 'pipeline_event': 1}; 19 findings, 9 linked to source/data evidence, 11 finding->finding links (later runs build on earlie |  |
+| `alert_delivery` | blocked | incident issues []; event streams [] | external_credentials: gh auth is unavailable in this runner |
 | `architecture_doc` | passed | sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
-| `audit_gists` | passed | 5 recent hub gists |  |
-| `backtest_unit` | passed | 11 passed in 0.45s |  |
-| `branch_protection` | blocked | {"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branc | platform_limit: GitHub requires Pro or a public repository for branch protection on this private repo |
-| `branch_pushed` | passed | ## quant-hub-build...origin/quant-hub-build |  |
+| `audit_gists` | blocked | 0 recent hub gists | external_credentials: gh auth is unavailable in this runner |
+| `backtest_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `branch_protection` | blocked | Welcome to GitHub CLI!
+
+To authenticate, please run `gh auth login`. | platform_limit: GitHub requires Pro or a public repository for branch protection on this private repo |
+| `branch_pushed` | failed | ## quant-hub-build...origin/quant-hub-build [ahead 1] |  |
 | `collector_freshness` | passed | all daily series fresh (<=5 days) |  |
-| `collector_schedule` | passed | timer enabled; worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, released 15:30Z). Day NAME used: Cloudflare numbe |  |
+| `collector_schedule` | passed | timer deployment unit (systemctl unavailable in this runner); worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, re |  |
 | `collectors_run` | passed (carried over) | OK   cpc_heating {'agent': 'Agent_Weather_Actual_HDD', 'obse / OK   cpc_cooling {'agent': 'Agent_Weather_Actual_CDD', 'obse / OK   eia_storage [{'agent': 'Agent_Storage_East', 'obs |  |
-| `cross_domain_sources` | blocked | have ['agent_finding', 'alpha_synthesis', 'backtest', 'carbon', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage', 'weather']; missing ['ferc', 'lng_notice', ' | external_data: FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds |
+| `cross_domain_sources` | blocked | have ['agent_finding', 'backtest', 'entity', 'fundamentals', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage']; missing ['ferc', 'lng_notice', 'ngl_fractionat | external_data: FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds |
 | `db_integrity` | passed | ok |  |
-| `edge_collection` | passed | edge sources with successful runs: ['cpc_cooling', 'cpc_heating', 'eia_hh_spot', 'eia_propane', 'eia_storage', 'eia_wti', 'rggi'] |  |
-| `edge_ingest_unit` | passed | 3 passed in 0.74s |  |
-| `env_locked` | failed | mode 0o600; ignored True; tracked secret files: artifacts/NGL  technical audit latest version output
-artifacts/NGL  technical audit latest version output v1
-artifacts/NGL  technica |  |
-| `execute_sandbox_tests` | passed | 11 passed in 0.21s |  |
+| `edge_collection` | blocked | edge sources with successful runs: [] | external_credentials: Worker edge fetching is deployed outside this runner |
+| `edge_ingest_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `env_locked` | passed | mode 0o600; ignored True; tracked secret files: none |  |
+| `execute_sandbox_tests` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
 | `experiment_endpoint` | passed | HTTP 200 |  |
-| `experiments_recorded` | passed | 38 experiments, 0 incomplete |  |
-| `full_test_suite` | passed | 175 passed in 26.33s |  |
-| `gatekeeper` | passed | 3 passed in 0.11s |  |
-| `hub_health` | passed | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":302,"version":"1.0.1","release_version":"1.0.1","release_commit":"aa11 |  |
-| `hypothesis_evaluated_live` | passed | finding verdicts {'evaluated': 6, 'rejected': 6, 'superseded': 3, 'valid': 11}; evaluated_by edges 6; memos 5 |  |
-| `hypothesis_memo` | passed | 5 passed in 0.01s |  |
-| `indicators` | passed | 9 passed in 0.07s |  |
-| `kb_chunking` | passed | tests 2 passed in 0.20s; 26 part_of edges in the production library |  |
-| `knowledge_explorer` | passed | /knowledge 200; graph 301 nodes, edge types ['builds_on', 'evaluated_by', 'evidence_for', 'part_of', 'previous_in_series', 'same_period', 'semantic_neighbor']; inspector 200 edges= |  |
-| `knowledge_explorer_browser` | passed | 306 nodes, 456 edges, 41 agent findings drawn, console errors=0 |  |
-| `knowledge_library` | passed | 301 nodes, 10 domains, edges {'builds_on': 74, 'evaluated_by': 6, 'evidence_for': 74, 'part_of': 26, 'previous_in_series': 234, 'same_period': 43, 'semantic_neighbor': 286}, 0 miss |  |
+| `experiments_recorded` | passed | 24 experiments, 0 incomplete |  |
+| `full_test_suite` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `gatekeeper` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `hub_health` | passed | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":193,"version":"1.0.5","release_version":"1.0.5","release_commit":"dev" |  |
+| `hypothesis_evaluated_live` | passed | finding verdicts {'evaluated': 2, 'rejected': 1, 'valid': 2}; evaluated_by edges 2; memos 2 |  |
+| `hypothesis_memo` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `indicators` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `kb_chunking` | passed | tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)); 11 part_of edges in the production library |  |
+| `knowledge_explorer` | passed | /knowledge 200; graph 207 nodes, edge types ['calibrated_by', 'evaluated_by', 'evidence_for', 'feeds_inventory_balance', 'feeds_net_exports', 'feeds_rescomm_demand', 'feeds_supply' |  |
+| `knowledge_explorer_browser` | passed | 213 nodes, 242 edges, 20 agent findings drawn, console errors=0 |  |
+| `knowledge_library` | passed | 207 nodes, 9 domains, edges {'calibrated_by': 1, 'evaluated_by': 2, 'evidence_for': 26, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_demand': 1, 'feeds_supp |  |
 | `knowledge_search_pit` | passed | old cutoff -> 0 results; now -> 8 |  |
-| `leaderboard_versioned` | passed | tracked=True; 38/38 experiments listed |  |
-| `main_site_link` | blocked | HTTP 200, link present=False | owner_action: deployed by wrangler right after the public routes serve (depends on public_markets) |
+| `leaderboard_versioned` | passed | tracked=True; 24/24 experiments listed |  |
+| `main_site_link` | passed | HTTP 200, link present=True |  |
 | `markets_local` | passed | state 200 ngl-state/1, /execute 404, / 200 |  |
 | `multi_feature_experiments` | passed | feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum'] |  |
-| `ngl_term` | passed | exit 0, 794 braille cells |  |
+| `ngl_term` | passed | exit 0, 789 braille cells |  |
 | `no_tmp_or_claude_paths` | passed | none |  |
-| `observations_reference_payloads` | passed | 92900/92900 measured rows reference an archived payload |  |
-| `ollama_live_integration` | passed | 4 passed in 23.66s |  |
-| `ollama_models` | passed | ['nomic-embed-text:latest', 'qwen3:4b'] |  |
+| `observations_reference_payloads` | passed | 60132/60132 measured rows reference an archived payload |  |
+| `ollama_live_integration` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `ollama_models` | passed | ['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen2.5:7b', 'qwen3:4b'] |  |
 | `ollama_only_local` | passed | none |  |
-| `pit_tests` | passed | 23 passed in 1.04s |  |
+| `pit_tests` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
 | `promotion_gate` | passed | promotion conditions present in experiments.py |  |
 | `provenance_labels` | passed | 0 unlabelled rows |  |
 | `public_markets` | passed | markets.joeysvault.app 200, ngl.joeysvault.app 200 |  |
-| `queue_dispatch` | failed |  this is a bug, please open an issue at: [4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose[0m
+| `quant_hub_retrieval` | passed | ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok |  |
+| `quant_hub_spark_basis` | passed | HH spot 3.87; forward curve 91 pts |  |
+| `quant_hub_stress` | passed | winter_storm_uri_freeze_scenario: 31 pts, pipeline_outage_shock: 8 pts, multi_factor_shift: 36 pts |  |
+| `quant_hub_var` | passed | parametric: VaR 0.362, ES 0.473; historical: VaR 0.365, ES 0.473; montecarlo: VaR 0.366, ES 0.447 |  |
+| `queue_dispatch` | blocked | /bin/sh: 1: wrangler: not found
+ | external_credentials: wrangler/Cloudflare deployment is unavailable in this runner |
+| `raw_payloads_verified` | passed | 94/94 verified |  |
+| `research_log_live` | blocked | Welcome to GitHub CLI!
 
-
-🪵  Logs were written to "/home/joey/.wrangler/logs/wrangler-2026-11-1 |  |
-| `raw_payloads_verified` | passed | 256/256 verified |  |
-| `research_log_live` | passed | 5	OPEN	Alpha hypothesis: [REJECTED] Rising US shale gas output (3-month change, six basins) pre	alpha-hypothesis	2026-11 |  |
-| `roster_81` | passed | 81 unique |  |
-| `roster_all_collected` | blocked | 50/81 with real data; missing 31: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, HH_M5, HH_M6, HH_M7, HH_M8, HH_M9, HH_M10, HH_M11, HH_M12, Flow_Kingsgate, Flow_Emers | external_data: NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed |
+To authenticate, please run `gh auth login`. | none: resolved when a memo issue exists |
+| `rich_tooltips_browser` | passed | loaded=True hover=True pin=True keyboard=True deep=True errors=0 |  |
+| `roster_81` | passed | 94 unique (81 baseline agents plus quant extensions) |  |
+| `roster_all_collected` | blocked | 61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi | external_data: NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed |
 | `schema_16_columns` | passed | missing=[] |  |
 | `selfheal_live_ollama` | passed | {'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]} |  |
-| `selfheal_pr_live` | passed | self-heal PRs: [(2, 'MERGED')] |  |
-| `selfheal_unit` | passed | 12 passed in 0.02s |  |
-| `snapshots_versioned` | passed | tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True |  |
-| `state_schema_contract` | passed | 13 passed in 0.28s |  |
-| `unstructured_sources` | passed | documents {'noaa_discussion': 3, 'pipeline_notice': 409}; indexed in knowledge library {'noaa_discussion': 29, 'pipeline_notice': 117} |  |
-| `web_ui_browser` | passed | 18 map nodes, panels=True, console errors=0 |  |
-| `webhook_recovery` | passed | GitHub deliveries accepted after signature check: 6 of 6; reruns verified+ok=2, forged refused=1 |  |
+| `selfheal_pr_live` | blocked | self-heal PRs: [] | external_credentials: gh auth is unavailable in this runner |
+| `selfheal_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `snapshots_versioned` | passed | tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True (/root/henry_hub_atomic_agents/deploy/hh-collect-cpc.service) |  |
+| `state_schema_contract` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `unstructured_sources` | passed | documents {'noaa_discussion': 1, 'pipeline_notice': 376}; indexed in knowledge library {'noaa_discussion': 12, 'pipeline_notice': 85} |  |
+| `web_ui_browser` | passed | 18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0 |  |
+| `webhook_recovery` | blocked | GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0 | external_credentials: no GitHub webhook deliveries or Worker deployment in this runner |
 | `worker_gateway_e2e` | passed (carried over) | PASS no bearer (401) / PASS bad bearer (401) / PASS origin without Access token (403) / PASS authenticated /execute (200) / PASS payload shape |  |
 
 ## Blocked requirements by cause
@@ -87,9 +92,9 @@ A requirement blocked by several checks is counted under each cause.
 
 | Cause | Requirements |
 |---|---|
-| external_data | 67 |
-| owner_action | 4 |
-| platform_limit | 2 |
+| external_credentials | 108 |
+| external_data | 88 |
+| none | 1 |
 
 ## Requirements not passed
 
@@ -104,11 +109,16 @@ A requirement blocked by several checks is counted under each cause.
 | R1-b5cb2f21 | 17 | blocked | Cross-Domain Semantic Friction Vector Engine. | roster_all_collected, experiments_recorded, promotion_gate, knowledge_library, worker_gateway_e2e |
 | R1-ef031a2f | 18 | blocked | Serverless Walk-Forward Backtest Orchestrator. | roster_all_collected, experiments_recorded, promotion_gate, knowledge_library, worker_gateway_e2e |
 | R1-f49cb20e | 19 | blocked | Remote Zero-Trust Command and Alpha Alerting Hub. | roster_all_collected, experiments_recorded, promotion_gate, knowledge_library, worker_gateway_e2e |
-| R2-568e4dd8 | 37 | failed | Cloudflare Workers for edge execution, request authentication, orchestration, and job dispatch. | access_protects_hub, queue_dispatch, hub_health |
-| R2-4a0ec542 | 38 | failed | Cloudflare Tunnel (cloudflared) for secure connectivity to the local workstation. | access_protects_hub, queue_dispatch, hub_health, full_test_suite |
-| R2-79b4fa66 | 39 | failed | Cloudflare Access service tokens for machine-to-machine authentication. | access_protects_hub, queue_dispatch, hub_health |
-| R2-8e92a39d | 40 | failed | Cloudflare Queues for asynchronous job distribution where appropriate. | access_protects_hub, queue_dispatch, hub_health |
-| R2-42dd3747 | 52 | failed | cloudflared routing quant.joeysvault.app to the local Quant Hub on port 8090. | access_protects_hub, queue_dispatch, hub_health |
+| R2-b3b3d2ca | 34 | blocked | Python-based orchestration, extraction, analysis, and backtesting. | audit_gists, hub_health, full_test_suite |
+| R2-568e4dd8 | 37 | blocked | Cloudflare Workers for edge execution, request authentication, orchestration, and job dispatch. | access_protects_hub, queue_dispatch, hub_health |
+| R2-4a0ec542 | 38 | blocked | Cloudflare Tunnel (cloudflared) for secure connectivity to the local workstation. | access_protects_hub, queue_dispatch, hub_health, full_test_suite |
+| R2-79b4fa66 | 39 | blocked | Cloudflare Access service tokens for machine-to-machine authentication. | access_protects_hub, queue_dispatch, hub_health |
+| R2-8e92a39d | 40 | blocked | Cloudflare Queues for asynchronous job distribution where appropriate. | access_protects_hub, queue_dispatch, hub_health |
+| R2-f82d10cb | 46 | blocked | GitHub private repositories for version-controlled code, historical data snapshots, experiment records, and re | audit_gists, hub_health, full_test_suite |
+| R2-643ab18c | 49 | blocked | GitHub CLI (gh) for commits, pull requests, issues, discussions, and private Gist creation. | audit_gists, hub_health, full_test_suite |
+| R2-2ce58f4b | 50 | blocked | Python orchestrators for scraping, extraction, validation, ingestion, recovery, and backtesting. | audit_gists, hub_health, full_test_suite |
+| R2-d6fb9a7f | 51 | blocked | FastAPI for local execution services. | audit_gists, hub_health, full_test_suite |
+| R2-42dd3747 | 52 | blocked | cloudflared routing quant.joeysvault.app to the local Quant Hub on port 8090. | access_protects_hub, queue_dispatch, hub_health |
 | R3-f1a3be90 | 62 | blocked | The system must collect market information from geographically and operationally diverse sources without relyi | roster_all_collected, collector_schedule, edge_collection, schema_16_columns, provenance_labels |
 | R3.1-8dfbddee | 68 | blocked | Each collector must: | roster_all_collected, collector_schedule, edge_collection |
 | R3.1-71a35591 | 69 | blocked | Retrieve its assigned source data. | roster_all_collected, collector_schedule, edge_collection, edge_ingest_unit |
@@ -121,12 +131,33 @@ A requirement blocked by several checks is counted under each cause.
 | R3.1-62633990 | 77 | blocked | The implementation may group collectors into shared Worker deployments where appropriate; each agent must reta | roster_all_collected, collector_schedule, edge_collection, edge_ingest_unit |
 | R3.1-6570b1fe | 79 | blocked | Cloudflare edge execution must not be assumed to eliminate source rate limits. | roster_all_collected, collector_schedule, edge_collection, collectors_run |
 | R3.2-e1da111a | 83 | blocked | Each edge collector must transmit its retrieved payload and collection metadata to the local ingestion gateway | roster_all_collected, collector_schedule, edge_collection, edge_ingest_unit, schema_16_columns, provenance_labels |
+| R3.2-730c15bc | 85 | blocked | Required components: | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
 | R3.2-81a4d839 | 86 | blocked | Cloudflare Worker. | roster_all_collected, collector_schedule, edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-2601812e | 87 | blocked | HTTPS transport. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-fa6b555a | 88 | blocked | Cloudflare Access service-token authentication. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-873b3767 | 89 | blocked | CF-Access-Client-Id. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-a95205e8 | 90 | blocked | CF-Access-Client-Secret. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-91b8b6d3 | 91 | blocked | Cloudflare Tunnel. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-7856bc0f | 92 | blocked | Local authenticated ingestion endpoint. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
+| R3.2-d700c127 | 94 | blocked | The local workstation must not expose an unauthenticated public ingestion port. | edge_collection, edge_ingest_unit, access_protects_hub, worker_gateway_e2e |
 | R3.3-d8238967 | 104 | blocked | agent_id | roster_all_collected, collector_schedule, edge_collection, schema_16_columns, provenance_labels |
-| R3.5-f90f98c5 | 137 | blocked | The Git history must preserve historical revisions and support reproducible retrieval. | raw_payloads_verified, observations_reference_payloads, schema_16_columns, provenance_labels, snapshots_versioned, branch_pushed, branch_protection |
-| R3.5-fa8bfa50 | 137 | blocked | Enforce repository permissions and branch protections; do not assume ordinary Git history is intrinsically imm | snapshots_versioned, branch_pushed, branch_protection |
+| R3.5-f90f98c5 | 137 | failed | The Git history must preserve historical revisions and support reproducible retrieval. | raw_payloads_verified, observations_reference_payloads, schema_16_columns, provenance_labels, snapshots_versioned, branch_pushed, branch_protection |
+| R3.5-fa8bfa50 | 137 | failed | Enforce repository permissions and branch protections; do not assume ordinary Git history is intrinsically imm | snapshots_versioned, branch_pushed, branch_protection |
 | R4-e0489c13 | 145 | blocked | These changes must not silently create permanent data gaps. | collector_freshness, selfheal_unit, roster_all_collected |
 | R4.1-ced2a6ba | 149 | blocked | The Python orchestration system must monitor all 81 atomic agents. | selfheal_unit, gatekeeper, collector_freshness, roster_all_collected |
+| R4.4-f57940b2 | 192 | blocked | The repair pipeline must: | selfheal_unit, selfheal_pr_live |
+| R4.4-333bdf25 | 193 | blocked | Create an isolated working branch. | selfheal_unit, selfheal_pr_live |
+| R4.4-f69ec027 | 194 | blocked | Apply the proposed patch. | selfheal_unit, selfheal_pr_live |
+| R4.4-02d45091 | 195 | blocked | Run unit tests against preserved source fixtures. | selfheal_unit, selfheal_pr_live |
+| R4.4-5aedbcff | 196 | blocked | Run schema validation. | selfheal_unit, selfheal_pr_live |
+| R4.4-2781b5c3 | 197 | blocked | Compare extracted values against known expected results. | selfheal_unit, selfheal_pr_live |
+| R4.4-f06a7416 | 198 | blocked | Check timestamp and PIT handling. | selfheal_unit, selfheal_pr_live |
+| R4.4-44c2a840 | 199 | blocked | Generate a repair report. | selfheal_unit, selfheal_pr_live |
+| R4.4-a113ed48 | 200 | blocked | Open a GitHub pull request using gh pr create. | selfheal_unit, selfheal_pr_live |
+| R4.4-d78818ad | 206 | blocked | Production deployment must require successful tests and an authorized merge. | selfheal_unit, selfheal_pr_live |
+| R4.4-afc642da | 206 | blocked | Do not allow an LLM to approve and deploy its own unverified code changes. | selfheal_unit, selfheal_pr_live |
+| R4.5-34636c2d | 212 | blocked | The Worker must authenticate the event and enqueue a deployment or execution request. | webhook_recovery |
+| R4.5-81c63eb3 | 214 | blocked | The local orchestrator must retrieve the approved change, verify its identity, and rerun the affected collecto | webhook_recovery |
 | R5-ee5ec77f | 222 | blocked | The system must discover relationships between seemingly unrelated market developments that can affect NGL and | knowledge_library, cross_domain_sources |
 | R5.1-e87f9b97 | 231 | blocked | FERC filings and regulatory announcements. | cross_domain_sources |
 | R5.1-b701c525 | 236 | blocked | LNG terminal operational notices. | cross_domain_sources |
@@ -147,47 +178,61 @@ A requirement blocked by several checks is counted under each cause.
 | R5.3-76b20e87 | 284 | blocked | NGL purity-product spreads changing alongside natural gas and crude oil benchmarks. | knowledge_library, unstructured_sources, provenance_labels, agents_live_run, hypothesis_evaluated_live, cross_domain_sources |
 | R5.3-afcfe344 | 285 | blocked | Associated gas production changing as crude oil economics shift. | knowledge_library, unstructured_sources, provenance_labels, agents_live_run, hypothesis_evaluated_live, cross_domain_sources |
 | R5.3-01b98b4c | 286 | blocked | Mont Belvieu NGL price movements interacting with Henry Hub forward curves. | knowledge_library, unstructured_sources, provenance_labels, agents_live_run, hypothesis_evaluated_live, cross_domain_sources |
-| R6.1-4385e970 | 332 | failed | Experiments must support parameter variations involving: | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-935d4351 | 333 | failed | Historical lag windows. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-145227b9 | 334 | failed | Weather forecast model selection. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-79761076 | 335 | failed | GFS versus ECMWF weighting. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-6eb6b2fb | 336 | failed | HDD and CDD sensitivity. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-eee2811d | 337 | failed | Production changes. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-8d00578a | 338 | failed | Storage deviations. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-ad5bf78c | 339 | failed | Pipeline flow disruptions. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-c491e8d0 | 340 | failed | LNG feedgas changes. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-9c71df28 | 341 | failed | NGL production and fractionation. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-c7db39af | 342 | failed | Ethane rejection. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-94f23cad | 343 | failed | Propane exports. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-360db41e | 344 | failed | Petrochemical demand. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-2ac160e8 | 345 | failed | Regional basis relationships. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-30a88cfd | 346 | failed | Henry Hub forward curves. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.1-95616166 | 347 | failed | Cross-domain vector-derived features. | queue_dispatch, multi_feature_experiments, backtest_unit |
-| R6.2-d4023761 | 353 | failed | A local Python worker must retrieve authenticated experiment jobs through the Cloudflare infrastructure. | queue_dispatch, experiment_endpoint, experiments_recorded |
-| R6.2-0a994e96 | 359 | failed | The system must not require thousands of simultaneous in-memory datasets. | queue_dispatch, experiment_endpoint, experiments_recorded, backtest_unit |
-| R8-97616259 | 529 | failed | The five architectures must operate as a connected pipeline. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-8df61f90 | 533 | failed | Cloudflare Workers retrieve source material through scheduled edge collectors. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-976918fe | 534 | failed | Secure ingress delivers source payloads to the local extraction infrastructure. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-725b75a3 | 535 | failed | The 81 atomic agents extract, normalize, and validate market observations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-414f2111 | 536 | failed | The ingestion system preserves original payloads and historical vintages. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-b7b57c6c | 537 | failed | SQLite stores structured PIT market observations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-4268a48c | 538 | failed | Ollama embeddings index relevant source documents and market events. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-b6c9a07c | 539 | failed | The vector engine retrieves historical cross-domain analogs. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-356a1f16 | 540 | failed | Ollama synthesizes structured observations and unstructured market information. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-e0ad558a | 541 | failed | The hypothesis engine generates testable market relationships. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-88b7bc11 | 542 | failed | Cloudflare Queues distribute backtesting experiments. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-e43422f7 | 543 | failed | Local compute executes PIT walk-forward simulations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-ed3fcfb1 | 544 | failed | The evaluation engine calculates out-of-sample performance. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-27bd6ebc | 545 | failed | GitHub preserves source code, experiment results, research memos, and approved model versions. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-20b70032 | 546 | failed | The remote Quant Hub exposes authenticated analytical capabilities. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-520b6109 | 547 | failed | The alerting system reports validated discoveries, operational failures, and material market developments. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R8-9adaa64a | 549 | failed | A successful system must connect all five architectures. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
-| R9-8d62a603 | 586 | failed | Preserve Cloudflare Access authentication. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-319a765e | 587 | failed | Keep service credentials outside source control. | raw_payloads_verified, schema_16_columns, gatekeeper, access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-e22e92b1 | 588 | failed | Restrict local database execution to read-only operations where appropriate. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-6ec4b921 | 589 | failed | Authenticate remote jobs and webhooks. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-7dfd4af1 | 590 | failed | Require authorization before merging and deploying repaired code. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
-| R9-a93f59cd | 591 | failed | Preserve execution and incident audit records. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R5.5-c478768c | 318 | blocked | Each memo must reference the underlying source observations, vector nodes, model version, analytical assumptio | hypothesis_memo, research_log_live |
+| R6.1-4385e970 | 332 | blocked | Experiments must support parameter variations involving: | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-935d4351 | 333 | blocked | Historical lag windows. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-145227b9 | 334 | blocked | Weather forecast model selection. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-79761076 | 335 | blocked | GFS versus ECMWF weighting. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-6eb6b2fb | 336 | blocked | HDD and CDD sensitivity. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-eee2811d | 337 | blocked | Production changes. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-8d00578a | 338 | blocked | Storage deviations. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-ad5bf78c | 339 | blocked | Pipeline flow disruptions. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-c491e8d0 | 340 | blocked | LNG feedgas changes. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-9c71df28 | 341 | blocked | NGL production and fractionation. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-c7db39af | 342 | blocked | Ethane rejection. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-94f23cad | 343 | blocked | Propane exports. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-360db41e | 344 | blocked | Petrochemical demand. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-2ac160e8 | 345 | blocked | Regional basis relationships. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-30a88cfd | 346 | blocked | Henry Hub forward curves. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.1-95616166 | 347 | blocked | Cross-domain vector-derived features. | queue_dispatch, multi_feature_experiments, backtest_unit |
+| R6.2-d4023761 | 353 | blocked | A local Python worker must retrieve authenticated experiment jobs through the Cloudflare infrastructure. | queue_dispatch, experiment_endpoint, experiments_recorded |
+| R6.2-0a994e96 | 359 | blocked | The system must not require thousands of simultaneous in-memory datasets. | queue_dispatch, experiment_endpoint, experiments_recorded, backtest_unit |
+| R7.5-a91cd2e9 | 512 | blocked | Original command. | audit_gists, worker_gateway_e2e |
+| R7.5-40eaa3f5 | 513 | blocked | Request timestamp. | audit_gists, worker_gateway_e2e |
+| R7.5-92e67c77 | 514 | blocked | PIT cutoff. | audit_gists, worker_gateway_e2e |
+| R7.5-1e4e243f | 515 | blocked | Retrieved market observations. | audit_gists, worker_gateway_e2e |
+| R7.5-0b23f89c | 516 | blocked | Retrieved vector nodes. | audit_gists, worker_gateway_e2e |
+| R7.5-037320b0 | 517 | blocked | Generated SQL. | audit_gists, worker_gateway_e2e |
+| R7.5-559b279e | 518 | blocked | Executed results. | audit_gists, worker_gateway_e2e |
+| R7.5-a6215bca | 519 | blocked | Scenario estimates. | audit_gists, worker_gateway_e2e |
+| R7.5-0b7265d4 | 520 | blocked | Market thesis. | audit_gists, worker_gateway_e2e |
+| R7.5-62f4a68f | 521 | blocked | Model identity. | audit_gists, worker_gateway_e2e |
+| R7.5-cd216305 | 522 | blocked | Execution status. | audit_gists, worker_gateway_e2e |
+| R7.5-b77ca20d | 523 | blocked | Relevant provenance. | audit_gists, worker_gateway_e2e |
+| R7.5-205221b1 | 525 | blocked | The alerting system must notify the user of material market events, failed collectors, data-quality incidents, | alert_delivery |
+| R8-97616259 | 529 | blocked | The five architectures must operate as a connected pipeline. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-8df61f90 | 533 | blocked | Cloudflare Workers retrieve source material through scheduled edge collectors. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-976918fe | 534 | blocked | Secure ingress delivers source payloads to the local extraction infrastructure. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-725b75a3 | 535 | blocked | The 81 atomic agents extract, normalize, and validate market observations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-414f2111 | 536 | blocked | The ingestion system preserves original payloads and historical vintages. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-b7b57c6c | 537 | blocked | SQLite stores structured PIT market observations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-4268a48c | 538 | blocked | Ollama embeddings index relevant source documents and market events. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-b6c9a07c | 539 | blocked | The vector engine retrieves historical cross-domain analogs. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-356a1f16 | 540 | blocked | Ollama synthesizes structured observations and unstructured market information. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-e0ad558a | 541 | blocked | The hypothesis engine generates testable market relationships. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-88b7bc11 | 542 | blocked | Cloudflare Queues distribute backtesting experiments. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-e43422f7 | 543 | blocked | Local compute executes PIT walk-forward simulations. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-ed3fcfb1 | 544 | blocked | The evaluation engine calculates out-of-sample performance. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-27bd6ebc | 545 | blocked | GitHub preserves source code, experiment results, research memos, and approved model versions. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-20b70032 | 546 | blocked | The remote Quant Hub exposes authenticated analytical capabilities. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-520b6109 | 547 | blocked | The alerting system reports validated discoveries, operational failures, and material market developments. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R8-9adaa64a | 549 | blocked | A successful system must connect all five architectures. | worker_gateway_e2e, queue_dispatch, knowledge_library, backtest_unit, roster_all_collected, edge_collection, alert_delivery |
+| R9-8d62a603 | 586 | blocked | Preserve Cloudflare Access authentication. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R9-319a765e | 587 | blocked | Keep service credentials outside source control. | raw_payloads_verified, schema_16_columns, gatekeeper, access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R9-e22e92b1 | 588 | blocked | Restrict local database execution to read-only operations where appropriate. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R9-6ec4b921 | 589 | blocked | Authenticate remote jobs and webhooks. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R9-7dfd4af1 | 590 | blocked | Require authorization before merging and deploying repaired code. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
+| R9-a93f59cd | 591 | blocked | Preserve execution and incident audit records. | access_protects_hub, env_locked, execute_sandbox_tests, webhook_recovery |
 | R10-cf8a2b74 | 595 | blocked | The completed platform must be able to: | roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-d712f6b5 | 597 | blocked | Collect and maintain data from 81 or more specialized market-data agents. | roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-ba057802 | 598 | blocked | Retrieve historical market observations with exact point-in-time availability. | pit_tests, raw_payloads_verified, roster_all_collected, worker_gateway_e2e, backtest_unit |
@@ -197,26 +242,22 @@ A requirement blocked by several checks is counted under each cause.
 | R10-4c202fb8 | 602 | blocked | Maintain a searchable cross-domain vector knowledge library. | knowledge_library, cross_domain_sources, hypothesis_memo, roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-325030ce | 603 | blocked | Identify historical analogs across natural gas, NGL, weather, infrastructure, and financial markets. | knowledge_library, cross_domain_sources, hypothesis_memo, roster_all_collected, worker_gateway_e2e, backtest_unit |
 | R10-513986e3 | 604 | blocked | Generate structured, testable market-alpha hypotheses. | knowledge_library, cross_domain_sources, hypothesis_memo, roster_all_collected, worker_gateway_e2e, backtest_unit |
-| R10-973553ea | 605 | failed | Execute large-scale PIT walk-forward backtesting experiments. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
-| R10-3dba0e7d | 606 | failed | Rank competing models using out-of-sample performance. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
-| R10-466788d5 | 607 | failed | Maintain reproducible experiment records and model leaderboards. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
+| R10-973553ea | 605 | blocked | Execute large-scale PIT walk-forward backtesting experiments. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
+| R10-3dba0e7d | 606 | blocked | Rank competing models using out-of-sample performance. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
+| R10-466788d5 | 607 | blocked | Maintain reproducible experiment records and model leaderboards. | backtest_unit, leaderboard_versioned, queue_dispatch, roster_all_collected, worker_gateway_e2e |
 | R10-dd8d6fa7 | 608 | blocked | Accept authenticated remote natural-language commands. | worker_gateway_e2e, alert_delivery, collector_schedule, roster_all_collected, backtest_unit |
 | R10-0cd3fea1 | 609 | blocked | Execute quantitative scenario analyses on the local workstation. | worker_gateway_e2e, alert_delivery, collector_schedule, roster_all_collected, backtest_unit |
 | R10-7b0e4bd5 | 610 | blocked | Produce auditable market research and alpha alerts. | worker_gateway_e2e, alert_delivery, collector_schedule, roster_all_collected, backtest_unit |
-| R10-182dd91b | 611 | failed | Continuously improve its analytical capabilities through validated data, research, and backtesting. | backtest_unit, leaderboard_versioned, queue_dispatch, worker_gateway_e2e, alert_delivery, collector_schedule, roster_all_collected |
+| R10-182dd91b | 611 | blocked | Continuously improve its analytical capabilities through validated data, research, and backtesting. | backtest_unit, leaderboard_versioned, queue_dispatch, worker_gateway_e2e, alert_delivery, collector_schedule, roster_all_collected |
 | R11-049dcf38 | 619 | blocked | Your responsibility is to backward-engineer the complete execution path from the ultimate objective to the req | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-1de351b2 | 629 | blocked | Identify existing agents, scripts, tests, scheduled jobs, and services. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-2d6da86e | 642 | blocked | External data sources and access requirements. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
-| R12.2-f0f82166 | 681 | blocked | Create and route markets.joeysvault.app as a new subdomain under joeysvault.app. | public_markets, main_site_link, access_protects_hub, markets_local |
-| R12.2-817681e4 | 682 | blocked | Create and route ngl.joeysvault.app (serving the NGL visual dashboard and the canonical synchronized JSON endp | public_markets, main_site_link, access_protects_hub, markets_local |
-| R12.2-01eef309 | 683 | blocked | Link markets.joeysvault.app (and ngl.joeysvault.app where appropriate) directly from the main landing page htt | public_markets, main_site_link, access_protects_hub, markets_local |
-| R12.2-e5fa8809 | 684 | blocked | Keep privileged write/LLM/execution endpoints on quant.joeysvault.app (127.0.0.1:8090) protected behind Cloudf | public_markets, main_site_link, access_protects_hub, markets_local |
-| R12.4-97513311 | 696 | blocked | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, roster_all_collected |
-| R12.4-b78c405d | 699 | blocked | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, roster_all_collected |
-| R12.5-0f7de509 | 704 | blocked | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, roster_all_collected |
-| R12.5-66afc426 | 705 | blocked | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, roster_all_collected |
-| R12.5-42a3ffd8 | 706 | blocked | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, roster_all_collected |
-| R12.5-f4ab8294 | 707 | blocked | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, roster_all_collected |
+| R12.4-97513311 | 696 | blocked | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.4-b78c405d | 699 | blocked | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-0f7de509 | 704 | blocked | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-66afc426 | 705 | blocked | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-42a3ffd8 | 706 | blocked | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-f4ab8294 | 707 | blocked | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
 | R12.7-31088a85 | 724 | blocked | Live Regional Flows & Active Pipeline Alerts: Real-time border/LNG/interstate meter flows, capacity constraint | ngl_term, roster_all_collected |
 
 ## CLAUDE.md directive (requirement -> implementation -> checks)

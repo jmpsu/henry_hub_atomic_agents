@@ -30,3 +30,13 @@ artifacts/NGL  technical audit latest version output v2
 
 # Local DB checkpoints taken before state-changing operations
 henry_hub_pit.db.pre-*
+
+# Binary artifacts, archives, backups, and local DBs
+*.pdf
+*.odt
+*.ods
+*.mp4
+*.tar.gz
+*.bak.*
+*.tmp
+*.db-shm

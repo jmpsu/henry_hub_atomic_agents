@@ -108,7 +108,7 @@ class OllamaLayer(unittest.TestCase):
         c = sqlite3.connect(":memory:"); llm_mod.ensure(c); return c
 
     def test_config_is_explicit_and_complete(self):
-        for task in ("extract", "classify", "interpret", "investigate", "synthesize", "diagnose", "embed"):
+        for task in ("extract", "classify", "interpret", "investigate", "triage", "synthesize", "diagnose", "embed"):
             cfg = llm_mod.CONFIG[task]
             self.assertTrue(cfg["model"]); self.assertGreater(cfg["timeout"], 0)
         self.assertEqual(llm_mod.CONFIG["synthesize"]["model"], llm_mod.REASONING_MODEL)
@@ -345,6 +345,20 @@ class DataQuality(unittest.TestCase):
         self.assertIn("3.04 (available 2026-10-20T21:00:00Z) -> ", fact); self.assertIn("4.5 (available 2026-10-26T12:00:00Z)", fact)
         again = workers.DataQualityAgent().run(c, FakeLLM(BASE), "2026-10-30T00:00:00Z")
         self.assertEqual(again["new_issues"], 0)                                      # each issue is reported once
+
+    def test_triage_uses_the_model_and_cites_source_evidence(self):
+        db, c = db_with_data()
+        avail = "2026-10-20T21:00:00Z"
+        nid = kb_ingest.node_id("price", "monthly_Agent_HH_Spot_EIA:2026-10")
+        c.execute("INSERT OR IGNORE INTO kb_nodes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                  (nid, "price", "monthly_Agent_HH_Spot_EIA", "2026-10", "HH spot", "3.04", "t", "Agent_HH_Spot_EIA", avail,
+                   kb_ingest.epoch(avail), avail, "", "measured", "h", avail, np.zeros(8, dtype=np.float32).tobytes()))
+        c.commit()
+        llm = FakeLLM({"triage": {"assessment": "no_actionable_issues", "action": "none"}})
+        res = workers.DataQualityAgent().run(c, llm, "2026-10-30T00:00:00Z")
+        self.assertIn("triage", [task for task, _ in llm.calls])
+        self.assertEqual(res["triage"]["assessment"], "no_actionable_issues")
+        self.assertTrue(c.execute("SELECT 1 FROM kb_edges WHERE src=? AND type='evidence_for'", (nid,)).fetchone())
 
 
 class Recheck(unittest.TestCase):

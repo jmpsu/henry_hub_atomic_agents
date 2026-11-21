@@ -312,7 +312,10 @@ def test_hub_chat_endpoints_stream_events_and_return_structured_json(tmp_path, m
     evs = re.findall(r"^event: (\w+)$", body, re.M)
     assert evs[0] == "status" and evs[-1] == "final" and "context" in evs
     assert c.post("/api/chat", json={"message": "x"}).status_code == 422 and c.post("/api/chat", json={"message": "hello there", "as_of": "garbage"}).status_code == 422
-    assert (tmp_path / "chat_log.db").exists() or True
+    log = tmp_path / "chat_log.db"
+    assert log.exists()
+    prompts = [r[0] for r in sqlite3.connect(log).execute("SELECT prompt FROM chat_log")]
+    assert any("Freeport flow" in p for p in prompts) and any("forward curve" in p for p in prompts)
     for _ in range(hub.CHAT_PER_MINUTE):
         hub._CHAT_TIMES.append(time.time())
     assert c.post("/api/chat", json={"message": "hello there"}).status_code == 429

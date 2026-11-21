@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-15T22:43:13Z",
+ "as_of": "2026-11-15T14:33:13Z",
  "note": "Payload bytes are archived under raw/<sha256> on the host and are not committed.",
  "payloads": [
   {
@@ -2305,78 +2305,6 @@
    "retrieved_timestamp": "2026-11-15T14:32:58Z",
    "source_id": "ecmwf_open_data",
    "source_url": "https://ecmwf-forecasts.s3.eu-central-1.amazonaws.com/20261115/00z/ifs/0p25/oper/20261115000000-168h-oper-fc.grib2"
-  },
-  {
-   "byte_length": 32993,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "dfb878a06745a1f270064a8b3c7e47a256dd9c820cf28983aadb664b1b82098c",
-   "retrieved_timestamp": "2026-11-15T22:42:29Z",
-   "source_id": "noaa_cpc_610_discussion",
-   "source_url": "https://www.cpc.ncep.noaa.gov/products/predictions/610day/fxus06.html"
-  },
-  {
-   "byte_length": 284743,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "3a13da35dc3e427f83c978f2ce707063dd7cc5ece3f6e685595fac53bf8dd4bf",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_kmlp",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=KMLP"
-  },
-  {
-   "byte_length": 371808,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "5384663fb97f6c8ca82433d390429bf13172a0b07cbeb47d8491247b3d3a0aec",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_cig",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=CIG"
-  },
-  {
-   "byte_length": 437756,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "8040b5066e12ec31b88e3b6d992b6e554f42c2b617d0c9175e689a5077f9441a",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_sng",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=SNG"
-  },
-  {
-   "byte_length": 425747,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "a87a62671e117489a464b9033bb51da4b2fe98eeb2cd2f9dc0f1a3c6aeceaab0",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_epng",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EPNG"
-  },
-  {
-   "byte_length": 445032,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "d2d4b45b90e1a2a2f643f51018f670a34d9feb76023f8cc27b6d74bc44d004eb",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_tgp",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=TGP"
-  },
-  {
-   "byte_length": 303038,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "dd2a875ade836d1506481a461a6780cb7b3375b2889065e5bb604ac50120ad9d",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_eec",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=EEC"
-  },
-  {
-   "byte_length": 433993,
-   "content_type": "text/html; charset=utf-8",
-   "http_status": 200,
-   "raw_payload_hash": "fa89793d40b12598155a073880e83cd570b3a493ee3b1bbf06f3764b2708aa7a",
-   "retrieved_timestamp": "2026-11-15T22:42:31Z",
-   "source_id": "kinder_morgan_notices_ngpl",
-   "source_url": "https://pipeline2.kindermorgan.com/Notices/Notices.aspx?type=C&code=NGPL"
   }
  ],
  "schema": "pit-snapshot/1"
