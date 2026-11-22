@@ -9,11 +9,11 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import httpx
 import xlrd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import ingest  # noqa: E402
+from ingestion.http_client import fetch_tuple  # noqa: E402
 
 SERIES = {  # xls name -> (agent_id, sourcekey, unit, discontinued)
     "RNGWHHDd": ("Agent_HH_Spot_EIA", "RNGWHHD", "USD/MMBtu", False),
@@ -40,8 +40,7 @@ def read_xls(body: bytes) -> list:
 
 
 def fetch(url):
-    r = httpx.get(url, timeout=60, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0"})
-    return r.status_code, r.content, r.headers.get("content-type", "")
+    return fetch_tuple(url, timeout=60, retries=2, backoff=1.0, headers={"User-Agent": "Mozilla/5.0"})
 
 
 def load(conn, name, rows, raw_hash, retrieved, url) -> int:

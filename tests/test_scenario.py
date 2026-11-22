@@ -43,6 +43,12 @@ class Sandbox(unittest.TestCase):
         for q in ("SELECT sql FROM sqlite_master", "SELECT count(*) FROM raw_payloads", "SELECT count(*) FROM main.pit_market_data",
                   "SELECT (SELECT count(*) FROM main.pit_market_data) FROM pit_market_data"):
             with self.assertRaises(sqlite3.DatabaseError): s.run_sandboxed(self.db, q, A2)
+
+    def test_projection_hides_storage_and_transport_metadata(self):
+        A2 = "2026-01-05T00:00:00Z"
+        for column in ("raw_payload_hash", "source_url", "retrieved_timestamp", "revision_timestamp"):
+            q = f"SELECT {column} FROM pit_market_data WHERE available_timestamp <= '{A2}'"
+            with self.assertRaises(sqlite3.DatabaseError): s.run_sandboxed(self.db, q, A2)
     def test_textual_validator_rejects_bypasses(self):
         ok = f"SELECT agent_id,value FROM pit_market_data WHERE available_timestamp <= '{A}'"
         for bad in (ok + " OR 1=1", f"SELECT (SELECT group_concat(sql) FROM sqlite_master) FROM pit_market_data WHERE available_timestamp <= '{A}'",

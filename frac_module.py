@@ -19,6 +19,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+import series_catalog
+
 ETHANE_MMBTU_PER_GAL = 0.0664                     # B2, the requirement's figure (the page's earlier 0.0665 was reconciled to this, O4)
 TF_COST_USD_PER_GAL = 0.08                        # ASSUMPTION (AD3): transport + fractionation; replace with the actual contract rate
 FULL_REJECTION_DEFICIT_USD_MMBTU = 1.00           # ASSUMPTION: deficit at which rejection is complete
@@ -68,8 +70,14 @@ def _fresh(row: dict | None, cutoff: str) -> bool:
         and row.get("provenance", "measured") == "measured"
 
 
-def build(ethane: dict | None, hub: dict | None, waha: dict | None, cutoff: str) -> dict:
+def build(ethane: dict | None, hub: dict | None, waha: dict | None, cutoff: str, conn=None) -> dict:
     """ethane / hub / waha: latest row dicts {value, latest_target_timestamp, available_timestamp, provenance} (point in time, already <= cutoff) or None."""
+    feeds = {}
+    if conn is not None:
+        for agent in (ETHANE_AGENT, HH_AGENT, WAHA_AGENT):
+            feeds[agent] = series_catalog.feed_status(conn, agent, cutoff)
+    feed_gaps = [{"agent_id": agent, "status": feed["status"], "label": feed["label"]} for agent, feed in feeds.items()
+                 if feed["label"] in ("Feed Not Configured", "Feed Not Fresh")]
     blocked = []
     if not _fresh(ethane, cutoff):
         blocked.append({"input": ETHANE_AGENT, "reason": "no Mont Belvieu ethane price is collected: EIA publishes no ethane spot (collectors/eia_petroleum_spot.py), and no free feed was found",
@@ -78,7 +86,7 @@ def build(ethane: dict | None, hub: dict | None, waha: dict | None, cutoff: str)
         blocked.append({"input": HH_AGENT, "reason": "no fresh Henry Hub spot at the cutoff", "activate": "python collectors/run_all.py (eia_prices)"})
     waha_note = {"input": WAHA_AGENT, "status": "BLOCKED" if not _fresh(waha, cutoff) else "available",
                  "reason": "no Waha price source is collected (AD2); the hub price used is Henry Hub only", "activate": "add a licensed Waha feed as collectors/waha_<source>.py (Agent_Gas_Waha_Spot)"}
-    base = {"provenance": "extracted_estimate", "formula": FORMULA, "assumptions": LABELS, "waha": waha_note, "unit": "Bcf/d",
+    base = {"provenance": "extracted_estimate", "formula": FORMULA, "assumptions": LABELS, "waha": waha_note, "feed_gaps": feed_gaps, "unit": "Bcf/d",
             "output_contract": "only net_dry_gas_delta_bcfd may enter the forward pricing balance (B4); no balance model consumes it yet (O6)", "feeds_forward_balance": False}
     if blocked:
         return {**base, "status": "pending_collector", "blocked": blocked, "tf_usd_mmbtu": tf_usd_mmbtu()}

@@ -108,10 +108,19 @@ class OllamaLayer(unittest.TestCase):
         c = sqlite3.connect(":memory:"); llm_mod.ensure(c); return c
 
     def test_config_is_explicit_and_complete(self):
-        for task in ("extract", "classify", "interpret", "investigate", "triage", "synthesize", "diagnose", "embed"):
+        for task in ("extract", "classify", "interpret", "investigate", "triage", "synthesize", "diagnose", "selector_repair", "kg_triplets", "embed"):
             cfg = llm_mod.CONFIG[task]
-            self.assertTrue(cfg["model"]); self.assertGreater(cfg["timeout"], 0)
-        self.assertEqual(llm_mod.CONFIG["synthesize"]["model"], llm_mod.REASONING_MODEL)
+            self.assertTrue(cfg["model"]); self.assertGreater(cfg["timeout"], 0); self.assertGreater(cfg["num_ctx"], 0)
+        for task in ("extract", "classify", "investigate", "triage", "diagnose", "selector_repair", "kg_triplets"):
+            cfg = llm_mod.CONFIG[task]
+            self.assertEqual(cfg["model"], llm_mod.CODER_MODEL)
+            self.assertEqual((cfg["num_ctx"], cfg["num_predict"]), (llm_mod.CODER_CTX, llm_mod.CODER_TOKENS))
+        for task in ("interpret", "synthesize"):
+            cfg = llm_mod.CONFIG[task]
+            self.assertEqual(cfg["model"], llm_mod.REASONING_MODEL)
+            self.assertEqual((cfg["num_ctx"], cfg["num_predict"]), (llm_mod.REASONING_CTX, llm_mod.REASONING_TOKENS))
+        self.assertEqual(llm_mod.CHAT_MODEL, llm_mod.REASONING_MODEL)
+        self.assertEqual(llm_mod.KG_MODEL, llm_mod.CODER_MODEL)
         self.assertEqual(llm_mod.CONFIG["embed"]["model"], llm_mod.EMBED_MODEL)
 
     def test_retry_on_5xx_then_success(self):
@@ -160,7 +169,8 @@ class OllamaLayer(unittest.TestCase):
     def test_status_requires_models_not_just_daemon(self):
         h = lambda req: httpx.Response(200, json={"models": [{"name": "nomic-embed-text:latest"}]})
         st = llm_mod.status(httpx.Client(transport=httpx.MockTransport(h)))
-        self.assertTrue(st["daemon"]); self.assertFalse(st["ok"]); self.assertIn(llm_mod.REASONING_MODEL, st["missing"])
+        self.assertTrue(st["daemon"]); self.assertFalse(st["ok"])
+        self.assertIn(llm_mod.CODER_MODEL, st["missing"]); self.assertIn(llm_mod.REASONING_MODEL, st["missing"])
         down = llm_mod.status(httpx.Client(transport=httpx.MockTransport(lambda req: (_ for _ in ()).throw(httpx.ConnectError("refused")))))
         self.assertFalse(down["daemon"]); self.assertFalse(down["ok"])
 

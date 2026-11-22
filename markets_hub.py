@@ -121,6 +121,21 @@ def knowledge_graph(limit: int = Query(300, ge=1, le=600), as_of: str | None = Q
         conn.close()
 
 
+@app.get("/api/knowledge-graph/reachable")
+def knowledge_graph_reachable(root: str = Query(..., max_length=64), as_of: str | None = Query(None, max_length=40),
+                              hops: int = Query(3, ge=1, le=10), limit: int = Query(100, ge=1, le=500),
+                              types: str | None = Query(None, max_length=200)):
+    """Bounded, PIT-safe reachable subgraph rooted at one knowledge object."""
+    cutoff = _cutoff(as_of)
+    conn = _ro()
+    try:
+        edge_types = [t.strip() for t in (types or "").split(",") if t.strip()]
+        return {"as_of": cutoff, "root": root, **kb_ingest.graph_reachable(
+            conn, [root], kb_ingest.epoch(cutoff), edge_types=edge_types, max_hops=hops, limit=limit)}
+    finally:
+        conn.close()
+
+
 @app.get("/api/knowledge-node/{node_id}")
 def knowledge_node(node_id: str, as_of: str | None = Query(None, max_length=40)):
     """One knowledge object: provenance, PIT timestamps, edges, verdict, source payload metadata (never the archive path)."""
@@ -327,3 +342,8 @@ async def _inject_markets_release_version(request: _RelRequest, call_next):
         except Exception:
             pass
     return resp
+
+@app.get("/api/geo/lng-registry")
+def api_geo_lng_registry():
+    from lng_geoenv.real_registry import export_geojson
+    return export_geojson()

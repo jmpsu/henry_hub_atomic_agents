@@ -36,3 +36,12 @@ class FutureRows(unittest.TestCase):
         for _ in range(3):
             g.collect(c, fetcher=lambda u: (200, page.encode(), "text/html"))
         self.assertEqual(c.execute("select count(*) from pit_market_data where target_timestamp like '2026-06-03%'").fetchone()[0], 1)
+
+
+class BlockedFeed(unittest.TestCase):
+    def test_http_403_degrades_without_writing_data(self):
+        f = os.path.join(_scratch.mkdtemp(), "t.db"); init_db.migrate(f); c = sqlite3.connect(f)
+        out = g.collect(c, fetcher=lambda u: (403, b"", "text/html"))
+        self.assertEqual(out[0]["status"], "unavailable")
+        self.assertEqual(out[0]["http_status"], 403)
+        self.assertEqual(c.execute("select count(*) from pit_market_data").fetchone()[0], 0)

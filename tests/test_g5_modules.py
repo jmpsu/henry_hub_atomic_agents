@@ -98,6 +98,7 @@ def test_estimate_flat_history_is_the_anchor_times_the_fuel_uplift_and_percentil
     assert est["p10"] <= est["p50"] <= est["p90"]
     assert anchor * 1.08 - 1e-3 <= est["p10"] and est["p90"] <= anchor * 1.10 + 1e-3  # zero growth history -> only the 8-10 % uplift spreads the result
     assert est["n_iterations"] == 1000 and est["evidence"]["ebb_scheduled_quantity"] == 0 and {x["id"] for x in est["not_used"]} == {"F1", "F2", "F3", "F4", "F8"}
+    assert {x["id"] for x in est["feed_gaps"] if x["label"] == "Feed Not Configured"} >= {"F1", "F2", "F3", "F4", "F8"}
     assert lg.estimate(c, "2026-06-15T00:00:00Z")["p50"] == est["p50"]                # deterministic seed
 
 
@@ -149,8 +150,11 @@ def _row(v, avail="2026-11-16T12:00:00Z", prov="measured"):
 
 
 def test_frac_module_pending_records_the_exact_blockers_and_never_guesses():
-    out = fm.build(None, _row(3.0), None, "2026-11-17T12:00:00Z")
+    db = _db()
+    c = sqlite3.connect(db)
+    out = fm.build(None, _row(3.0), None, "2026-11-17T12:00:00Z", c)
     assert out["status"] == "pending_collector" and [b["input"] for b in out["blocked"]] == ["Agent_NGL_MontBelvieu_Ethane"]
+    assert {g["agent_id"] for g in out["feed_gaps"] if g["label"] == "Feed Not Configured"} >= {"Agent_NGL_MontBelvieu_Ethane", "Agent_Gas_Waha_Spot"}
     assert out["waha"]["status"] == "BLOCKED" and "Waha" in out["waha"]["reason"] and "net_dry_gas_delta_bcfd" not in out
     assert fm.build(_row(25.0, avail="2026-10-01T00:00:00Z"), _row(3.0), None, "2026-11-17T12:00:00Z")["status"] == "pending_collector"      # stale ethane
     assert fm.build(_row(25.0, prov="unverified_seed"), _row(3.0), None, "2026-11-17T12:00:00Z")["status"] == "pending_collector"          # a seed is not a measurement
@@ -270,3 +274,19 @@ def test_the_feedgas_model_runs_inside_the_scheduled_pipeline_after_its_anchor_c
     empty = sqlite3.connect(_db())
     out = lg.run_conn(empty, "2026-06-15T00:00:00Z", tmp_path / "g.json")
     assert out["status"] == "pending_collector" and out["rows_written"] == 0
+
+
+def test_prior_year_cpc_revisions_are_collected_outside_january(monkeypatch):
+    from datetime import datetime, timezone
+    from collectors import run_all
+
+    class FixedClock:
+        @staticmethod
+        def now(tz):
+            return datetime(2026, 11, 22, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(run_all, "datetime", FixedClock)
+    names = run_all.names()
+    assert names.index("cpc_heating") < names.index("cpc_heating_prev_year")
+    assert names.index("cpc_cooling") < names.index("cpc_cooling_prev_year")
+    assert "cpc_heating_prev_year" in names and "cpc_cooling_prev_year" in names

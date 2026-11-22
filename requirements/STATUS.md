@@ -1,89 +1,89 @@
-# Requirement status (2026-11-20T07:28:41Z)
+# Requirement status (2026-11-22T17:50:05Z)
 
 Source: `artifacts/Ultimate_Goal.md` (sha256 `8eb56ffd613480c1`) · 427 atomic requirements
 
 | Status | Count |
 |---|---|
-| passed | 268 |
-| failed | 2 |
-| blocked | 157 |
+| passed | 249 |
+| failed | 27 |
+| blocked | 151 |
 | unverified | 0 |
 
 ## Checks
 
 | Check | Status | Evidence | Blocked by |
 |---|---|---|---|
-| `access_protects_hub` | passed | /execute 403, /ingest 403 |  |
-| `agent_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `agents_live_run` | passed | ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 75, 'data_quality': 1, 'synthesis': 6}; embedding ok  |  |
-| `agents_scheduled` | passed | timer deployment unit (systemctl unavailable in this runner); ExecStopPost run_agents.py=True; /ingest trigger=True |  |
-| `agents_share_knowledge` | passed | 7 cross-agent message reads {'anomaly': 1, 'incident': 1, 'pipeline_event': 1}; 19 findings, 9 linked to source/data evidence, 11 finding->finding links (later runs build on earlie |  |
-| `alert_delivery` | blocked | incident issues []; event streams [] | external_credentials: gh auth is unavailable in this runner |
-| `architecture_doc` | passed | sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
-| `audit_gists` | blocked | 0 recent hub gists | external_credentials: gh auth is unavailable in this runner |
-| `backtest_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `branch_protection` | blocked | Welcome to GitHub CLI!
+| `access_protects_hub` | passed (carried over) | /execute 403, /ingest 403 |  |
+| `agent_unit` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `agents_live_run` | passed (carried over) | ok runs ['diagnostics', 'data_quality', 'repair', 'notice_analyst', 'anomaly', 'synthesis']; qwen3 ok calls {'notice_analyst': 75, 'data_quality': 1, 'synthesis': 6}; embedding ok  |  |
+| `agents_scheduled` | passed (carried over) | timer deployment unit (systemctl unavailable in this runner); ExecStopPost run_agents.py=True; /ingest trigger=True |  |
+| `agents_share_knowledge` | passed (carried over) | 7 cross-agent message reads {'anomaly': 1, 'incident': 1, 'pipeline_event': 1}; 19 findings, 9 linked to source/data evidence, 11 finding->finding links (later runs build on earlie |  |
+| `alert_delivery` | blocked (carried over) | incident issues []; event streams [] | external_credentials: gh auth is unavailable in this runner |
+| `architecture_doc` | passed (carried over) | sections present=['Architecture 1', 'Architecture 2', 'Architecture 3', 'Architecture 4', 'Architecture 5']; tracked=True |  |
+| `audit_gists` | blocked (carried over) | 0 recent hub gists | external_credentials: gh auth is unavailable in this runner |
+| `backtest_unit` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `branch_protection` | blocked (carried over) | Welcome to GitHub CLI!
 
 To authenticate, please run `gh auth login`. | platform_limit: GitHub requires Pro or a public repository for branch protection on this private repo |
-| `branch_pushed` | failed | ## quant-hub-build...origin/quant-hub-build [ahead 1] |  |
-| `collector_freshness` | passed | all daily series fresh (<=5 days) |  |
-| `collector_schedule` | passed | timer deployment unit (systemctl unavailable in this runner); worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, re |  |
+| `branch_pushed` | failed (carried over) | ## quant-hub-build...origin/quant-hub-build [ahead 1] |  |
+| `collector_freshness` | passed (carried over) | all daily series fresh (<=5 days) |  |
+| `collector_schedule` | passed (carried over) | timer deployment unit (systemctl unavailable in this runner); worker crons ['crons = ["30 13 * * *", "45 15 * * THU"]  # daily 13:30 UTC (CPC); Thursdays 15:45 UTC (EIA storage, re |  |
 | `collectors_run` | passed (carried over) | OK   cpc_heating {'agent': 'Agent_Weather_Actual_HDD', 'obse / OK   cpc_cooling {'agent': 'Agent_Weather_Actual_CDD', 'obse / OK   eia_storage [{'agent': 'Agent_Storage_East', 'obs |  |
-| `cross_domain_sources` | blocked | have ['agent_finding', 'backtest', 'entity', 'fundamentals', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage']; missing ['ferc', 'lng_notice', 'ngl_fractionat | external_data: FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds |
-| `db_integrity` | passed | ok |  |
-| `edge_collection` | blocked | edge sources with successful runs: [] | external_credentials: Worker edge fetching is deployed outside this runner |
-| `edge_ingest_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `env_locked` | passed | mode 0o600; ignored True; tracked secret files: none |  |
-| `execute_sandbox_tests` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `experiment_endpoint` | passed | HTTP 200 |  |
-| `experiments_recorded` | passed | 24 experiments, 0 incomplete |  |
-| `full_test_suite` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `gatekeeper` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `hub_health` | passed | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":193,"version":"1.0.5","release_version":"1.0.5","release_commit":"dev" |  |
-| `hypothesis_evaluated_live` | passed | finding verdicts {'evaluated': 2, 'rejected': 1, 'valid': 2}; evaluated_by edges 2; memos 2 |  |
-| `hypothesis_memo` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `indicators` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `kb_chunking` | passed | tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)); 11 part_of edges in the production library |  |
-| `knowledge_explorer` | passed | /knowledge 200; graph 207 nodes, edge types ['calibrated_by', 'evaluated_by', 'evidence_for', 'feeds_inventory_balance', 'feeds_net_exports', 'feeds_rescomm_demand', 'feeds_supply' |  |
-| `knowledge_explorer_browser` | passed | 213 nodes, 242 edges, 20 agent findings drawn, console errors=0 |  |
-| `knowledge_library` | passed | 207 nodes, 9 domains, edges {'calibrated_by': 1, 'evaluated_by': 2, 'evidence_for': 26, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_demand': 1, 'feeds_supp |  |
-| `knowledge_search_pit` | passed | old cutoff -> 0 results; now -> 8 |  |
-| `leaderboard_versioned` | passed | tracked=True; 24/24 experiments listed |  |
-| `main_site_link` | passed | HTTP 200, link present=True |  |
-| `markets_local` | passed | state 200 ngl-state/1, /execute 404, / 200 |  |
-| `multi_feature_experiments` | passed | feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum'] |  |
-| `ngl_term` | passed | exit 0, 789 braille cells |  |
-| `no_tmp_or_claude_paths` | passed | none |  |
-| `observations_reference_payloads` | passed | 60132/60132 measured rows reference an archived payload |  |
-| `ollama_live_integration` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `ollama_models` | passed | ['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen2.5:7b', 'qwen3:4b'] |  |
-| `ollama_only_local` | passed | none |  |
-| `pit_tests` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `promotion_gate` | passed | promotion conditions present in experiments.py |  |
-| `provenance_labels` | passed | 0 unlabelled rows |  |
-| `public_markets` | passed | markets.joeysvault.app 200, ngl.joeysvault.app 200 |  |
-| `quant_hub_retrieval` | passed | ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok |  |
-| `quant_hub_spark_basis` | passed | HH spot 3.87; forward curve 91 pts |  |
-| `quant_hub_stress` | passed | winter_storm_uri_freeze_scenario: 31 pts, pipeline_outage_shock: 8 pts, multi_factor_shift: 36 pts |  |
-| `quant_hub_var` | passed | parametric: VaR 0.362, ES 0.473; historical: VaR 0.365, ES 0.473; montecarlo: VaR 0.366, ES 0.447 |  |
-| `queue_dispatch` | blocked | /bin/sh: 1: wrangler: not found
+| `cross_domain_sources` | blocked (carried over) | have ['agent_finding', 'backtest', 'entity', 'fundamentals', 'noaa_discussion', 'pipeline_notice', 'price', 'production', 'storage']; missing ['ferc', 'lng_notice', 'ngl_fractionat | external_data: FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds |
+| `db_integrity` | passed (carried over) | ok |  |
+| `edge_collection` | blocked (carried over) | edge sources with successful runs: [] | external_credentials: Worker edge fetching is deployed outside this runner |
+| `edge_ingest_unit` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `env_locked` | passed (carried over) | mode 0o600; ignored True; tracked secret files: none |  |
+| `execute_sandbox_tests` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `experiment_endpoint` | passed (carried over) | HTTP 200 |  |
+| `experiments_recorded` | passed (carried over) | 24 experiments, 0 incomplete |  |
+| `full_test_suite` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `gatekeeper` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `hub_health` | passed (carried over) | {"ok":true,"db":"henry_hub_pit.db","vector_nodes":193,"version":"1.0.5","release_version":"1.0.5","release_commit":"dev" |  |
+| `hypothesis_evaluated_live` | passed (carried over) | finding verdicts {'evaluated': 2, 'rejected': 1, 'valid': 2}; evaluated_by edges 2; memos 2 |  |
+| `hypothesis_memo` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `indicators` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `kb_chunking` | passed (carried over) | tests   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)); 11 part_of edges in the production library |  |
+| `knowledge_explorer` | passed (carried over) | /knowledge 200; graph 207 nodes, edge types ['calibrated_by', 'evaluated_by', 'evidence_for', 'feeds_inventory_balance', 'feeds_net_exports', 'feeds_rescomm_demand', 'feeds_supply' |  |
+| `knowledge_explorer_browser` | passed (carried over) | 213 nodes, 242 edges, 20 agent findings drawn, console errors=0 |  |
+| `knowledge_library` | passed (carried over) | 639 nodes, 12 domains, edges {'builds_on': 84, 'calibrated_by': 1, 'evaluated_by': 20, 'evidence_for': 250, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_dem |  |
+| `knowledge_search_pit` | passed (carried over) | old cutoff -> 0 results; now -> 8 |  |
+| `leaderboard_versioned` | passed (carried over) | tracked=True; 24/24 experiments listed |  |
+| `main_site_link` | passed (carried over) | HTTP 200, link present=True |  |
+| `markets_local` | passed (carried over) | state 200 ngl-state/1, /execute 404, / 200 |  |
+| `multi_feature_experiments` | passed (carried over) | feature sets: ['hdd_anomaly', 'propane_wti_revert', 'propane_wti_momentum', 'hh_production_momentum'] |  |
+| `ngl_term` | passed (carried over) | exit 0, 789 braille cells |  |
+| `no_tmp_or_claude_paths` | passed (carried over) | none |  |
+| `observations_reference_payloads` | passed (carried over) | 98183/98183 measured rows reference an archived payload |  |
+| `ollama_live_integration` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `ollama_models` | passed (carried over) | ['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen3:32b'] |  |
+| `ollama_only_local` | passed (carried over) | none |  |
+| `pit_tests` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `promotion_gate` | passed (carried over) | promotion conditions present in experiments.py |  |
+| `provenance_labels` | passed (carried over) | 0 unlabelled rows |  |
+| `public_markets` | passed (carried over) | markets.joeysvault.app 200, ngl.joeysvault.app 200 |  |
+| `quant_hub_retrieval` | passed (carried over) | ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok |  |
+| `quant_hub_spark_basis` | passed (carried over) | HH spot 3.87; forward curve 91 pts |  |
+| `quant_hub_stress` | passed (carried over) | winter_storm_uri_freeze_scenario: 31 pts, pipeline_outage_shock: 8 pts, multi_factor_shift: 36 pts |  |
+| `quant_hub_var` | passed (carried over) | parametric: VaR 0.362, ES 0.473; historical: VaR 0.365, ES 0.473; montecarlo: VaR 0.366, ES 0.447 |  |
+| `queue_dispatch` | blocked (carried over) | /bin/sh: 1: wrangler: not found
  | external_credentials: wrangler/Cloudflare deployment is unavailable in this runner |
-| `raw_payloads_verified` | passed | 94/94 verified |  |
-| `research_log_live` | blocked | Welcome to GitHub CLI!
+| `raw_payloads_verified` | passed (carried over) | 58 local archives verified; 1012 pre-transfer legacy archives absent |  |
+| `research_log_live` | blocked (carried over) | Welcome to GitHub CLI!
 
 To authenticate, please run `gh auth login`. | none: resolved when a memo issue exists |
-| `rich_tooltips_browser` | passed | loaded=True hover=True pin=True keyboard=True deep=True errors=0 |  |
-| `roster_81` | passed | 94 unique (81 baseline agents plus quant extensions) |  |
-| `roster_all_collected` | blocked | 61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi | external_data: NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed |
-| `schema_16_columns` | passed | missing=[] |  |
-| `selfheal_live_ollama` | passed | {'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]} |  |
-| `selfheal_pr_live` | blocked | self-heal PRs: [] | external_credentials: gh auth is unavailable in this runner |
-| `selfheal_unit` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `snapshots_versioned` | passed | tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True (/root/henry_hub_atomic_agents/deploy/hh-collect-cpc.service) |  |
-| `state_schema_contract` | passed |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
-| `unstructured_sources` | passed | documents {'noaa_discussion': 1, 'pipeline_notice': 376}; indexed in knowledge library {'noaa_discussion': 12, 'pipeline_notice': 85} |  |
-| `web_ui_browser` | passed | 18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0 |  |
-| `webhook_recovery` | blocked | GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0 | external_credentials: no GitHub webhook deliveries or Worker deployment in this runner |
+| `rich_tooltips_browser` | failed | loaded=True hover=True pin=True keyboard=True deep=True errors=1 |  |
+| `roster_81` | passed (carried over) | 94 unique (81 baseline agents plus quant extensions) |  |
+| `roster_all_collected` | blocked (carried over) | 61/81 with real data; missing 20: HH_Cash_Midpoint, HH_Cash_High, HH_Cash_Low, HH_Cash_Volume, Flow_Kingsgate, Flow_Emerson, Flow_Waddington, LNG_SabinePass_Flow, LNG_CorpusChristi | external_data: NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed |
+| `schema_16_columns` | passed (carried over) | missing=[] |  |
+| `selfheal_live_ollama` | passed (carried over) | {'selector': 'span.px', 'attempts': ['span.old', 'span.px']} {'passed': True, 'n_fixtures': 1, 'results': [True]} |  |
+| `selfheal_pr_live` | blocked (carried over) | self-heal PRs: [] | external_credentials: gh auth is unavailable in this runner |
+| `selfheal_unit` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `snapshots_versioned` | passed (carried over) | tracked snapshot days ['2026-11-13', '2026-11-14', '2026-11-15']; scheduled=True (/root/henry_hub_atomic_agents/deploy/hh-collect-cpc.service) |  |
+| `state_schema_contract` | passed (carried over) |   warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET)) |  |
+| `unstructured_sources` | passed (carried over) | documents {'noaa_discussion': 9, 'pipeline_notice': 561}; indexed in knowledge library {'noaa_discussion': 94, 'pipeline_notice': 269} |  |
+| `web_ui_browser` | failed | 21 map nodes, panels=True, map={'canvas': True, 'width': 997, 'height': 640, 'gl': True, 'dw': 997, 'markers': 21, 'unavailable': False}, console errors=1 |  |
+| `webhook_recovery` | blocked (carried over) | GitHub deliveries accepted after signature check: 0 of 0; reruns verified+ok=0, forged refused=0 | external_credentials: no GitHub webhook deliveries or Worker deployment in this runner |
 | `worker_gateway_e2e` | passed (carried over) | PASS no bearer (401) / PASS bad bearer (401) / PASS origin without Access token (403) / PASS authenticated /execute (200) / PASS payload shape |  |
 
 ## Blocked requirements by cause
@@ -93,7 +93,7 @@ A requirement blocked by several checks is counted under each cause.
 | Cause | Requirements |
 |---|---|
 | external_credentials | 108 |
-| external_data | 88 |
+| external_data | 82 |
 | none | 1 |
 
 ## Requirements not passed
@@ -252,12 +252,31 @@ A requirement blocked by several checks is counted under each cause.
 | R11-049dcf38 | 619 | blocked | Your responsibility is to backward-engineer the complete execution path from the ultimate objective to the req | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-1de351b2 | 629 | blocked | Identify existing agents, scripts, tests, scheduled jobs, and services. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
 | R11-2d6da86e | 642 | blocked | External data sources and access requirements. | full_test_suite, worker_gateway_e2e, architecture_doc, roster_all_collected |
-| R12.4-97513311 | 696 | blocked | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
-| R12.4-b78c405d | 699 | blocked | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
-| R12.5-0f7de509 | 704 | blocked | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
-| R12.5-66afc426 | 705 | blocked | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
-| R12.5-42a3ffd8 | 706 | blocked | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
-| R12.5-f4ab8294 | 707 | blocked | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.1-f79a50dc | 667 | failed | Both the web interface and the terminal dashboard must follow a clean, sophisticated, high-contrast monochrome | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.1-569c27e8 | 669 | failed | Before designing or implementing any UI, map, chart, or terminal layout, Claude MUST inspect and base the visu | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.1-2a65d69c | 671 | failed | /home/joey/Projects/henry_hub_atomic_agents/artifacts/Real-time global maritime traffic visualization image ex | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.1-9bd48e8f | 672 | failed | /home/joey/Projects/henry_hub_atomic_agents/artifacts/NGL Henry Hub Visual Intelligence | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.1-0441f203 | 673 | failed | /home/joey/Projects/henry_hub_atomic_agents/artifacts/NGL pipeline and meter map view.png | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.1-4388e823 | 675 | failed | Additionally, Claude MUST utilize geospatial tooling and visualization libraries from https://github.com/sshua | web_ui_browser, rich_tooltips_browser, ngl_term |
+| R12.3-b24434ad | 689 | failed | As atomic agents discover new market developments (pipeline critical notices, force majeure, EIA/NOAA reports, | knowledge_library, knowledge_search_pit, web_ui_browser, rich_tooltips_browser, knowledge_explorer, knowledge_explorer_browser, agents_share_knowledge |
+| R12.3-f23bf6e2 | 690 | failed | Render an interactive monochrome fine-line node-and-edge knowledge graph explorer in the web UI with PIT-filte | knowledge_library, knowledge_search_pit, web_ui_browser, rich_tooltips_browser, knowledge_explorer, knowledge_explorer_browser, agents_share_knowledge |
+| R12.4-cdd9c4bc | 694 | failed | Top Hero Focus Panel: The uppermost, most prominent visual on the interface MUST display Seasonal Patterns and | state_schema_contract, web_ui_browser, rich_tooltips_browser |
+| R12.4-61440bd5 | 695 | failed | Dynamic Product & Timeframe Tracking: | state_schema_contract, web_ui_browser, rich_tooltips_browser |
+| R12.4-97513311 | 696 | failed | Dynamically detect and track whichever NGL or gas product is currently being calculated by the main pricing en | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.4-c6890b6e | 697 | failed | Support selectable trading timeframes: Intraday, Seasonal Swing, and Multi-Year Hedging. | state_schema_contract, web_ui_browser, rich_tooltips_browser |
+| R12.4-c53cea8c | 698 | failed | Live Pricing Decomposition & Source Availability: | state_schema_contract, web_ui_browser, rich_tooltips_browser |
+| R12.4-b78c405d | 699 | failed | Visually display the calculated price, historical price fluctuations, and the production/fundamental elements  | state_schema_contract, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.4-79c1b0ff | 700 | failed | Display a Source Availability Transparency panel listing every contributing agent, source_id, available_timest | state_schema_contract, web_ui_browser, rich_tooltips_browser |
+| R12.5-0f7de509 | 704 | failed | NGL-to-WTI Percentage Ratio Charts: Propane, normal butane, and natural gasoline plotted as a percentage of WT | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-66afc426 | 705 | failed | Mont Belvieu vs. Conway Hub Spreads: Side-by-side hub prices and differential spread tracking Gulf Coast vs. M | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-42a3ffd8 | 706 | failed | The "Frac Spread" Curve: Ethane ($/MMBtu) vs. Henry Hub natural gas ($/MMBtu), visually highlighting ethane re | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-f4ab8294 | 707 | failed | Forward Curve Contango and Backwardation: Futures term structure slope across delivery months with automatic r | indicators, web_ui_browser, rich_tooltips_browser, roster_all_collected |
+| R12.5-242c56a9 | 708 | failed | Multi-Year Seasonal Overlay Bands: Calendar-aligned multi-year historical price lines and min/max/average band | indicators, web_ui_browser, rich_tooltips_browser |
+| R12.6-3737fe92 | 712 | failed | Symmetrical and Ascending Triangles: Converging swing-high/swing-low trendlines and breakout trigger levels. | indicators, web_ui_browser, rich_tooltips_browser |
+| R12.6-cdf6ceaf | 713 | failed | Bollinger Band Squeezes: 20-period SMA ± 2σ volatility bands with low-bandwidth squeeze detection shading. | indicators, web_ui_browser, rich_tooltips_browser |
+| R12.6-9e40e670 | 714 | failed | 200-Day Moving Average Crossovers: 50-day and 200-day moving average overlays with Golden/Death cross markers. | indicators, web_ui_browser, rich_tooltips_browser |
+| R12.6-5c6339ea | 715 | failed | RSI and MACD Divergences: Synchronized lower momentum oscillator panes (RSI-14 and MACD 12/26/9) with automate | indicators, web_ui_browser, rich_tooltips_browser |
+| R12.6-1ec5f656 | 716 | failed | Fibonacci Retracement Levels: Horizontal 23.6%, 38.2%, 50.0%, 61.8%, and 78.6% grids anchored to trailing seas | indicators, web_ui_browser, rich_tooltips_browser |
 | R12.7-31088a85 | 724 | blocked | Live Regional Flows & Active Pipeline Alerts: Real-time border/LNG/interstate meter flows, capacity constraint | ngl_term, roster_all_collected |
 
 ## CLAUDE.md directive (requirement -> implementation -> checks)
@@ -278,9 +297,9 @@ A requirement blocked by several checks is counted under each cause.
 | Library: vector embeddings and persistent vector indexing | 37 | kb_nodes.embedding + Chroma henry_hub_alpha_graph | knowledge_library, agents_share_knowledge, hub_health | passed |
 | Library: semantic search and retrieval by agents and research workflows | 38 | agents/memory.search; /execute retrieve_vector_nodes; /api/knowledge-search | knowledge_search_pit, agents_live_run, worker_gateway_e2e | passed |
 | Library: relationships between documents, concepts, series, agents, findings, features | 39 | kb_edges types previous_in_series, same_period, builds_on, semantic_neighbor, part_of, evidence_for, evaluated_by | knowledge_library, agents_share_knowledge, hypothesis_evaluated_live | passed |
-| Library: graphical interface for exploring, searching, inspecting, navigating | 40 | web/knowledge.html + web/knowledge.js at /knowledge; /api/knowledge-graph, /api/knowledge-node, /api/agents/activity | knowledge_explorer, knowledge_explorer_browser, web_ui_browser | passed |
+| Library: graphical interface for exploring, searching, inspecting, navigating | 40 | web/knowledge.html + web/knowledge.js at /knowledge; /api/knowledge-graph, /api/knowledge-node, /api/agents/activity | knowledge_explorer, knowledge_explorer_browser, web_ui_browser | failed |
 | Library: persistent across runs, updates, deduplication, traceable sources | 41 | doc_hash idempotent ingest; finding content-hash ids; raw_payloads | knowledge_library, agent_unit, raw_payloads_verified | passed |
-| Library: Ollama for embedding and synthesis | 42 | nomic-embed-text embeddings; qwen3:4b synthesis | ollama_live_integration, agents_live_run | passed |
+| Library: Ollama for embedding and synthesis | 42 | nomic-embed-text embeddings; qwen2.5-coder:32b structured extraction and qwen3:32b synthesis | ollama_live_integration, agents_live_run | passed |
 | Agents use shared intelligence and knowledge infrastructure (verified execution) | 47 | agents/ via /agents/run and the daily timer | agents_live_run, agents_share_knowledge, agents_scheduled | passed |
 | Point-in-time correctness, no look-ahead in features, retrieval, inputs, training, backtesting | 50 | markets_engine.load_series, kb_ingest.search, memory.search assertions, observations(), evaluate(created<=as_of), backtest.py | pit_tests, knowledge_search_pit, agent_unit, backtest_unit | passed |
 | End-to-end: acquisition -> ... -> agent collaboration -> Ollama synthesis -> backtesting -> persistent knowledge | 53 | collectors -> pit_market_data -> kb_ingest -> agents -> experiments -> kb findings/memos | collectors_run, knowledge_library, agents_live_run, hypothesis_evaluated_live, experiments_recorded | passed |

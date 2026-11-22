@@ -43,7 +43,7 @@ except Exception:
 """LlamaIndex Multi-Engine Retrieval Hub (QUANT_HUB_SPEC section 2).
 
 Ingests news articles, scientific journals and reports (text from URLs, files or in-memory strings) into a
-LlamaIndex KnowledgeGraphIndex (entity triples via Ollama qwen3:4b by default) and a VectorStoreIndex
+LlamaIndex KnowledgeGraphIndex (entity triples via Ollama qwen2.5-coder:32b by default) and a VectorStoreIndex
 (Ollama nomic-embed-text by default), and exposes a unified retrieval interface with six query-engine
 modalities through the factory `get_query_engine(engine_type, **kwargs)`:
 
@@ -63,6 +63,7 @@ Both indexes are held in a llama_index StorageContext pointed at `storage_dir`; 
 `load(storage_dir, ...)` rebuilds the hub so persistent knowledge across runs is available to agents.
 """
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -72,9 +73,11 @@ from llama_index.core.base.base_retriever import BaseRetriever
 from llama_index.core.base.embeddings.base import BaseEmbedding
 from llama_index.core.indices.knowledge_graph.retrievers import KnowledgeGraphRAGRetriever
 from llama_index.core.llms.mock import MockLLM
+from llama_index.core.postprocessor import LLMRerank
 from llama_index.core.query_engine.knowledge_graph_query_engine import KnowledgeGraphQueryEngine
 from llama_index.core.graph_stores.simple import SimpleGraphStore
-from llama_index.core.schema import Document, QueryBundle
+from llama_index.core.schema import Document, NodeWithScore, QueryBundle, TextNode
+from llama_index.core.utils import globals_helper
 from llama_index.core.storage.docstore.simple_docstore import SimpleDocumentStore
 from llama_index.core.storage.index_store.simple_index_store import SimpleIndexStore
 from llama_index.core.storage.storage_context import StorageContext
@@ -82,9 +85,14 @@ from llama_index.core.vector_stores.simple import SimpleVectorStore
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
+from agents.llm import KG_CTX, KG_MODEL, KG_TOKENS
+
 OLLAMA = os.environ.get("HH_OLLAMA_URL", "http://127.0.0.1:11434")
-REASONING_MODEL = os.environ.get("HH_REASONING_MODEL", "qwen3:4b")
+REASONING_MODEL = KG_MODEL
 EMBED_MODEL = os.environ.get("HH_EMBED_MODEL", "nomic-embed-text")
+RERANK_MODEL = os.environ.get("HH_RERANK_MODEL", KG_MODEL)
+RERANK_BATCH_SIZE = int(os.environ.get("HH_RERANK_BATCH_SIZE", "10"))
+COMBO_KG_MODES = ("embedding", "hybrid")
 
 ENGINE_TYPES = ("kg_vector", "kg_keyword", "raw_vector", "combo", "kg_query_engine", "kg_rag")
 DEFAULT_ENGINE = "kg_vector"
@@ -151,7 +159,8 @@ class _HashingEmbedding(BaseEmbedding):
 
 def _default_llm():
     try:
-        return Ollama(model=REASONING_MODEL, base_url=OLLAMA)
+        return Ollama(model=KG_MODEL, base_url=OLLAMA, temperature=0, context_window=KG_CTX, request_timeout=300.0,
+                      additional_kwargs={"num_predict": KG_TOKENS, "num_ctx": KG_CTX}, thinking=False)
     except Exception:  # noqa: BLE001
         return MockLLM(max_tokens=32)
 
@@ -161,6 +170,15 @@ def _default_embedder():
         return OllamaEmbedding(model_name=EMBED_MODEL, base_url=OLLAMA)
     except Exception:  # noqa: BLE001
         return _HashingEmbedding(embed_dim=8)
+
+
+def _default_reranker():
+    try:
+        llm = Ollama(model=RERANK_MODEL, base_url=OLLAMA, temperature=0, context_window=KG_CTX, request_timeout=300.0,
+                     additional_kwargs={"num_predict": KG_TOKENS, "num_ctx": KG_CTX}, thinking=False)
+    except Exception:  # noqa: BLE001
+        llm = MockLLM(max_tokens=32)
+    return LLMRerank(llm=llm, choice_batch_size=RERANK_BATCH_SIZE, top_n=64)
 
 
 def _default_triplet_fn(text: str) -> list:
@@ -210,12 +228,17 @@ def _to_hits(nodes, limit: int = 8) -> list:
 
 
 class RetrievalHub:
-    def __init__(self, storage_dir=None, llm=None, embed_model=None, kg_triplet_extract_fn=None, verbose=False):
+    def __init__(self, storage_dir=None, llm=None, embed_model=None, kg_triplet_extract_fn=None, verbose=False,
+                 combo_kg_mode=None, reranker=None):
         self.storage_dir = Path(storage_dir).resolve() if storage_dir else None
         self.storage_context = _storage_context(str(self.storage_dir) if self.storage_dir else None)
         self.llm = llm or _default_llm()
         self.embed_model = embed_model or _default_embedder()
         self._kg_triplet_extract_fn = kg_triplet_extract_fn or _default_triplet_fn
+        self.combo_kg_mode = combo_kg_mode or os.environ.get("HH_COMBO_KG_MODE", COMBO_KG_MODES[0])
+        if self.combo_kg_mode not in COMBO_KG_MODES:
+            raise ValueError(f"unknown combo_kg_mode {self.combo_kg_mode!r}; choose from {list(COMBO_KG_MODES)}")
+        self.reranker = reranker
         self.kg_index = KnowledgeGraphIndex(nodes=[], llm=self.llm, embed_model=self.embed_model,
                                             storage_context=self.storage_context, include_embeddings=True,
                                             kg_triplet_extract_fn=self._kg_triplet_extract_fn, verbose=verbose)
@@ -268,7 +291,8 @@ class RetrievalHub:
             elif engine_type == "raw_vector":
                 eng = self.vector_index.as_retriever(**kwargs)
             elif engine_type == "combo":
-                eng = ComboRetriever(self.vector_index.as_retriever(**kwargs), self.kg_index.as_retriever(retriever_mode="embedding", **kwargs))
+                eng = ComboRetriever(self.vector_index.as_retriever(**kwargs),
+                                     self.kg_index.as_retriever(retriever_mode=self.combo_kg_mode, **kwargs))
             elif engine_type == "kg_query_engine":
                 eng = KnowledgeGraphQueryEngine(index=self.kg_index, storage_context=self.kg_index.storage_context, llm=self.llm, **kwargs)
             elif engine_type == "kg_rag":
@@ -289,12 +313,57 @@ class RetrievalHub:
             nodes = getattr(resp, "source_nodes", None) or []
         return _to_hits(nodes, limit)
 
-    def search(self, query: str, as_of: str | None = None, limit: int = 8, engine_type: str = DEFAULT_ENGINE) -> list:
-        """PIT-filtered hits on the chosen engine: available_timestamp <= as_of."""
-        hits = self.retrieve(engine_type, query, limit)
+    def kg_context(self, query: str, max_entities: int = 20, max_relationships: int = 30) -> str:
+        """Deterministic entity/relationship context from stored triples (NexusRAG pattern)."""
+        triples = list(self.storage_context.graph_store.query(query))
+        if not triples:
+            return ""
+        stop = {str(w).lower() for w in (getattr(globals_helper, "stopwords", ()) or ())}
+        terms = {t for t in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", query or "") if t.lower() not in stop}
+        def matches(value) -> bool:
+            hay = str(value).lower().replace("-", " ").replace("_", " ")
+            return any(t.lower() in hay for t in terms)
+        rels = [(s, p, o) for s, p, o in triples if not terms or matches(s) or matches(p) or matches(o)] or triples
+        entities = []
+        for s, p, o in rels:
+            for value in (s, p, o):
+                key = str(value).strip()
+                if key and key not in entities:
+                    entities.append(key)
+        lines = ["entities: " + ", ".join(entities[:max_entities]), "relationships:"]
+        lines += [f"- {s} {p} {o}" for s, p, o in rels[:max_relationships]]
+        return "\n".join(lines)
+
+    def _rerank_hits(self, query: str, hits: list, reranker=None, prefetch: int = 20, min_score: float = 0.0) -> list:
+        reranker = reranker or self.reranker or _default_reranker()
+        candidates = hits[:max(prefetch, 1)]
+        nodes = [NodeWithScore(node=TextNode(text=h.get("text", ""), id_=h["id"]), score=float(h.get("similarity", 0.0)))
+                 for h in candidates]
+        by_id = {h["id"]: h for h in candidates}
+        scored, seen = [], set()
+        for node in reranker.postprocess_nodes(nodes, QueryBundle(query_str=query)) or []:
+            hit_id = node.node.node_id
+            if hit_id in seen or hit_id not in by_id:
+                continue
+            hit = dict(by_id[hit_id])
+            hit["rerank_score"] = float(getattr(node, "score", 0.0) or 0.0)
+            seen.add(hit_id)
+            if hit["rerank_score"] >= min_score:
+                scored.append(hit)
+        return scored or candidates[:3]
+
+    def search(self, query: str, as_of: str | None = None, limit: int = 8, engine_type: str = DEFAULT_ENGINE,
+               rerank: bool = False, prefetch: int = 20, min_score: float = 0.0, reranker=None) -> list:
+        """PIT-filtered hits; optional opt-in rerank after PIT filtering (NexusRAG over-fetch/fallback pattern)."""
+        hits = self.retrieve(engine_type, query, max(prefetch, limit) if rerank else limit)
         if as_of:
             as_of_epoch = _epoch(as_of)
             hits = [h for h in hits if h["available_timestamp"] and _epoch(h["available_timestamp"]) <= as_of_epoch]
+        if rerank and hits:
+            try:
+                hits = self._rerank_hits(query, hits, reranker=reranker, prefetch=prefetch, min_score=min_score)
+            except Exception:  # noqa: BLE001 - reranking is an enhancement, never a hard dependency
+                pass
         return hits[:limit]
 
     # ---------------------------------------------------------------- persistence

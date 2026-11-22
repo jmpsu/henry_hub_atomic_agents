@@ -36,7 +36,7 @@ from pathlib import Path
 import kb_ingest
 import markets_engine as me
 from agents import memory, quant_risk, retrieval_hub
-from agents.llm import LLM, REASONING_MODEL, numbers_grounded, status as llm_status
+from agents.llm import CODER_MODEL, LLM, REASONING_MODEL, numbers_grounded, status as llm_status
 
 ROOT = Path(__file__).resolve().parent.parent
 DOMAINS = ["natural_gas", "ngl", "lng", "electricity", "weather", "pipelines", "storage", "production", "crude_oil", "coal", "carbon"]
@@ -409,7 +409,7 @@ class NoticeAnalystAgent:
 
     VERSION = 3   # bump when the prompt/rubric changes: older extractions are redone
 
-    def __init__(self, per_run: int = 25):
+    def __init__(self, per_run: int = 150):
         self.per_run = per_run
 
     def run(self, conn, llm: LLM, as_of: str, collection=None) -> dict:
@@ -456,7 +456,7 @@ class NoticeAnalystAgent:
             conn.execute("INSERT OR REPLACE INTO notice_extractions(document_id,pipeline,event_type,severity,location,summary,posted,model,extracted_at,"
                          "grounded,version,checks) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                          (did, pipe, res["event_type"], res["severity"], res["location"][:120], res["summary"][:300], posted,
-                          REASONING_MODEL if source == "model" else "rules_v1", memory.now(), int(grounded), self.VERSION, "; ".join(checks)))
+                           CODER_MODEL if source == "model" else "rules_v1", memory.now(), int(grounded), self.VERSION, "; ".join(checks)))
             n += 1
             already = conn.execute("SELECT 1 FROM agent_messages WHERE topic='pipeline_event' AND ref=?", (did,)).fetchone()
             if (res["event_type"] == "force_majeure" or res["severity"] == "high") and not already:
@@ -939,7 +939,7 @@ class SynthesisAgent:
 
 
 # ----------------------------------------------------------------------------- orchestration
-def run_all(db_path: str, collection=None, as_of: str | None = None, llm_factory=None, notice_limit: int = 25, run_backtests: bool = True,
+def run_all(db_path: str, collection=None, as_of: str | None = None, llm_factory=None, notice_limit: int = 150, run_backtests: bool = True,
             only: list | None = None) -> dict:
     as_of = me.pit_cutoff(as_of)
     conn = sqlite3.connect(db_path, timeout=60)
@@ -980,7 +980,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--as-of")
     ap.add_argument("--only", nargs="*")
-    ap.add_argument("--notice-limit", type=int, default=25)
+    ap.add_argument("--notice-limit", type=int, default=150)
     ap.add_argument("--no-backtests", action="store_true")
     a = ap.parse_args(argv)
     db = os.environ.get("DB_PATH") or str(ROOT / "henry_hub_pit.db")

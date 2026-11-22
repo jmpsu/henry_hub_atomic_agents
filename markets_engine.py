@@ -22,6 +22,7 @@ import numpy as np
 
 import lng_forward
 import lng_global
+import series_catalog
 
 BASE_DIR = Path(__file__).resolve().parent
 SCHEMA_VERSION = "ngl-state/1"
@@ -77,6 +78,34 @@ GEO_FLOWS = [
     ("APP", "HHB", "gas"), ("APP", "CVP", "gas"), ("CNW", "MBV", "ngl"), ("BKN", "CNW", "ngl"), ("DJB", "CNW", "ngl"),
     ("HHB", "SAB", "gas"), ("HHB", "CAM", "gas"), ("HHB", "CCP", "gas"), ("HHB", "PLQ", "gas"), ("MBV", "FPT", "gas_ngl"),
     ("APP", "ELB", "gas"),
+]
+MAP_ARBITRAGE_ROUTES = [
+    {"id": "sabine_osaka", "label": "Sabine Pass to Osaka", "from": "SAB", "to": "OSA", "to_lat": 34.69, "to_lon": 135.50,
+     "netback": "usgc_jkm_netback", "freight": "spark25s_pacific_freight", "price_basis": "JKM (modeled)",
+     "source": "lng-arbitrage route US-SABINE__JP-OSAKA; value from lng_global M1", "note": "Asia destination from the geographic arbitrage notebook; no licensed JKM quote is used."},
+    {"id": "sabine_rotterdam", "label": "Sabine Pass to Rotterdam", "from": "SAB", "to": "RTM", "to_lat": 51.92, "to_lon": 4.48,
+     "netback": "usgc_ttf_netback", "freight": "spark30s_atlantic_freight", "price_basis": "TTF (PIT quote where eligible)",
+     "source": "lng-arbitrage route US-SABINE__NL-ROTTERDAM; value from lng_global M1", "note": "Destination anchors use only quotes eligible at the cutoff."},
+    {"id": "sabine_thames", "label": "Sabine Pass to Thames", "from": "SAB", "to": "THM", "to_lat": 51.51, "to_lon": 0.34,
+     "netback": "usgc_ttf_netback", "freight": "spark30s_atlantic_freight", "price_basis": "TTF proxy for NBP",
+     "source": "lng-arbitrage route US-SABINE__GB-THAMES; value from lng_global M1", "note": "TTF is used as the European proxy; no separate NBP collector exists."},
+]
+MAP_CHOKEPOINTS = [
+    {"id": "hormuz", "label": "Strait of Hormuz", "lat": 26.60, "lon": 56.50, "risk": 0.9, "band": "high",
+     "source": "lng-geoenv route_risk_map", "note": "Highest route-risk score in lng-geoenv; EIA source register cites about 20% of global LNG trade through Hormuz."},
+    {"id": "suez", "label": "Suez Canal", "lat": 30.44, "lon": 32.55, "risk": 0.6, "band": "elevated",
+     "source": "lng-geoenv route_risk_map", "note": "Elevated route-risk score in lng-geoenv; historical disruption context is documented in the skill."},
+    {"id": "panama", "label": "Panama Canal", "lat": 9.08, "lon": -79.62, "risk": 0.3, "band": "low",
+     "source": "lng-geoenv route_risk_map", "note": "Baseline route-risk score in lng-geoenv; the diversion spread is modeled separately by lng_global."},
+    {"id": "cape", "label": "Cape of Good Hope", "lat": -34.35, "lon": 18.47, "risk": 0.2, "band": "low",
+     "source": "lng-geoenv route_risk_map", "note": "Alternative route in lng-geoenv and lng_global; lower route-risk score but longer voyage."},
+]
+MAP_SHOCK_SCENARIOS = [
+    {"id": "normalization", "label": "Normalization", "global_supply_loss_pct": 2.0, "duration_days": 30, "route_cost_shock_pct": 5.0, "description": "Short-lived disruption with rapid cargo and production substitution"},
+    {"id": "managed", "label": "Managed disruption", "global_supply_loss_pct": 10.0, "duration_days": 60, "route_cost_shock_pct": 15.0, "description": "Material supply interruption contained by non-Gulf replacement volumes"},
+    {"id": "severe", "label": "Severe LNG shock", "global_supply_loss_pct": 20.0, "duration_days": 120, "route_cost_shock_pct": 35.0, "description": "Loss comparable to a major Gulf export interruption with partial substitution"},
+    {"id": "infrastructure", "label": "Infrastructure damage", "global_supply_loss_pct": 30.0, "duration_days": 365, "route_cost_shock_pct": 55.0, "description": "Prolonged liquefaction and export infrastructure impairment"},
+    {"id": "demand", "label": "Demand destruction", "global_supply_loss_pct": 20.0, "duration_days": 270, "route_cost_shock_pct": 40.0, "description": "Extended price shock triggers industrial curtailment and fuel switching"},
 ]
 FUNDAMENTALS_PRICE_NOTE = ("No fundamentals-to-price model exists in this code (checklist O6). The Henry Hub forward curve is a delayed market quote and the LNG forward is derived "
                            "from it as k x HH + L; none of the seven elements below enters either number. They are shown as the context that moves the market.")
@@ -464,6 +493,13 @@ def _age_days(ts: str | None, as_of: str) -> float | None:
     return (f(as_of) - f(ts)).total_seconds() / 86400.0
 
 
+def _lng_global_m1(payload: dict, key: str) -> float | None:
+    values = (((payload or {}).get("calculations") or {}).get(key) or {}).get("values") or []
+    first = values[0] if values else {}
+    value = first.get("base")
+    return float(value) if isinstance(value, (int, float)) and math.isfinite(value) else None
+
+
 def build_state(db_path: str, product: str | None = None, timeframe: str = "seasonal", as_of: str | None = None,
                 knowledge: dict | None = None) -> dict:
     cutoff = pit_cutoff(as_of)
@@ -631,7 +667,7 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
                        [latest[a] for a in DRIVER_GROUPS[0][2] if a in latest]), "unit": "Bcf/d (six roster basins)", "provenance": "extracted_estimate"}}
 
         # ---- G5: the seven fundamental elements (direct inputs vs separately calculated modules). Nothing here is fed into any price (O6) and the block says so.
-        frac_mod = frac_module.build(latest.get(frac_module.ETHANE_AGENT), latest.get(frac_module.HH_AGENT), latest.get(frac_module.WAHA_AGENT), cutoff)
+        frac_mod = frac_module.build(latest.get(frac_module.ETHANE_AGENT), latest.get(frac_module.HH_AGENT), latest.get(frac_module.WAHA_AGENT), cutoff, conn)
         feedgas_mod = lng_feedgas.load(cutoff)
         lp, ln = lng.get("points") or [], lng.get("netback") or {}
         forward_inputs = [
@@ -660,17 +696,20 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         rmeta = _roster_meta()
         for a in agents:
             r = latest.get(a)
+            feed = series_catalog.feed_status(conn, a, cutoff)
             if r:
                 sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
                                 **{k: r[k] for k in ("agent_id", "source_id", "latest_target_timestamp", "available_timestamp", "retrieved_timestamp",
                                                      "quality_status", "raw_payload_hash", "provenance")},
                                 "status": "pending_collector" if r["provenance"] == "unverified_seed" else "collected",
+                                "feed_status": feed["status"], "feed_label": feed["label"], "feed_age_days": feed["age_days"],
                                 "raw_payload_archived": bool(r["raw_payload_hash"]) and r["raw_payload_hash"] in payload_hashes,
                                 "age_days": _age_days(r["available_timestamp"], cutoff), "in_roster": a in set(roster), "contributes": a in needed})
             else:
                 sources.append({"series": (rmeta.get(a) or {}).get("series"), "intended_source": (rmeta.get(a) or {}).get("source"),
                                 "agent_id": a, "source_id": None, "latest_target_timestamp": None, "available_timestamp": None, "retrieved_timestamp": None,
                                 "quality_status": None, "raw_payload_hash": None, "provenance": None, "status": "pending_collector",
+                                "feed_status": feed["status"], "feed_label": feed["label"], "feed_age_days": feed["age_days"],
                                 "raw_payload_archived": False, "age_days": None, "in_roster": True, "contributes": a in needed})
         collected = [s for s in sources if s["in_roster"] and s["status"] == "collected"]
 
@@ -686,6 +725,21 @@ def build_state(db_path: str, product: str | None = None, timeframe: str = "seas
         geo = {"nodes": nodes, "flows": [{"from": a, "to": b, "kind": k, "schematic": True, "value": None, "status": PENDING} for a, b, k in GEO_FLOWS],
                "note": "Corridors are schematic links between real locations, not surveyed pipeline routes. LNG terminal labels show the latest monthly exports (EIA); there is no daily pipeline-flow collector yet.",
                "flow_agents_collected": len(flows_ok), "flow_agents_total": len(flow_agents)}
+        origin = next((n for n in nodes if n["id"] == "SAB"), None)
+        routes = []
+        for spec in MAP_ARBITRAGE_ROUTES:
+            netback = _lng_global_m1(lng_global_payload, spec["netback"])
+            freight = _lng_global_m1(lng_global_payload, spec["freight"])
+            routes.append({**spec, "origin": origin["label"] if origin else "Sabine Pass LNG",
+                           "from_lat": origin["lat"] if origin else 29.73, "from_lon": origin["lon"] if origin else -93.87,
+                           "netback_value": netback, "freight_value": freight, "unit": "USD/MMBtu",
+                           "status": "modeled" if netback is not None and freight is not None else PENDING})
+        geo["overlays"] = {
+            "routes": routes,
+            "chokepoints": [dict(c) for c in MAP_CHOKEPOINTS],
+            "scenarios": [dict(s) for s in MAP_SHOCK_SCENARIOS],
+            "note": "Arbitrage routes and netbacks are sourced from lng-arbitrage route definitions and the M1 outputs of the existing lng_global model. Chokepoint scores come from lng-geoenv; shock presets come from cheniere-lng-shock. All overlays are schematic and labeled as modeled context, not surveyed routes or measured outages.",
+        }
 
         # ---- pipeline critical notices (source documents, PIT: posted at or before the cutoff)
         try:

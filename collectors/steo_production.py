@@ -15,10 +15,9 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-import httpx
-
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import ingest  # noqa: E402
+from ingestion.http_client import fetch_tuple  # noqa: E402
 
 URL = "https://www.eia.gov/opendata/bulk/STEO.zip"
 AGENTS = {
@@ -32,8 +31,7 @@ AGENTS = {
 
 
 def fetch(url):
-    r = httpx.get(url, timeout=180, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0"})
-    return r.status_code, r.content, r.headers.get("content-type", "")
+    return fetch_tuple(url, timeout=180, retries=2, backoff=1.0, headers={"User-Agent": "Mozilla/5.0"})
 
 
 def parse(body: bytes) -> dict:

@@ -4,7 +4,7 @@
 Stages (all idempotent; nothing here writes henry_hub_pit.db, the live markets DB is opened read-only by the engine):
   ingest     PDFs in --pdf-dir -> runtime/literature_kb.db (chunk, embed with nomic-embed-text via local Ollama, edges)
   retrieval  10 concept queries with a pre-registered gold document each -> doc-level hit@1/3/5 (weak sanity check, not a benchmark)
-  generate   for 5 tooltip subjects, three conditions with the same local model (qwen3:4b), temperature 0:
+  generate   for 5 tooltip subjects, three conditions with the same local model (qwen3:32b), temperature 0:
                A  facts only (no literature)            B  facts + top-3 paper chunks            C  facts + top-2 chunks + their next chunk (graph step)
              Every number in FACTS is computed by code from the live engine payload; the model only writes the explanation.
 Checks per tooltip (recorded raw; a production path would reject on any failure):

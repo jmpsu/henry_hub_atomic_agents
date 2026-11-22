@@ -46,6 +46,8 @@ def thesis_consistency(thesis: str, delta: float) -> str:
 _BAD = re.compile(r"(;|--|/\*|\b(pragma|attach|insert|update|delete|drop|alter|create|replace|vacuum|load_extension|with|main|temp|sqlite_\w*)\b)", re.I)
 _TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 _FUNCS = {"count", "sum", "avg", "min", "max", "round", "abs", "substr", "lower", "upper", "coalesce", "like", "date", "strftime", "total", "length"}
+PIT_QUERY_COLUMNS = ("agent_id", "target_timestamp", "available_timestamp", "value", "source_id", "series_id",
+                     "unit", "geographic_scope", "quality_status", "provenance")
 MAX_ROWS = 200
 
 
@@ -90,12 +92,13 @@ def run_sandboxed(db_path: str, sql: str, as_of: str, max_rows: int = MAX_ROWS, 
         raise ValueError("Blocked non-SELECT query for safety.")
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     try:
-        conn.execute(f"CREATE TEMP VIEW pit_market_data AS SELECT * FROM main.pit_market_data WHERE available_timestamp <= '{as_of}'")
+        cols = ",".join(PIT_QUERY_COLUMNS)
+        conn.execute(f"CREATE TEMP VIEW pit_market_data AS SELECT {cols} FROM main.pit_market_data WHERE available_timestamp <= '{as_of}'")
 
         def auth(action, a1, a2, db, src):
             if action == sqlite3.SQLITE_SELECT:
                 return sqlite3.SQLITE_OK
-            if action == sqlite3.SQLITE_READ and a1 == "pit_market_data" and (db == "temp" or src == "pit_market_data"):
+            if action == sqlite3.SQLITE_READ and a1 == "pit_market_data" and a2 in PIT_QUERY_COLUMNS and (db == "temp" or src == "pit_market_data"):
                 return sqlite3.SQLITE_OK
             if action == sqlite3.SQLITE_FUNCTION and (a2 or "").lower() in _FUNCS:
                 return sqlite3.SQLITE_OK

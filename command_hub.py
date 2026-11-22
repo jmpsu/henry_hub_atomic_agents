@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 import scenario
 import kb_ingest
 import notify
+from agents.llm import CODER_CTX, CODER_MODEL, CODER_TOKENS, EMBED_MODEL
 
 app = FastAPI()
 OLLAMA_GEN_URL = "http://127.0.0.1:11434/api/generate"
@@ -29,7 +30,7 @@ async def get_embedding(text: str) -> list[float]:
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             OLLAMA_EMB_URL,
-            json={"model": "nomic-embed-text", "prompt": text},
+            json={"model": EMBED_MODEL, "prompt": text},
             timeout=30.0
         )
         resp.raise_for_status()
@@ -129,7 +130,7 @@ async def generate_pit_analysis(user_query: str, sql_ctx: str, vec_ctx: str, as_
         "\"scenario_delta_bcf\":-1.2,\"alpha_thesis\":\"Supply loss tightens the balance. Prompt-month should firm.\"} /no_think"
     )
     payload = {
-        "model": "qwen3:4b",
+        "model": CODER_MODEL,
         "prompt": prompt,
         "stream": False,
         "think": False,
@@ -143,10 +144,10 @@ async def generate_pit_analysis(user_query: str, sql_ctx: str, vec_ctx: str, as_
             },
             "required": ["sql_query", "scenario_delta_bcf", "alpha_thesis"]
         },
-        "options": {"temperature": 0.0, "num_ctx": 2048, "num_predict": 180}
+        "options": {"temperature": 0.0, "num_ctx": CODER_CTX, "num_predict": CODER_TOKENS}
     }
     async with httpx.AsyncClient() as client:
-        resp = await client.post(OLLAMA_GEN_URL, json=payload, timeout=60.0)
+        resp = await client.post(OLLAMA_GEN_URL, json=payload, timeout=300.0)
         resp.raise_for_status()
         return json.loads(resp.json()["response"])
 
@@ -357,7 +358,7 @@ _AGENTS_LOCK = asyncio.Lock()
 _AGENTS_LAST: dict = {}
 
 
-async def _run_agents(notice_limit: int = 25, trigger: str = "api") -> dict:
+async def _run_agents(notice_limit: int = 150, trigger: str = "api") -> dict:
     from agents import workers
     async with _AGENTS_LOCK:
         rep = await asyncio.to_thread(workers.run_all, DB_PATH, kb_collection, None, None, max(1, min(notice_limit, 200)))
@@ -367,7 +368,7 @@ async def _run_agents(notice_limit: int = 25, trigger: str = "api") -> dict:
 
 
 @app.post("/agents/run")
-async def agents_run(notice_limit: int = 25):
+async def agents_run(notice_limit: int = 150):
     """Run the research agents (diagnostics, data quality, repair assistance, pipeline-notice analyst, anomaly, cross-domain
     synthesis) point-in-time now. They use local Ollama, the shared knowledge library (including this process's Chroma
     collection) and the message bus. Access-protected like every privileged route."""

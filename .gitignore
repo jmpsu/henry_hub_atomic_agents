@@ -40,3 +40,5 @@ henry_hub_pit.db.pre-*
 *.bak.*
 *.tmp
 *.db-shm
+# Added by code-review-graph
+.code-review-graph/

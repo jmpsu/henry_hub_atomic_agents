@@ -7,7 +7,10 @@
   const PENDING = "pending_collector";
   const qs = new URLSearchParams(location.search);
   const sel = { product: qs.get("product"), timeframe: qs.get("timeframe") || "seasonal" };
-  let state = null, map = null, mapReady = false, basemap = null, overlay = null, markers = [], graph = null, kgSel = null, kgHits = new Set();
+  let state = null, graph = null, map = null, mapReady = false, basemap = null, overlay = null, markers = [], overlayMarkers = [], mapHover = null;
+  let mapOverlays = { routes: [], chokepoints: [], scenarios: [] }, mapLayerState = { routes: true, risk: true, shock: false };
+  let selectedRoute = null, activeScenario = null, lastRouteFit = null, mapOverlaySerial = 0, mapLayersReady = false;
+  const idle = (fn) => (window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 250 }) : setTimeout(fn, 0));
 
   function el(tag, attrs, kids) {
     const n = document.createElement(tag);
@@ -435,7 +438,7 @@
       const lo = Math.min.apply(null, ys), hi = Math.max.apply(null, ys), span = Math.max(hi - lo, 1e-9);
       svg.setAttribute("viewBox", "0 0 132 30"); svg.setAttribute("width", "132"); svg.setAttribute("height", "30"); svg.setAttribute("class", "lng-spark");
       line.setAttribute("points", values.map((v, i) => `${(i / Math.max(values.length - 1, 1)) * 128 + 2},${27 - ((v.base - lo) / span) * 24}`).join(" "));
-      line.setAttribute("fill", "none"); line.setAttribute("stroke", "#d7a94a"); line.setAttribute("stroke-width", "1.5");
+      line.setAttribute("fill", "none"); line.setAttribute("stroke", "#f0c36a"); line.setAttribute("stroke-width", "1.5");
       svg.appendChild(line); return svg;
     };
     const cards = el("div", { class: "lng-card-grid" });
@@ -569,19 +572,21 @@
     const ts = (v) => (v ? v.replace("T", " ").replace(":00Z", "Z").slice(0, 17) : "—");
     for (const r of rows) {
       const st = r.status === "collected" ? "collected" : PENDING, pv = r.provenance || "none";
+      const feed = r.feed_status || "UNREGISTERED", fst = feed === "ACTIVE" ? "collected" : PENDING, flabel = r.feed_label || "Feed Not Configured";
       const tr = el("tr", {}, [
         el("td", { text: short(r.agent_id) }), el("td", {}, el("span", { class: "st " + st, text: st.replace("_", " ") })),
+        el("td", {}, el("span", { class: "st " + fst, text: flabel })),
         el("td", {}, el("span", { class: "st " + pv, text: pv === "none" ? "no data" : pv.replace(/_/g, " ") })),
         el("td", { class: "dim", text: r.source_id || "—" }), el("td", { text: r.latest_target_timestamp ? r.latest_target_timestamp.slice(0, 10) : "—" }),
         el("td", { text: ts(r.available_timestamp) }), el("td", { class: "dim", text: ts(r.retrieved_timestamp) }), el("td", { class: "dim", text: (r.quality_status || "—").replace(/_/g, " ") }),
         el("td", { class: "hash" + (r.raw_payload_archived ? " ok" : ""), text: r.raw_payload_hash ? r.raw_payload_hash.slice(0, 12) + "…" : "—" }),
       ]);
       tb.append(tr);
-      T(st === "collected" ? "provenance" : "pending", tr, () => ({ title: short(r.agent_id), value: st === "collected" ? `latest ${r.latest_target_timestamp ? r.latest_target_timestamp.slice(0, 10) : "—"}` : "pending collector",
+      T(st === "collected" ? "provenance" : "pending", tr, () => ({ title: short(r.agent_id), value: st === "collected" ? `latest ${r.latest_target_timestamp ? r.latest_target_timestamp.slice(0, 10) : "—"}` : flabel,
         badge: badgeOf(st === "collected" ? r.provenance : "pending_collector"), what: r.series || X("roster").what, formula: null, params: {}, read: null,
-        sections: [lineage(r.agent_id)].concat(st === "collected" && r.intended_source ? [{ h: "Intended source (roster)", rows: [["Source", r.intended_source]] }] : []) }), "source_" + r.agent_id);
+        sections: [{ h: "Feed", rows: [["Status", feed], ["Label", flabel], ["Age", r.feed_age_days == null ? "—" : num(r.feed_age_days, 1) + " days"]] }].concat([lineage(r.agent_id)]).concat(st === "collected" && r.intended_source ? [{ h: "Intended source (roster)", rows: [["Source", r.intended_source]] }] : []) }), "source_" + r.agent_id);
     }
-    const hd = { 0: ["roster", "Agent"], 1: ["provenance", "Status"], 2: ["provenance", "Provenance"], 3: ["roster", "Source"], 4: ["t_target", "Latest target"], 5: ["t_available", "Available"], 6: ["t_retrieved", "Retrieved"], 7: ["quality", "Quality"], 8: ["payload_hash", "Raw payload hash"] };
+    const hd = { 0: ["roster", "Agent"], 1: ["provenance", "Status"], 2: ["roster", "Feed"], 3: ["provenance", "Provenance"], 4: ["roster", "Source"], 5: ["t_target", "Latest target"], 6: ["t_available", "Available"], 7: ["t_retrieved", "Retrieved"], 8: ["quality", "Quality"], 9: ["payload_hash", "Raw payload hash"] };
     document.querySelectorAll("#sources thead th").forEach((th, k) => { if (hd[k]) T(hd[k][0], th, { title: hd[k][1] }, "th_src_" + k); });
     const p = s.platform, tg = clear($("src-tags"));
     const t1 = tag(`${p.roster_agents_collected}/${p.roster_agents} roster agents`, "on"), t2 = tag(`${num(p.pit_rows, 0)} PIT rows`), t3 = tag(`${p.raw_payloads} raw payloads`);
@@ -599,11 +604,18 @@
     if (map || !window.maplibregl) return;
     try {
       map = new maplibregl.Map({ container: "map", attributionControl: false, dragRotate: false, pitchWithRotate: false, renderWorldCopies: false,
-        style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#000" } }] },
-        bounds: [[-108, 24.5], [-73, 45.5]], maxBounds: [[-140, 10], [-50, 62]], minZoom: 2.5, maxZoom: 8 });
+        style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#161618" } }] },
+        bounds: [[-108, 24.5], [-73, 45.5]], maxBounds: [[-180, -60], [180, 80]], minZoom: 1.5, maxZoom: 8 });
     } catch (e) { pending($("map"), "MAP UNAVAILABLE", ["WebGL is required to draw the map."]); return; }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    mapHover = el("div", { class: "map-hover" }); mapHover.style.display = "none"; $("map").append(mapHover);
+    installMapControls();
     map.on("error", (e) => { $("map-note").dataset.err = "map error: " + ((e && e.error && e.error.message) || "unknown"); });
+    for (const [layer, fn] of [["lng-routes-hit", showRouteHover], ["lng-chokepoints-hit", showRiskHover]]) {
+      map.on("mousemove", layer, (e) => fn(e, e.features && e.features[0]));
+      map.on("mouseleave", layer, hideMapHover);
+      map.on("click", layer, (e) => { const f = e.features && e.features[0]; if (!f) return; if (layer === "lng-routes-hit") selectRoute(f.properties.id); else showRiskDetail(f.properties.id); });
+    }
     // The style is inline (no network), so "style.load" is the reliable ready signal; "load" also waits for a first render.
     let started = false;
     const onReady = async () => {
@@ -616,10 +628,155 @@
     map.once("style.load", onReady); map.once("load", onReady);
     if (map.isStyleLoaded()) onReady();
   }
+  const ROUTE_LAYERS = ["lng-routes-glow", "lng-routes-line", "lng-routes-hit"];
+  const RISK_LAYERS = ["lng-chokepoints-halo", "lng-chokepoints-dot", "lng-chokepoints-hit"];
+  function installMapControls() {
+    const box = el("div", { class: "maplibregl-ctrl maplibregl-ctrl-group map-ctrl" });
+    for (const [key, label] of [["routes", "routes"], ["risk", "risk"], ["shock", "shock"], ["fit", "fit"]]) {
+      const b = el("button", { type: "button", "data-layer": key, "aria-pressed": String(key === "fit" ? false : mapLayerState[key]), title: label, text: label });
+      b.addEventListener("click", () => {
+        if (key === "fit") { fitMapOverlays(); return; }
+        mapLayerState[key] = !mapLayerState[key];
+        if (key === "shock" && mapLayerState[key] && !activeScenario) activeScenario = (mapOverlays.scenarios[0] || {}).id || null;
+        b.setAttribute("aria-pressed", String(mapLayerState[key]));
+        renderMapInspector(state); applyMapLayers();
+      });
+      box.append(b);
+    }
+    map.addControl({ onAdd: () => box, onRemove: () => box.remove() }, "top-left");
+  }
+  function applyMapLayers() {
+    if (!map || !mapLayersReady) return;
+    const visible = (ids, on) => ids.forEach((id) => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", on ? "visible" : "none"); });
+    visible(ROUTE_LAYERS, mapLayerState.routes);
+    visible(RISK_LAYERS, mapLayerState.risk);
+    visible(["lng-terminal-halos"], mapLayerState.shock && !!activeScenario);
+    overlayMarkers.forEach((m) => { m.getElement().style.display = mapLayerState.routes ? "" : "none"; });
+    if (map.getLayer("lng-terminal-halos")) {
+      const sc = mapOverlays.scenarios.find((x) => x.id === activeScenario);
+      map.setPaintProperty("lng-terminal-halos", "circle-radius", 10 + (sc ? sc.global_supply_loss_pct * 0.25 : 0));
+      map.setPaintProperty("lng-terminal-halos", "circle-opacity", sc ? 0.24 : 0);
+    }
+  }
+  function addMapLayers() {
+    if (!map || mapLayersReady) return;
+    const empty = () => ({ type: "FeatureCollection", features: [] });
+    map.addSource("lng-routes", { type: "geojson", data: empty() });
+    map.addSource("lng-chokepoints", { type: "geojson", data: empty() });
+    map.addSource("lng-terminal-halos", { type: "geojson", data: empty() });
+    map.addLayer({ id: "lng-routes-glow", type: "line", source: "lng-routes", paint: { "line-color": "rgba(240,195,106,.16)", "line-width": 8 } });
+    map.addLayer({ id: "lng-routes-line", type: "line", source: "lng-routes", paint: { "line-color": ["case", ["==", ["get", "status"], PENDING], "#e0a86a", "#f0c36a"], "line-width": 2 } });
+    map.addLayer({ id: "lng-routes-hit", type: "line", source: "lng-routes", paint: { "line-color": "#f0c36a", "line-opacity": 0, "line-width": 16 } });
+    map.addLayer({ id: "lng-chokepoints-halo", type: "circle", source: "lng-chokepoints", paint: {
+      "circle-radius": ["interpolate", ["linear"], ["get", "risk"], 0.2, 9, 0.9, 24],
+      "circle-color": ["match", ["get", "band"], "high", "#e76f51", "elevated", "#e0a86a", "#2a9d8f"], "circle-opacity": 0.16 } });
+    map.addLayer({ id: "lng-chokepoints-dot", type: "circle", source: "lng-chokepoints", paint: {
+      "circle-radius": 3.5, "circle-color": ["match", ["get", "band"], "high", "#e76f51", "elevated", "#e0a86a", "#2a9d8f"],
+      "circle-stroke-color": "#f7f1e8", "circle-stroke-width": 0.8 } });
+    map.addLayer({ id: "lng-chokepoints-hit", type: "circle", source: "lng-chokepoints", paint: { "circle-radius": 18, "circle-color": "#2a9d8f", "circle-opacity": 0 } });
+    map.addLayer({ id: "lng-terminal-halos", type: "circle", source: "lng-terminal-halos", paint: { "circle-radius": 10, "circle-color": "#f0c36a", "circle-opacity": 0, "circle-stroke-color": "#f0c36a", "circle-stroke-width": 1 } });
+    mapLayersReady = true;
+    applyMapLayers();
+  }
+  function updateMapSources(s) {
+    if (!map || !mapReady) return;
+    addMapLayers();
+    mapOverlays = (s.geo && s.geo.overlays) || mapOverlays;
+    const routeFeatures = mapOverlays.routes.filter((r) => Number.isFinite(r.from_lon) && Number.isFinite(r.to_lon)).map((r) => ({
+      type: "Feature", properties: { id: r.id, label: r.label, status: r.status, netback: r.netback_value, freight: r.freight_value, unit: r.unit, basis: r.price_basis },
+      geometry: { type: "LineString", coordinates: [[r.from_lon, r.from_lat], [r.to_lon, r.to_lat]] } }));
+    routeFeatures.sort((a, b) => Number(a.properties.id === selectedRoute) - Number(b.properties.id === selectedRoute));
+    const riskFeatures = mapOverlays.chokepoints.map((c) => ({ type: "Feature", properties: { id: c.id, label: c.label, risk: c.risk, band: c.band, note: c.note },
+      geometry: { type: "Point", coordinates: [c.lon, c.lat] } }));
+    const terminalFeatures = ((s.geo && s.geo.nodes) || []).filter((n) => n.kind === "lng").map((n) => ({ type: "Feature", properties: { id: n.id, label: n.label },
+      geometry: { type: "Point", coordinates: [n.lon, n.lat] } }));
+    map.getSource("lng-routes").setData({ type: "FeatureCollection", features: routeFeatures });
+    map.getSource("lng-chokepoints").setData({ type: "FeatureCollection", features: riskFeatures });
+    map.getSource("lng-terminal-halos").setData({ type: "FeatureCollection", features: terminalFeatures });
+    applyMapLayers();
+  }
+  function scheduleMapSources(s) {
+    if (!mapReady) return;
+    const serial = ++mapOverlaySerial;
+    idle(() => { if (serial === mapOverlaySerial && mapReady) updateMapSources(s); });
+  }
+  function mapHoverAt(e, text) {
+    if (!mapHover) return;
+    mapHover.textContent = text;
+    mapHover.style.display = "block";
+    const w = map.getCanvas().clientWidth;
+    mapHover.style.left = Math.max(8, Math.min(e.point.x + 12, w - 280)) + "px";
+    mapHover.style.top = Math.max(8, e.point.y + 12) + "px";
+  }
+  function showRouteHover(e, f) {
+    const r = mapOverlays.routes.find((x) => x.id === f.properties.id);
+    if (r) mapHoverAt(e, `${r.label}\nnetback ${num(r.netback_value, 2)} ${r.unit}\nfreight ${num(r.freight_value, 2)} · ${r.price_basis}\nmodeled context, not a traded quote`);
+  }
+  function showRiskHover(e, f) {
+    const c = mapOverlays.chokepoints.find((x) => x.id === f.properties.id);
+    if (c) mapHoverAt(e, `${c.label}\nroute risk ${num(c.risk, 2)} · ${c.band}\n${c.source}\n${c.note}`);
+  }
+  function hideMapHover() { if (mapHover) mapHover.style.display = "none"; }
+  function selectRoute(id) {
+    selectedRoute = id;
+    const r = mapOverlays.routes.find((x) => x.id === id);
+    if (r && map && lastRouteFit !== id) {
+      map.fitBounds([[r.from_lon, r.from_lat], [r.to_lon, r.to_lat]], { padding: 90, duration: 650, maxZoom: 4 });
+      lastRouteFit = id;
+    }
+    renderMapInspector(state); scheduleMapSources(state);
+  }
+  function showRiskDetail(id) {
+    const row = $("map-risk-" + id);
+    if (!row) return;
+    row.classList.add("sel"); setTimeout(() => row.classList.remove("sel"), 2400);
+  }
+  function fitMapOverlays() {
+    if (!map) return;
+    const pts = mapOverlays.routes.flatMap((r) => [[r.from_lon, r.from_lat], [r.to_lon, r.to_lat]]).concat(mapOverlays.chokepoints.map((c) => [c.lon, c.lat]));
+    if (pts.length) map.fitBounds(pts.reduce((b, p) => [[Math.min(b[0][0], p[0]), Math.min(b[0][1], p[1])], [Math.max(b[1][0], p[0]), Math.max(b[1][1], p[1])]], [[180, 90], [-180, -90]]), { padding: 60, duration: 650 });
+  }
+  function renderMapInspector(s) {
+    if (!s || !$("map-route-list")) return;
+    mapOverlays = (s.geo && s.geo.overlays) || mapOverlays;
+    const routes = clear($("map-route-list"));
+    routes.append(el("h4", { text: "arbitrage routes · modeled M1" }));
+    for (const r of mapOverlays.routes) {
+      const b = el("button", { id: "map-route-" + r.id, type: "button", class: "map-route-row" + (selectedRoute === r.id ? " sel" : "") },
+        [el("b", { text: r.label }), el("span", { text: `netback ${num(r.netback_value, 2)} · freight ${num(r.freight_value, 2)} USD/MMBtu` }), el("span", { text: r.price_basis })]);
+      b.addEventListener("click", () => selectRoute(r.id));
+      T("lng_netback", b, () => ({ title: r.label, value: `${num(r.netback_value, 2)} ${r.unit}`, badge: badgeOf("extracted_estimate"), what: r.note,
+        formula: null, params: {}, read: "Modeled context at the current cutoff; not a tradeable quote.", sections: [{ h: "Route", rows: [["Origin", r.origin], ["Destination basis", r.price_basis], ["Source", r.source]] }] }), "map_route_" + r.id);
+      routes.append(b);
+    }
+    const risks = clear($("map-risk-list"));
+    risks.append(el("h4", { text: "chokepoint risk · schematic" }));
+    for (const c of mapOverlays.chokepoints) {
+      const b = el("button", { id: "map-risk-" + c.id, type: "button", class: "map-risk-row", "data-band": c.band },
+        [el("b", { text: `${c.label} · ${c.band}` }), el("span", { text: `route risk ${num(c.risk, 2)} · ${c.source}` })]);
+      T("lng_supply_risk", b, () => ({ title: c.label, value: `route risk ${num(c.risk, 2)}`, badge: badgeOf("extracted_estimate"), what: c.note,
+        formula: null, params: {}, read: "A source risk score, not a measured disruption.", sections: [{ h: "Layer", rows: [["Band", c.band], ["Source", c.source]] }] }), "map_risk_" + c.id);
+      risks.append(b);
+    }
+    const scBox = clear($("map-scenario-list"));
+    for (const [id, label, title] of [[null, "none", "No shock overlay"]].concat(mapOverlays.scenarios.map((x) => [x.id, x.label, x.description]))) {
+      const b = el("button", { type: "button", title, "aria-pressed": String(id === activeScenario), text: label });
+      b.addEventListener("click", () => {
+        activeScenario = id;
+        mapLayerState.shock = !!id;
+        document.querySelectorAll(".map-ctrl button[data-layer='shock']").forEach((n) => n.setAttribute("aria-pressed", String(mapLayerState.shock)));
+        renderMapInspector(state); applyMapLayers();
+      });
+      b.dataset.layer = "shock-option"; scBox.append(b);
+    }
+    const sc = mapOverlays.scenarios.find((x) => x.id === activeScenario);
+    $("map-overlay-note").textContent = sc ? `${sc.label}: ${sc.global_supply_loss_pct}% global supply loss · ${sc.duration_days} days · ${sc.route_cost_shock_pct}% route cost shock. ${mapOverlays.note}` : mapOverlays.note;
+  }
   const nodeVal = (n, d) => (/MMcf/.test(n.unit || "") ? num(n.value, 0) : num(n.value, n.value >= 100 ? 1 : d));
   function drawMap(s) {
     if (!map || !mapReady) return;
-    markers.forEach((m) => m.remove()); markers = [];
+    markers.forEach((m) => m.remove()); overlayMarkers.forEach((m) => m.remove()); markers = []; overlayMarkers = [];
+    mapOverlays = (s.geo && s.geo.overlays) || mapOverlays;
     const byId = Object.fromEntries(s.geo.nodes.map((n) => [n.id, n]));
     for (const n of s.geo.nodes) {
       const ok = n.status === "measured", pos = LABEL_POS[n.id] || [1, 0];
@@ -634,6 +791,13 @@
         sections: [{ h: "Location", rows: [["Kind", n.kind], ["Observation date", n.date]] }, lineage(n.agent_id)], notes: ["Arcs between locations are schematic links, not surveyed pipeline routes."] }), "node_" + n.id);
       markers.push(new maplibregl.Marker({ element: dot }).setLngLat([n.lon, n.lat]).addTo(map));
     }
+    for (const r of mapOverlays.routes) {
+      const lab = el("span", { class: "node-label overlay-label", text: `${r.to} · ${num(r.netback_value, 2)}` });
+      const dot = el("div", { class: "node-wrap" }, [el("i", { class: "overlay-node" }), lab]);
+      T("lng_netback", dot, () => ({ title: r.label, value: `${num(r.netback_value, 2)} ${r.unit}`, badge: badgeOf("extracted_estimate"), what: r.note,
+        formula: null, params: {}, read: "Modeled destination context; the route is schematic.", sections: [{ h: "Route", rows: [["Destination basis", r.price_basis], ["Freight", `${num(r.freight_value, 2)} ${r.unit}`]] }] }), "map_dest_" + r.id);
+      overlayMarkers.push(new maplibregl.Marker({ element: dot }).setLngLat([r.to_lon, r.to_lat]).addTo(map));
+    }
     try {
       const data = s.geo.flows.map((f) => ({ from: [byId[f.from].lon, byId[f.from].lat], to: [byId[f.to].lon, byId[f.to].lat], f }));
       const layer = new deck.ArcLayer({ id: "flows", data, getSourcePosition: (d) => d.from, getTargetPosition: (d) => d.to, getHeight: 0.35, greatCircle: false,
@@ -645,9 +809,11 @@
       if (!overlay) { overlay = new deck.MapboxOverlay({ interleaved: false, layers }); map.addControl(overlay); } else overlay.setProps({ layers });
     } catch (e) { /* the map still works without the arc layer */ }
     const mt = clear($("map-tags"));
-    mt.append(tag(`${s.geo.nodes.filter((n) => n.status === "measured").length}/${s.geo.nodes.length} nodes with data`, "on"), tag(`flows ${s.geo.flow_agents_collected}/${s.geo.flow_agents_total}`, "gap"));
-    $("map-note").textContent = s.geo.note + " Filled marker = measured value at that location; hollow = no collector. Arcs fade from origin to destination."
+    mt.append(tag(`${s.geo.nodes.filter((n) => n.status === "measured").length}/${s.geo.nodes.length} nodes with data`, "on"), tag(`flows ${s.geo.flow_agents_collected}/${s.geo.flow_agents_total}`, "gap"),
+      tag(`${mapOverlays.routes.length} modeled routes`, "gold"), tag(`${mapOverlays.chokepoints.length} chokepoints`));
+    $("map-note").textContent = s.geo.note + " Filled marker = measured value at that location; hollow = no collector. Arcs fade from origin to destination. Teal diamonds are modeled global route destinations; gold arcs and red/amber/teal rings are schematic overlays."
       + ($("map-note").dataset.err ? "  [" + $("map-note").dataset.err + "]" : "");
+    scheduleMapSources(s);
   }
 
   /* ---------- knowledge graph ---------- */
@@ -741,7 +907,7 @@
     const keep = NGLTip.reset();
     $("asof").textContent = `as of ${s.as_of.replace("T", " ")} · ${s.schema}`;
     renderControls(s); renderHero(s); renderPricing(s); renderFib(s); renderAlerts(s); renderCurves(s); renderLng(s); renderLngGlobal(s); renderFundamentals(s); renderDrivers(s); renderSources(s);
-    initMap(s); drawMap(s);
+    initMap(s); renderMapInspector(s); drawMap(s);
     if (graph) drawGraph();
     NGLTip.restore(keep);
     const p = s.platform, k = s.knowledge;

@@ -6,6 +6,8 @@ import re
 import subprocess
 from html.parser import HTMLParser
 
+from agents.llm import CODER_CTX, CODER_MODEL, CODER_TOKENS
+
 
 class _Collect(HTMLParser):
     def __init__(self, selector):
@@ -106,7 +108,7 @@ def _usable(selector: str, html: str, failed: str) -> bool:
 
 
 def propose_repair(diag: dict, html: str, llm) -> dict:
-    """llm(prompt, schema) -> dict. The prompt ends with /no_think; callers use num_predict 180.
+    """llm(prompt, schema) -> dict. The prompt ends with /no_think; callers use the coder token budget.
     A proposal that repeats the failed selector or extracts nothing from the page is rejected, and the model gets one
     more attempt with the selectors actually present in the page listed. The result is still only a PROPOSAL:
     validate_proposal() against preserved fixtures decides whether it is accepted."""
@@ -134,14 +136,14 @@ def propose_repair(diag: dict, html: str, llm) -> dict:
     return {"selector": sel, "attempts": attempts}
 
 
-def ollama_llm(prompt: str, schema: dict, url="http://127.0.0.1:11434/api/generate", model="qwen3:4b", timeout=60) -> dict:
-    """Default llm() for propose_repair. qwen3 returns an EMPTY response unless thinking is disabled, so "think": False is
-    required alongside the /no_think suffix; num_predict stays at 180 and the JSON schema is enforced by Ollama."""
+def ollama_llm(prompt: str, schema: dict, url="http://127.0.0.1:11434/api/generate", model=CODER_MODEL, timeout=300) -> dict:
+    """Default llm() for propose_repair. "think": False is required alongside the /no_think suffix; the coder context and
+    token budgets are explicit and the JSON schema is enforced by Ollama."""
     import urllib.request
     if not prompt.rstrip().endswith("/no_think"):
         prompt = prompt.rstrip() + " /no_think"
     payload = json.dumps({"model": model, "prompt": prompt, "format": schema, "stream": False, "think": False,
-                          "options": {"temperature": 0, "num_ctx": 2048, "num_predict": 180}}).encode()
+                          "options": {"temperature": 0, "num_ctx": CODER_CTX, "num_predict": CODER_TOKENS}}).encode()
     req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         text = json.loads(resp.read().decode()).get("response", "")

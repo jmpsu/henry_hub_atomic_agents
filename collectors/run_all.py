@@ -33,6 +33,9 @@ def selector_agents() -> dict:
     return {a: f"{v['n_fixtures']} fixtures ok" for a, v in out.items()}
 
 
+from collectors import ebb_pipeline_flows, gas_basis_and_jkm_free, maritime_chokepoints_free, ngl_purity_free
+
+
 def _feedgas_model(conn) -> list:
     """Module A (LNG feedgas p10/p50/p90): a model run, not a collector. It reads only the EIA monthly exports stored by eia_ng_flows (above) and is skipped, with the reason, when they are absent."""
     import lng_feedgas
@@ -46,6 +49,8 @@ def jobs(conn) -> list:
     now = datetime.now(timezone.utc)
     out = [("cpc_heating", lambda: cpc_degree_days.collect(conn, "Heating", now.year)),
            ("cpc_cooling", lambda: cpc_degree_days.collect(conn, "Cooling", now.year)),
+           ("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
+           ("cpc_cooling_prev_year", lambda: cpc_degree_days.collect(conn, "Cooling", now.year - 1)),
            ("eia_storage", lambda: eia_storage.collect(conn)),
            ("eia_prices", lambda: eia_prices.collect(conn)),
            ("eia_ng_monthly", lambda: eia_ng_monthly.collect(conn)),
@@ -63,12 +68,14 @@ def jobs(conn) -> list:
            ("hh_forward_yahoo", lambda: hh_forward_yahoo.collect(conn)),
            ("ttf_forward_yahoo", lambda: ttf_forward_yahoo.collect(conn)),
            ("metar_ambient", lambda: metar_ambient.collect(conn)),
+           ("ngl_purity_free", lambda: ngl_purity_free.collect(conn)),
+           ("gas_basis_and_jkm_free", lambda: gas_basis_and_jkm_free.collect(conn)),
+           ("ebb_pipeline_flows", lambda: ebb_pipeline_flows.collect(conn)),
+           ("maritime_chokepoints_free", lambda: maritime_chokepoints_free.collect(conn)),
            ("lng_feedgas_model", lambda: _feedgas_model(conn)),
-           ("selfheal_demo", selector_agents)]
-    if now.month == 1:  # year-end observations and late-December revisions live in the prior-year file
-        out += [("cpc_heating_prev_year", lambda: cpc_degree_days.collect(conn, "Heating", now.year - 1)),
-                ("cpc_cooling_prev_year", lambda: cpc_degree_days.collect(conn, "Cooling", now.year - 1))]
+            ("selfheal_demo", selector_agents)]
     return out
+
 
 
 def names() -> list:

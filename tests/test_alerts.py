@@ -9,7 +9,7 @@ GOOD = {"relationship": "LNG feedgas drop interacts with salt storage draw", "in
         "analogs": ["2024-02 freeze"], "observations": ["Agent_LNG_SabinePass_Flow"], "direction": "up",
         "magnitude": "+3%", "horizon": "5d", "markets": ["Henry Hub"], "assumptions": ["no pipeline reroute"],
         "contradictory_evidence": ["storage above 5y avg"], "confidence": "low", "backtest_method": "PIT walk-forward",
-        "vector_nodes": ["node_x"], "model_version": "qwen3:4b",
+        "vector_nodes": ["node_x"], "model_version": "qwen3:32b",
         "backtest_results": {"sample": "out_of_sample", "n": 50, "rmse": 0.1, "directional_hit_rate": 0.55,
                              "mean_return_after_costs": 0.001, "cost_bps": 10}}
 
