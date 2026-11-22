@@ -359,6 +359,11 @@ def pit_cutoff(as_of: str | None) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def catalog_summary(conn, domain: str | None = None) -> list[dict]:
+    from series_catalog import list_series
+    return list_series(conn, domain=domain, active_only=True)
+
+
 def load_series(conn, agent_id: str, as_of: str) -> list[tuple]:
     """[(date, value, available_timestamp)] for MEASURED rows only: latest vintage with available_timestamp <= as_of."""
     rows = conn.execute(

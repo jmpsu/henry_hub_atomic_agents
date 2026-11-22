@@ -70,6 +70,10 @@ def record_observation(conn, *, agent_id, target_timestamp, available_timestamp,
     ok, reason = check(agent_id, float(value), unit)
     if not ok:
         raise ValueError(f"gatekeeper rejected {agent_id}: {reason}")
+    from series_catalog import check_unit_consistency
+    u_ok, u_why = check_unit_consistency(conn, agent_id, unit)
+    if not u_ok:
+        raise ValueError(f"catalog rejected {agent_id}: {u_why}")
     cur = conn.execute(
         "INSERT OR IGNORE INTO pit_market_data (agent_id,target_timestamp,available_timestamp,value,"
         "source_id,source_url,retrieved_timestamp,published_timestamp,revision_timestamp,unit,"
