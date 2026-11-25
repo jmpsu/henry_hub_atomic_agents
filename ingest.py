@@ -87,6 +87,25 @@ def record_observation(conn, *, agent_id, target_timestamp, available_timestamp,
     return cur.rowcount == 1
 
 
+def pit_snapshot_at_revision(conn, as_of: str, recorded_revision: int | None = None, agent_ids=None, measured_only=True) -> list:
+    """PIT snapshot as it was recorded at/before a local revision index (TypeGraph recorded-time pattern)."""
+    if recorded_revision is None:
+        return pit_snapshot(conn, as_of, agent_ids=agent_ids, measured_only=measured_only)
+    as_of = utc_iso(as_of)
+    q = ("SELECT h.agent_id,h.target_timestamp,h.available_timestamp,h.value FROM pit_revision_history h "
+         "WHERE h.recorded_revision<=? AND h.available_timestamp<=? "
+         "AND h.available_timestamp=(SELECT MAX(r.available_timestamp) FROM pit_revision_history r "
+         "WHERE r.agent_id=h.agent_id AND r.target_timestamp=h.target_timestamp "
+         "AND r.recorded_revision<=? AND r.available_timestamp<=?)")
+    args = [recorded_revision, as_of, recorded_revision, as_of]
+    if measured_only:
+        q += " AND COALESCE(h.provenance,'measured')='measured'"
+    if agent_ids:
+        q += " AND h.agent_id IN (%s)" % ",".join("?" * len(agent_ids))
+        args += list(agent_ids)
+    return conn.execute(q + " ORDER BY h.agent_id,h.target_timestamp", args).fetchall()
+
+
 def pit_snapshot(conn, as_of: str, agent_ids=None, measured_only=True) -> list:
     """What the platform knew at as_of: for each (agent_id, target_timestamp) the LATEST vintage with
     available_timestamp <= as_of. Later revisions are invisible."""

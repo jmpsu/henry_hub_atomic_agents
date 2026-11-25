@@ -20,6 +20,12 @@ PRODUCTION_COLUMNS = {
 }
 
 
+def configure(conn: sqlite3.Connection) -> None:
+    for pragma in ("PRAGMA journal_mode=WAL", "PRAGMA synchronous=NORMAL",
+                   "PRAGMA cache_size=-2000000", "PRAGMA mmap_size=8589934598"):
+        conn.execute(pragma)
+
+
 def migrate(path: str) -> list:
     conn = sqlite3.connect(path)
     conn.executescript(
@@ -43,6 +49,62 @@ def migrate(path: str) -> list:
             conn.execute(f"ALTER TABLE pit_market_data ADD COLUMN {col} {decl}")
             added.append(col)
     conn.execute("CREATE INDEX IF NOT EXISTS idx_pit_agent_target ON pit_market_data (agent_id, target_timestamp, available_timestamp)")
+
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS pit_revision_history (
+        recorded_revision INTEGER PRIMARY KEY,
+        recorded_at TEXT NOT NULL,
+        op TEXT NOT NULL DEFAULT 'insert',
+        agent_id TEXT NOT NULL,
+        target_timestamp TEXT NOT NULL,
+        available_timestamp TEXT NOT NULL,
+        value REAL NOT NULL,
+        source_id TEXT,
+        source_url TEXT,
+        retrieved_timestamp TEXT,
+        published_timestamp TEXT,
+        revision_timestamp TEXT,
+        unit TEXT,
+        geographic_scope TEXT,
+        series_id TEXT,
+        raw_payload_hash TEXT,
+        extraction_version TEXT,
+        quality_status TEXT,
+        provenance TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_pit_revision_lookup
+        ON pit_revision_history (agent_id, target_timestamp, available_timestamp, recorded_revision);
+    CREATE INDEX IF NOT EXISTS idx_pit_revision_available
+        ON pit_revision_history (available_timestamp, recorded_revision);
+    CREATE INDEX IF NOT EXISTS idx_pit_revision_hash
+        ON pit_revision_history (raw_payload_hash);
+
+    INSERT OR IGNORE INTO pit_revision_history (
+        recorded_revision, recorded_at, op, agent_id, target_timestamp, available_timestamp, value,
+        source_id, source_url, retrieved_timestamp, published_timestamp, revision_timestamp, unit,
+        geographic_scope, series_id, raw_payload_hash, extraction_version, quality_status, provenance)
+    SELECT rowid, COALESCE(retrieved_timestamp, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')), 'insert',
+           agent_id, target_timestamp, available_timestamp, value, source_id, source_url,
+           retrieved_timestamp, published_timestamp, revision_timestamp, unit, geographic_scope,
+           series_id, raw_payload_hash, extraction_version, quality_status, provenance
+    FROM pit_market_data;
+
+    DROP TRIGGER IF EXISTS trg_pit_market_data_revision_history;
+    CREATE TRIGGER trg_pit_market_data_revision_history
+    AFTER INSERT ON pit_market_data
+    BEGIN
+        INSERT OR IGNORE INTO pit_revision_history (
+            recorded_revision, recorded_at, op, agent_id, target_timestamp, available_timestamp, value,
+            source_id, source_url, retrieved_timestamp, published_timestamp, revision_timestamp, unit,
+            geographic_scope, series_id, raw_payload_hash, extraction_version, quality_status, provenance)
+        VALUES (
+            NEW.rowid, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), 'insert', NEW.agent_id, NEW.target_timestamp,
+            NEW.available_timestamp, NEW.value, NEW.source_id, NEW.source_url, NEW.retrieved_timestamp,
+            NEW.published_timestamp, NEW.revision_timestamp, NEW.unit, NEW.geographic_scope, NEW.series_id,
+            NEW.raw_payload_hash, NEW.extraction_version, NEW.quality_status, NEW.provenance);
+    END;
+    """)
 
     conn.executescript("""
 -- 0002_series_catalog.sql
@@ -139,7 +201,45 @@ BEGIN
         observation_count = series_catalog.observation_count + 1,
         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now');
 END;
+
+CREATE TABLE IF NOT EXISTS chat_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT NOT NULL,
+    cutoff TEXT NOT NULL,
+    prompt TEXT NOT NULL,
+    intent TEXT,
+    entities TEXT,
+    node_ids TEXT,
+    chunk_ids TEXT,
+    fact_ids TEXT,
+    model TEXT,
+    verdict TEXT,
+    answer TEXT,
+    first_event_ms INTEGER,
+    total_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_log_ts ON chat_log(ts);
+
+INSERT OR IGNORE INTO series_catalog (agent_id, series_id, source_id, domain, frequency, unit, is_active)
+VALUES
+    ('Agent_LNG_JKM_Forward', 'Agent_LNG_JKM_Forward', 'planned_gap', 'global_gas_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_NATGAS_AECO_Basis', 'Agent_NATGAS_AECO_Basis', 'planned_gap', 'henry_hub_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_NATGAS_Waha_Basis', 'Agent_NATGAS_Waha_Basis', 'planned_gap', 'henry_hub_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_Gas_Waha_Spot', 'Agent_Gas_Waha_Spot', 'planned_gap', 'henry_hub_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_Houston_ShipChannel_Basis', 'Agent_Houston_ShipChannel_Basis', 'planned_gap', 'henry_hub_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_NATGAS_TranscoZone6_Basis', 'Agent_NATGAS_TranscoZone6_Basis', 'planned_gap', 'henry_hub_pricing', 'daily', 'USD/MMBtu', 0),
+    ('Agent_NGL_Conway_Propane', 'Agent_NGL_Conway_Propane', 'planned_gap', 'ngl_markets', 'daily', 'cents/gal', 0),
+    ('Agent_NGL_MontBelvieu_Ethane', 'Agent_NGL_MontBelvieu_Ethane', 'planned_gap', 'ngl_markets', 'daily', 'cents/gal', 0),
+    ('Agent_NGL_MontBelvieu_NormalButane', 'Agent_NGL_MontBelvieu_NormalButane', 'planned_gap', 'ngl_markets', 'daily', 'cents/gal', 0),
+    ('Agent_NGL_MontBelvieu_Isobutane', 'Agent_NGL_MontBelvieu_Isobutane', 'planned_gap', 'ngl_markets', 'daily', 'cents/gal', 0),
+    ('Agent_NGL_MontBelvieu_NatGasoline', 'Agent_NGL_MontBelvieu_NatGasoline', 'planned_gap', 'ngl_markets', 'daily', 'cents/gal', 0);
+
+UPDATE series_catalog
+SET is_active = 0
+WHERE unit IS NULL OR TRIM(unit) = '' OR UPPER(TRIM(unit)) = 'NONE';
     """)
+    configure(conn)
     conn.commit()
     conn.close()
     return added

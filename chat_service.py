@@ -26,6 +26,7 @@ import kb_ingest
 import emi_alignment
 import knowledge_roles as kr
 import literature_kb as lk
+from agents.llm import CHAT_CTX, CHAT_MODEL, CHAT_TOKENS
 
 BASE_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = Path(os.environ.get("QH_RUNTIME_DIR", BASE_DIR / "runtime"))
@@ -34,7 +35,7 @@ EMI_ROOT = "/home/joey/Projects/energy_market_intelligence"
 MAX_MESSAGE = 800
 MIN_NODE_SIM, MIN_DOC_SIM = 0.50, 0.68      # measured on the live library: governing methodology chunks score >= 0.70, unrelated text about 0.62
 SYNTHETIC_MARK = "SYNTHETIC HYPOTHETICAL DATA"   # exercise outputs that label themselves as made-up data are never cited as evidence
-PROMPT_FACTS, PROMPT_NODES, PROMPT_DOCS = 16, 6, 3          # what the model is shown (a CPU-only 4B model: prompt length is latency); the same limits bound valid citation tags
+PROMPT_FACTS, PROMPT_NODES, PROMPT_DOCS = 16, 6, 3          # what the model is shown; the same limits bound valid citation tags
 SYSTEM = ("You are the assistant of a natural-gas and NGL markets dashboard. Answer ONLY from the numbered FACTS, NODES and DOCUMENTS you are given. "
           "If a feed has no data, say its collector is pending and quote the last verified value or the bootstrapped proxy if one is listed; never invent or estimate a number. "
           "Name whether a figure is a direct EIA/NOAA actual, a bootstrapped proxy, or a calculated module. Cite as [F1], [N1], [D1]. Never state or imply what caused a price move: report what the data shows and say it does not prove a cause. Be concise (under 120 words).")
@@ -299,10 +300,10 @@ class AnswerExtractor:
         return out
 
 
-def ollama_stream(prompt: str, model: str = "qwen3:4b", url: str = "http://127.0.0.1:11434", timeout: float = 120.0):
+def ollama_stream(prompt: str, model: str = CHAT_MODEL, url: str = "http://127.0.0.1:11434", timeout: float = 300.0):
     """Yield the answer text from the local model (Ollama /api/chat, streamed, schema-constrained). Raises on failure; the caller falls back to the deterministic answer."""
     import httpx
-    body = {"model": model, "stream": True, "think": False, "keep_alive": -1, "format": ANSWER_SCHEMA, "options": {"temperature": 0, "num_predict": 320, "num_ctx": 6144},
+    body = {"model": model, "stream": True, "think": False, "keep_alive": -1, "format": ANSWER_SCHEMA, "options": {"temperature": 0, "num_predict": CHAT_TOKENS, "num_ctx": CHAT_CTX},
             "messages": [{"role": "system", "content": SYSTEM + JSON_RULES}, {"role": "user", "content": prompt}]}
     ex = AnswerExtractor()
     with httpx.stream("POST", f"{url}/api/chat", json=body, timeout=timeout) as resp:
@@ -391,7 +392,7 @@ def respond(message: str, cutoff: str, state_fn, kb, lit, embedder, stream_fn=No
     yield "context", {"cited_nodes": ret["nodes"], "cited_documents": ret["documents"], "node_error": ret["node_error"]}
     text, verdict, model = "", "deterministic", None
     if stream_fn is not None:
-        model = "qwen3:4b (local Ollama)"
+        model = f"{CHAT_MODEL} (local Ollama)"
         try:
             for tok in stream_fn(build_prompt(message, facts, ret)):
                 text += tok

@@ -9,7 +9,7 @@ Fixture directory: *.html pages with *.expected (one number each) preserved from
 
 repair(agent_id, html) does, in order, and stops at the first failure:
   1. diagnose the current selector against the failing page (structured record)
-  2. propose a repair with local qwen3:4b (selfheal.propose_repair: grounded, constrained retry)
+   2. propose a repair with local qwen2.5-coder:32b (selfheal.propose_repair: grounded, constrained retry)
   3. validate the proposal on EVERY preserved fixture AND on the failing page's value range
   4. create an isolated worktree on a new branch selfheal/<collector>/<UTC timestamp> from origin/<base>
   5. apply the patch (selectors.json), add the failing page as a new fixture, run the full test suite in the worktree
@@ -127,7 +127,7 @@ def repair(agent_id: str, page_html: str, base: str | None = None, dry_run: bool
             return {**report, "stage": "tests", "ok": False, "error": out[-800:]}
         run(["git", "add", REG, cfg["fixtures"]], wt)
         rc, out = run(["git", "commit", "-q", "-m", f"selfheal: {agent_id} add selector {prop['selector']!r} ahead of {current!r}\n\n"
-                       f"Proposed by local qwen3:4b, validated on {val['n_fixtures']} preserved fixtures and the failing page "
+                        f"Proposed by local qwen2.5-coder:32b, validated on {val['n_fixtures']} preserved fixtures and the failing page "
                        f"(value {page_value}). Tests: {report['tests']}.\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"], wt)
         if rc:
             return {**report, "stage": "commit", "ok": False, "error": out[-400:]}

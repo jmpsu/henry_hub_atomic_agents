@@ -43,7 +43,7 @@ class Live(unittest.TestCase):
         self.assertIn(out["event_type"], workers.NoticeAnalystAgent.SCHEMA["properties"]["event_type"]["enum"])
         self.assertIn(out["severity"], ("low", "medium", "high"))
         row = self.conn.execute("SELECT model, ok, fallback, prompt_version FROM llm_calls WHERE task='extract' ORDER BY id DESC LIMIT 1").fetchone()
-        self.assertEqual(row, (llm_mod.REASONING_MODEL, 1, 0, "live-test"))
+        self.assertEqual(row, (llm_mod.CODER_MODEL, 1, 0, "live-test"))
 
     def test_real_agent_run_extracts_notice(self):
         c = self.conn
@@ -56,7 +56,7 @@ class Live(unittest.TestCase):
         self.assertEqual(res["extracted"], 1); self.assertEqual(res["by_source"].get("model"), 1)
         et, sev, model = c.execute("SELECT event_type, severity, model FROM notice_extractions WHERE document_id='km_TGP_405742'").fetchone()
         self.assertEqual(et, "capacity_restriction")                                # source label
-        self.assertEqual(model, llm_mod.REASONING_MODEL)
+        self.assertEqual(model, llm_mod.CODER_MODEL)
         self.assertIn(sev, ("medium", "high"))
 
 

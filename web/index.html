@@ -61,7 +61,17 @@
   <div class="row map-row">
     <section class="panel" aria-labelledby="map-h">
       <h2 id="map-h">North American energy hub<span class="tags" id="map-tags"></span></h2>
-      <div id="map"></div>
+      <div class="map-wrap">
+        <div id="map"></div>
+        <aside class="map-inspector" id="map-inspector" aria-label="Map overlays">
+          <h3>route &amp; risk inspector</h3>
+          <div id="map-route-list"></div>
+          <div id="map-risk-list"></div>
+          <h4>shock overlay</h4>
+          <div class="map-scenario" id="map-scenario-list"></div>
+          <div class="map-ctrl-note" id="map-overlay-note"></div>
+        </aside>
+      </div>
       <div class="note" id="map-note"></div>
     </section>
     <div class="stack">
@@ -106,7 +116,7 @@
       <span id="src-legend" class="legend"></span>
     </div>
     <div class="table-wrap"><table id="sources"><thead><tr>
-      <th>Agent</th><th>Status</th><th>Provenance</th><th>Source</th><th>Latest target</th><th>Available</th><th>Retrieved</th><th>Quality</th><th>Raw payload hash</th>
+      <th>Agent</th><th>Status</th><th>Feed</th><th>Provenance</th><th>Source</th><th>Latest target</th><th>Available</th><th>Retrieved</th><th>Quality</th><th>Raw payload hash</th>
     </tr></thead><tbody></tbody></table></div>
   </section>
 

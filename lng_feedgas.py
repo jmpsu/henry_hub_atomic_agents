@@ -31,6 +31,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import series_catalog
+
 BASE_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = Path(os.environ.get("QH_RUNTIME_DIR", BASE_DIR / "runtime"))
 OUT_FILE = RUNTIME_DIR / "lng_feedgas.json"
@@ -142,10 +144,20 @@ def ambient_context(conn, cutoff: str) -> list:
     return out
 
 
+def _feed_gaps(conn: sqlite3.Connection, cutoff: str) -> list[dict]:
+    gaps = [{"id": x["id"], "input": x["input"], "status": "UNREGISTERED", "label": "Feed Not Configured"} for x in NOT_USED]
+    for terminal, agent in sorted(TERMINALS.items()):
+        feed = series_catalog.feed_status(conn, agent, cutoff)
+        if feed["status"] != "ACTIVE" or not feed["observed"]:
+            gaps.append({"id": terminal, "agent_id": agent, "status": feed["status"], "label": feed["label"]})
+    return gaps
+
+
 def estimate(conn, as_of: str, n_iter: int = N_ITER) -> dict:
     """p10/p50/p90 US LNG feedgas (Bcf/d) at `as_of` (ISO timestamp), using only information available at `as_of`."""
     monthly, per = monthly_total_bcfd(conn, as_of)
     base = {"as_of": as_of, "provenance": PROVENANCE, "unit": "Bcf/d", "inputs": sorted(TERMINALS.values()), "not_used": NOT_USED,
+            "feed_gaps": _feed_gaps(conn, as_of),
             "evidence": {"ebb_scheduled_quantity": 0, "ais_draft": 0, "grid_load": 0, "monthly_eia_anchor": 1, "class": "inferred_from_monthly_anchor"},
             "method": "EIA monthly exports -> Bcf/d; Feedgas = Cargo x (1 + fuel/shrinkage 8-10%), dInventory = 0; stationary block bootstrap of monthly log-changes, 1000 iterations"}
     if not monthly:

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opencode.ai",
+  "default_agent": "build",
+  "model": "ollama/qwen3:32b",
+  "permission": {
+    "*": "allow",
+    "read": "allow",
+    "edit": "allow",
+    "write": "allow",
+    "bash": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "task": "allow",
+    "external_directory": "allow"
+  },
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "model": "ollama/qwen3:32b",
+      "permission": {
+        "*": "allow"
+      }
+    },
+    "general": {
+      "mode": "subagent",
+      "model": "ollama/qwen3:32b",
+      "permission": {
+        "*": "allow"
+      }
+    },
+    "explore": {
+      "mode": "subagent",
+      "model": "ollama/qwen3:32b",
+      "permission": {
+        "*": "allow"
+      }
+    }
+  },
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama Blackwell",
+      "options": {
+        "baseURL": "http://127.0.0.1:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:32b": {
+          "name": "Qwen 2.5 Coder 32B",
+          "tools": true,
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
+        },
+        "qwen3:32b": {
+          "name": "Qwen 3 32B",
+          "tools": true,
+          "reasoning": true,
+          "limit": {
+            "context": 40960,
+            "output": 8192
+          }
+        }
+      }
+    }
+  },
+  "mcp": {
+    "code-review-graph": {
+      "type": "local",
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "code_review_graph",
+        "serve",
+        "--repo",
+        "/root/henry_hub_atomic_agents"
+      ],
+      "enabled": true
+    },
+    "mcp-memory-libsql": {
+      "type": "local",
+      "command": [
+        "/usr/local/bin/mcp-memory-libsql"
+      ],
+      "environment": {
+        "LIBSQL_URL": "file:/root/.local/share/opencode/agent-memory.db"
+      },
+      "enabled": true
+    }
+  }
+}

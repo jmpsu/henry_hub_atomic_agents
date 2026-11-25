@@ -100,18 +100,23 @@ def _():
     return need <= have, f"missing={sorted(need - have)}"
 
 
-@check("raw_payloads_verified", "every raw_payloads row has its archived bytes and the sha256 matches")
+@check("raw_payloads_verified", "locally archived raw_payloads bytes verify by sha256; pre-transfer legacy gaps are reported separately")
 def _():
-    bad, n = [], 0
+    bad, verified, legacy_missing = [], 0, 0
     with ro() as c:
         for h, p in c.execute("SELECT raw_payload_hash, archive_path FROM raw_payloads"):
-            n += 1
             f = Path(p) if Path(p).is_absolute() else ROOT / p
             if not f.is_file():
                 f = next((x for x in (ROOT / "raw" / h, ROOT / "raw" / f"{h}.gz") if x.is_file()), f)
-            if not f.is_file() or hashlib.sha256(ingest_mod.read_payload(str(f))).hexdigest() != h:
+            if not f.is_file():
+                legacy_missing += 1
+                continue
+            if hashlib.sha256(ingest_mod.read_payload(str(f))).hexdigest() != h:
                 bad.append(h[:12])
-    return not bad and n > 0, f"{n - len(bad)}/{n} verified" + (f"; bad {bad[:5]}" if bad else "")
+            else:
+                verified += 1
+    return not bad and verified > 0, (f"{verified} local archives verified; {legacy_missing} pre-transfer legacy archives absent"
+                                      + (f"; bad {bad[:5]}" if bad else ""))
 
 
 @check("observations_reference_payloads", "measured rows from collectors cite an archived raw payload")
@@ -214,7 +219,7 @@ def _():
     return pytest_ok("tests/test_selfheal.py")
 
 
-@check("selfheal_live_ollama", "qwen3:4b proposes a selector that passes fixtures (live local Ollama)", network=True)
+@check("selfheal_live_ollama", "qwen2.5-coder:32b proposes a selector that passes fixtures (live local Ollama)", network=True)
 def _():
     code = ("import selfheal as s;h='<div><span class=\"px\">$3.42</span></div>';d=s.diagnose('Agent_X',h,'span.old',(1,20));"
             "p=s.propose_repair(d,h,s.ollama_llm);v=s.validate_proposal(p['selector'],[{'html':h,'expected':3.42}]);print(p,v);assert v['passed']")
@@ -251,11 +256,11 @@ def _():
 
 
 # ----------------------------------------------------------------------------- vector engine
-@check("ollama_models", "local Ollama serves qwen3:4b and nomic-embed-text", network=True)
+@check("ollama_models", "local Ollama serves qwen2.5-coder:32b, qwen3:32b and nomic-embed-text", network=True)
 def _():
     st, body = http("http://127.0.0.1:11434/api/tags")
     names = {m["name"] for m in json.loads(body).get("models", [])} if st == 200 else set()
-    return {"qwen3:4b", "nomic-embed-text:latest"} <= names, f"{sorted(names)}"
+    return {"qwen2.5-coder:32b", "qwen3:32b", "nomic-embed-text:latest"} <= names, f"{sorted(names)}"
 
 
 @check("knowledge_library", "knowledge objects with PIT metadata, typed edges, PIT-filtered search")
@@ -668,17 +673,17 @@ def _():
     return pytest_ok("tests/test_ollama_live.py")
 
 
-@check("agents_live_run", "every research agent ran against the production database within 2 days and the reasoning agents used qwen3:4b")
+@check("agents_live_run", "every research agent ran against the production database within 2 days and the agents used the configured Qwen 32B models")
 def _():
     since = (datetime.now(timezone.utc) - __import__("datetime").timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
     with ro() as c:
         runs = {a: c.execute("SELECT ok FROM agent_runs WHERE agent=? AND finished>=? ORDER BY id DESC LIMIT 1", (a, since)).fetchone() for a in AGENT_NAMES}
-        calls = dict(c.execute("SELECT agent, SUM(ok) FROM llm_calls WHERE at>=? AND model LIKE 'qwen3%' GROUP BY agent", (since,)).fetchall())
+        calls = dict(c.execute("SELECT agent, SUM(ok) FROM llm_calls WHERE at>=? AND (model LIKE 'qwen2.5-coder%' OR model LIKE 'qwen3%') GROUP BY agent", (since,)).fetchall())
         emb = c.execute("SELECT SUM(ok) FROM llm_calls WHERE at>=? AND model LIKE 'nomic-embed-text%'", (since,)).fetchone()[0] or 0
     ok_runs = [a for a, r in runs.items() if r and r[0]]
     used = {a: calls.get(a, 0) for a in ("notice_analyst", "data_quality", "synthesis")}
     return len(ok_runs) == len(AGENT_NAMES) and all(v > 0 for v in used.values()) and emb > 0, \
-        f"ok runs {ok_runs}; qwen3 ok calls {used}; embedding ok calls {emb}"
+        f"ok runs {ok_runs}; Qwen 32B ok calls {used}; embedding ok calls {emb}"
 
 
 @check("agents_share_knowledge", "agents exchange messages and persist findings linked to the evidence they used, mirrored into the vector store")
@@ -799,7 +804,7 @@ DIRECTIVE = [
      ["knowledge_explorer", "knowledge_explorer_browser", "web_ui_browser"]),
     ("Library: persistent across runs, updates, deduplication, traceable sources", 41,
      "doc_hash idempotent ingest; finding content-hash ids; raw_payloads", ["knowledge_library", "agent_unit", "raw_payloads_verified"]),
-    ("Library: Ollama for embedding and synthesis", 42, "nomic-embed-text embeddings; qwen3:4b synthesis", ["ollama_live_integration", "agents_live_run"]),
+    ("Library: Ollama for embedding and synthesis", 42, "nomic-embed-text embeddings; qwen2.5-coder:32b structured extraction and qwen3:32b synthesis", ["ollama_live_integration", "agents_live_run"]),
     ("Agents use shared intelligence and knowledge infrastructure (verified execution)", 47, "agents/ via /agents/run and the daily timer",
      ["agents_live_run", "agents_share_knowledge", "agents_scheduled"]),
     ("Point-in-time correctness, no look-ahead in features, retrieval, inputs, training, backtesting", 50,

@@ -54,7 +54,7 @@ text (pipeline notices, forecast discussions) with the source's publication time
 
 ## Architecture 2 — self-healing scrapers (Section 4)
 
-`selfheal.py`: structured diagnosis, LLM (qwen3:4b via `ollama_llm`) selector proposal with a constrained, grounded retry
+`selfheal.py`: structured diagnosis, LLM (qwen2.5-coder:32b via `ollama_llm`) selector proposal with a constrained, grounded retry
 and a deterministic fallback, fixture validation. `selfheal_pipeline.py`: selector agents registered in
 `ingestion/selectors.json` (selector lists; a repair is prepended so old layouts keep working) -> diagnose -> propose ->
 validate on preserved fixtures and the failing page's value range -> isolated worktree branch `selfheal/<collector>/...` ->
@@ -77,8 +77,10 @@ notices, NGL fractionation, cracker/refinery outages, Mont Belvieu purity produc
 ## Research agents and the local Ollama layer (`agents/`, CLAUDE.md capabilities 1-3)
 
 `agents/llm.py` is the only path from agents to a model. Configuration is explicit and environment-overridable:
-`HH_OLLAMA_URL` (default `http://127.0.0.1:11434`), `HH_REASONING_MODEL` (`qwen3:4b`), `HH_EMBED_MODEL` (`nomic-embed-text`), per-task token
-budgets and timeouts (`HH_SYNTH_TIMEOUT` 240 s, `HH_EXTRACT_TIMEOUT` 90 s, `HH_EMBED_TIMEOUT` 30 s, ...), `HH_LLM_RETRIES` (1, for
+`HH_OLLAMA_URL` (default `http://127.0.0.1:11434`), `HH_CODER_MODEL` (`qwen2.5-coder:32b`), `HH_REASONING_MODEL` (`qwen3:32b`),
+`HH_EMBED_MODEL` (`nomic-embed-text`), per-task context and token budgets (`HH_CODER_CTX` 16384 / `HH_CODER_TOKENS` 1024,
+`HH_REASONING_CTX` 32768 / `HH_REASONING_TOKENS` 2048, `HH_EMBED_CTX` 8192) and timeouts (300 s for coder/reasoning tasks,
+30 s for embeddings), `HH_LLM_RETRIES` (1, for
 connection errors and HTTP 5xx; timeouts are not retried). `status()` reports ok only when every configured model is installed - a
 responding daemon is not enough; when it fails every agent runs on its deterministic fallback. Generations are JSON-schema constrained
 (free-text fields carry `maxLength`), `think=false`, temperature 0; truncated output (`done_reason=length`) is an error. Every call -
@@ -134,8 +136,8 @@ No model has met the promotion bar.
 ## Architecture 5 — zero-trust command and alerting (Section 7)
 
 Worker: constant-time bearer check, 4 KiB body limit, Access headers injected, bearer dropped, upstream status preserved.
-Hub `/execute`: `as_of` normalised to UTC, PIT SQL context filtered by query-implied agents, PIT vector retrieval, qwen3:4b
-with strict JSON schema, `/no_think`, `num_predict` 180; model SQL runs in a sandbox (temp view with the cutoff, SQLite
+Hub `/execute`: `as_of` normalised to UTC, PIT SQL context filtered by query-implied agents, PIT vector retrieval, qwen2.5-coder:32b
+with strict JSON schema, `/no_think`, `num_ctx` 16384 and `num_predict` 1024; model SQL runs in a sandbox (temp view with the cutoff, SQLite
 authorizer, row cap, step limit) with deterministic fallback; scenario delta computed deterministically; a thesis that
 contradicts the delta's sign is withheld; private audit gist piped to `gh` on stdin; new vector node linked to its
 parents. Response carries all ten fields of 7.4 plus provenance labels. Owner alerts: `notify.py` opens one GitHub issue per incident (collector failure), closes it on recovery, and posts

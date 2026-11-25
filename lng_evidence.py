@@ -5,7 +5,7 @@ parameter value comes from:
 
   1. Retrieve candidate sentences for the parameter from the literature library (literature_kb.best_quotes: embedding
      search with nomic-embed-text, verbatim-verified sentences only, abstains below the similarity thresholds).
-  2. Ask the local reasoning model (agents.llm, qwen3) to read ONE verified sentence and return the number it states.
+   2. Ask the local coder model (agents.llm, qwen2.5-coder:32b) to read ONE verified sentence and return the number it states.
   3. Accept the number only if (a) the quote is still a verbatim substring of the stored chunk, (b) the number, or for a
      percentage the number x100, literally appears in that sentence, and (c) it lies inside the parameter's sanity band.
   4. Otherwise keep the labelled default assumption. A model output is never used without a quote that contains it.
@@ -26,6 +26,7 @@ from pathlib import Path
 
 import kb_ingest
 import literature_kb
+from agents.llm import CODER_MODEL
 
 BASE_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = Path(os.environ.get("QH_RUNTIME_DIR", BASE_DIR / "runtime"))
@@ -108,7 +109,7 @@ def extract_param(name: str, spec: dict, lit_conn, llm, embedder, as_of_epoch: i
         return {"name": name, "value": float(out["value"]), "unit": spec["unit"], "source": "library",
                 "quote": q["quote"], "chunk_id": q["chunk_id"], "doc_id": q["doc_id"], "title": q["title"],
                 "similarity": q["similarity"], "doc_available_timestamp": q["available_timestamp"],
-                "model": "agents.llm extract (local Ollama)", "prompt_version": PROMPT_VERSION,
+                "model": f"agents.llm extract ({CODER_MODEL})", "prompt_version": PROMPT_VERSION,
                 "attempts": default["attempts"]}
     return default
 

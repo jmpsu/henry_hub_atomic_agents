@@ -32,7 +32,7 @@ def post(path: str, timeout: float) -> tuple[int, dict]:
 def main() -> int:
     st, kb = post("/kb/ingest", 900)
     print("kb_ingest", st, json.dumps({k: kb.get(k) for k in ("new", "changed", "nodes_total", "detail") if k in kb}))
-    st2, rep = post("/agents/run?notice_limit=25", 3000)
+    st2, rep = post("/agents/run?notice_limit=150", 3000)
     if st2 == 409:
         print("agents already running (started by another trigger)")
         return 0 if st == 200 else 1

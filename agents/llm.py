@@ -1,8 +1,8 @@
 """Local Ollama intelligence layer shared by every agent.
 
 Configuration (explicit; every value can be overridden by environment variable, see CONFIG below):
-- Model routing: each task kind maps to a local model (reasoning/extraction -> qwen3:4b, embeddings -> nomic-embed-text),
-  a token budget and a timeout. Generations enforce a JSON schema, send /no_think with think=false and temperature 0.
+- Model routing: each task kind maps to a local model (structured/code tasks -> qwen2.5-coder:32b, reasoning/synthesis/chat -> qwen3:32b,
+  embeddings -> nomic-embed-text), a token budget and a timeout. Generations enforce a JSON schema, send /no_think with think=false and temperature 0.
 - Transient failures (connection refused, HTTP 5xx) are retried once; timeouts are not retried (the call is expensive).
 - `status()` checks that the configured models are actually installed, not merely that the daemon answers.
 - Every call is recorded in `llm_calls` (agent, task, model, prompt version, prompt sha256, latency, ok, error, fallback),
@@ -37,20 +37,33 @@ def _env(name: str, default):
 
 
 OLLAMA = _env("HH_OLLAMA_URL", "http://127.0.0.1:11434")
-REASONING_MODEL = _env("HH_REASONING_MODEL", "qwen3:4b")
+CODER_MODEL = _env("HH_CODER_MODEL", "qwen2.5-coder:32b")
+REASONING_MODEL = _env("HH_REASONING_MODEL", "qwen3:32b")
 EMBED_MODEL = _env("HH_EMBED_MODEL", "nomic-embed-text")
-CONFIG = {  # task kind -> model, num_predict, timeout seconds
-    "extract": {"model": REASONING_MODEL, "num_predict": _env("HH_EXTRACT_TOKENS", 260), "timeout": _env("HH_EXTRACT_TIMEOUT", 90.0)},
-    "classify": {"model": REASONING_MODEL, "num_predict": 120, "timeout": _env("HH_CLASSIFY_TIMEOUT", 60.0)},
-    "interpret": {"model": REASONING_MODEL, "num_predict": 260, "timeout": _env("HH_INTERPRET_TIMEOUT", 90.0)},
-    "investigate": {"model": REASONING_MODEL, "num_predict": 220, "timeout": _env("HH_INVESTIGATE_TIMEOUT", 90.0)},
-    "triage": {"model": REASONING_MODEL, "num_predict": 120, "timeout": _env("HH_TRIAGE_TIMEOUT", 60.0)},
-    "synthesize": {"model": REASONING_MODEL, "num_predict": _env("HH_SYNTH_TOKENS", 700), "timeout": _env("HH_SYNTH_TIMEOUT", 240.0)},
-    "diagnose": {"model": REASONING_MODEL, "num_predict": 200, "timeout": _env("HH_DIAGNOSE_TIMEOUT", 60.0)},
-    "embed": {"model": EMBED_MODEL, "num_predict": 0, "timeout": _env("HH_EMBED_TIMEOUT", 30.0)},
+CODER_CTX = _env("HH_CODER_CTX", 16384)
+CODER_TOKENS = _env("HH_CODER_TOKENS", 1024)
+REASONING_CTX = _env("HH_REASONING_CTX", 32768)
+REASONING_TOKENS = _env("HH_REASONING_TOKENS", 2048)
+CHAT_MODEL = _env("HH_CHAT_OLLAMA_MODEL", REASONING_MODEL)
+CHAT_CTX = _env("HH_CHAT_CTX", REASONING_CTX)
+CHAT_TOKENS = _env("HH_CHAT_TOKENS", REASONING_TOKENS)
+KG_MODEL = _env("HH_KG_MODEL", CODER_MODEL)
+KG_CTX = _env("HH_KG_CTX", CODER_CTX)
+KG_TOKENS = _env("HH_KG_TOKENS", CODER_TOKENS)
+CONFIG = {  # task kind -> model, num_predict, num_ctx, timeout seconds
+    "extract": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_EXTRACT_TIMEOUT", 300.0)},
+    "classify": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_CLASSIFY_TIMEOUT", 300.0)},
+    "interpret": {"model": REASONING_MODEL, "num_predict": REASONING_TOKENS, "num_ctx": REASONING_CTX, "timeout": _env("HH_INTERPRET_TIMEOUT", 600.0)},
+    "investigate": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_INVESTIGATE_TIMEOUT", 300.0)},
+    "triage": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_TRIAGE_TIMEOUT", 300.0)},
+    "synthesize": {"model": REASONING_MODEL, "num_predict": REASONING_TOKENS, "num_ctx": REASONING_CTX, "timeout": _env("HH_SYNTH_TIMEOUT", 600.0)},
+    "diagnose": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_DIAGNOSE_TIMEOUT", 300.0)},
+    "selector_repair": {"model": CODER_MODEL, "num_predict": CODER_TOKENS, "num_ctx": CODER_CTX, "timeout": _env("HH_SELECTOR_REPAIR_TIMEOUT", 300.0)},
+    "kg_triplets": {"model": KG_MODEL, "num_predict": KG_TOKENS, "num_ctx": KG_CTX, "timeout": _env("HH_KG_TIMEOUT", 300.0)},
+    "embed": {"model": EMBED_MODEL, "num_predict": 0, "num_ctx": _env("HH_EMBED_CTX", 8192), "timeout": _env("HH_EMBED_TIMEOUT", 30.0)},
 }
 ROUTES = {k: (v["model"], v["num_predict"]) for k, v in CONFIG.items()}   # kept for callers of the earlier interface
-NUM_CTX = _env("HH_NUM_CTX", 4096)
+NUM_CTX = _env("HH_NUM_CTX", REASONING_CTX)
 RETRIES = _env("HH_LLM_RETRIES", 1)
 
 
@@ -127,7 +140,7 @@ class LLM:
             if not self.available:
                 raise ModelUnavailable(f"{model} unavailable (status check failed)")
             data = self._post("/api/generate", {"model": model, "prompt": prompt, "format": schema, "stream": False, "think": False,
-                                                "keep_alive": -1, "options": {"temperature": 0, "num_ctx": NUM_CTX, "num_predict": cfg["num_predict"]}},
+                                                 "keep_alive": -1, "options": {"temperature": 0, "num_ctx": cfg.get("num_ctx", NUM_CTX), "num_predict": cfg["num_predict"]}},
                               cfg["timeout"])
             text = data.get("response", "")
             if not text.strip():

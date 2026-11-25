@@ -49,6 +49,23 @@ def ensure(conn) -> None:
         source_id TEXT, agent_ids TEXT, available_timestamp TEXT, available_epoch INTEGER, published_timestamp TEXT, raw_payload_hash TEXT,
         provenance TEXT, doc_hash TEXT, created TEXT, embedding BLOB)""")
     conn.execute("CREATE TABLE IF NOT EXISTS kb_edges(src TEXT, dst TEXT, type TEXT, weight REAL, PRIMARY KEY(src, dst, type))")
+    conn.execute("""CREATE TABLE IF NOT EXISTS kb_edge_versions(
+        recorded_revision INTEGER PRIMARY KEY AUTOINCREMENT,
+        src TEXT NOT NULL, dst TEXT NOT NULL, type TEXT NOT NULL, weight REAL,
+        available_epoch INTEGER NOT NULL DEFAULT 0,
+        recorded_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+        UNIQUE(src, dst, type, available_epoch, recorded_revision))""")
+    conn.execute("CREATE INDEX IF NOT EXISTS kb_edge_versions_lookup ON kb_edge_versions(src, type, available_epoch, recorded_revision)")
+    conn.execute("CREATE INDEX IF NOT EXISTS kb_edge_versions_reverse ON kb_edge_versions(dst, type, available_epoch, recorded_revision)")
+    conn.execute("DROP TRIGGER IF EXISTS trg_kb_edges_history")
+    conn.execute("""CREATE TRIGGER trg_kb_edges_history
+        AFTER INSERT ON kb_edges
+        BEGIN
+            INSERT INTO kb_edge_versions(src, dst, type, weight, available_epoch, recorded_at)
+            VALUES (NEW.src, NEW.dst, NEW.type, NEW.weight,
+                    COALESCE((SELECT MAX(n.available_epoch) FROM kb_nodes n WHERE n.id=NEW.src), 0),
+                    strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+        END""")
     conn.execute("CREATE INDEX IF NOT EXISTS kb_nodes_epoch ON kb_nodes(available_epoch)")
     # Superseded versions of a node (additive; kb_nodes keeps the current one). Same 16 columns so the two can be UNIONed.
     conn.execute("""CREATE TABLE IF NOT EXISTS kb_node_versions(id TEXT, domain TEXT, series_key TEXT, period TEXT, title TEXT, document TEXT,
@@ -434,6 +451,64 @@ def graph(conn, as_of_epoch: int, limit: int = 300, domain: str | None = None) -
     links = [{"source": s, "target": d, "type": t, "weight": w} for s, d, t, w in conn.execute("SELECT src,dst,type,weight FROM kb_edges") if s in ids and d in ids]
     doms = dict(conn.execute(f"SELECT n.domain, COUNT(*) FROM {src} n WHERE {_asof(src)} GROUP BY n.domain", {"t": as_of_epoch}).fetchall())
     return {"total_nodes": sum(doms.values()), "nodes": nodes, "links": links, "domains": doms, "edge_legend": EDGE_LEGEND}
+
+
+def _reachable_edge_source(conn, as_of_epoch: int, recorded_revision: int | None = None):
+    has_history = conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='kb_edge_versions'").fetchone()
+    if has_history and conn.execute("SELECT 1 FROM kb_edge_versions LIMIT 1").fetchone():
+        sql = "SELECT src,dst,type,weight FROM kb_edge_versions WHERE available_epoch<=:t"
+        args = {"t": as_of_epoch}
+        if recorded_revision is not None:
+            sql += " AND recorded_revision<=:rev"
+            args["rev"] = recorded_revision
+        return sql, args
+    return "SELECT src,dst,type,weight FROM kb_edges", {}
+
+
+def graph_reachable(conn, seed_ids, as_of_epoch: int, edge_types=(), max_hops: int = 3,
+                    recorded_revision: int | None = None, limit: int = 100) -> dict:
+    """Bounded recursive traversal with the same PIT predicate on every node and edge (TypeGraph pattern)."""
+    src = _src(conn)
+    seeds = list(dict.fromkeys(s for s in (seed_ids or []) if isinstance(s, str) and s))[:50]
+    max_hops = max(1, min(int(max_hops), 10))
+    limit = max(1, min(int(limit), 500))
+    if not seeds:
+        return {"nodes": [], "links": [], "depths": {}, "max_hops": max_hops}
+    edge_sql, edge_args = _reachable_edge_source(conn, as_of_epoch, recorded_revision)
+    types = [t for t in (edge_types or []) if isinstance(t, str) and t]
+    args = {"t": as_of_epoch, "hops": max_hops, "lim": limit, "rev": recorded_revision, **edge_args}
+    args.update({f"seed{i}": seed for i, seed in enumerate(seeds)})
+    seed_sql = ",".join(f":seed{i}" for i in range(len(seeds)))
+    type_sql = f" AND e.type IN ({','.join(':' + f'type{i}' for i in range(len(types)))})" if types else ""
+    args.update({f"type{i}": t for i, t in enumerate(types)})
+    node_asof = _asof(src, "nxt")
+    q = f"""
+    WITH RECURSIVE walk(id, depth, path) AS (
+        SELECT n.id, 0, '/' || n.id || '/'
+        FROM {src} n
+        WHERE n.id IN ({seed_sql}) AND {_asof(src, 'n')}
+        UNION
+        SELECT nxt.id, walk.depth + 1, walk.path || nxt.id || '/'
+        FROM walk
+        JOIN ({edge_sql}) e ON e.src = walk.id
+        JOIN {src} nxt ON nxt.id = e.dst AND {node_asof}
+        WHERE walk.depth < :hops
+          AND INSTR(walk.path, '/' || nxt.id || '/') = 0
+          {type_sql}
+    )
+    SELECT DISTINCT n.id, n.domain, n.title, n.available_timestamp, n.available_epoch, walk.depth
+    FROM walk JOIN {src} n ON n.id = walk.id AND {_asof(src, 'n')}
+    ORDER BY walk.depth, n.available_epoch DESC
+    LIMIT :lim
+    """
+    rows = conn.execute(q, args).fetchall()
+    keys = ("id", "domain", "title", "available_timestamp", "available_epoch", "depth")
+    nodes = [{k: v for k, v in zip(keys, r) if k != "depth"} for r in rows]
+    depths = {r[0]: r[5] for r in rows}
+    ids = set(depths)
+    links = [{"source": s, "target": d, "type": t, "weight": w}
+             for s, d, t, w in conn.execute(edge_sql, edge_args) if s in ids and d in ids]
+    return {"nodes": nodes, "links": links, "depths": depths, "max_hops": max_hops}
 
 
 EDGE_LEGEND = {"previous_in_series": "prior object of the same series", "same_period": "different domains, same period (co-occurrence, not causation)",

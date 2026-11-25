@@ -94,6 +94,7 @@ class PitState(unittest.TestCase):
         self.assertEqual(s["curves"]["frac_spread"]["status"], "pending_collector"); self.assertEqual(s["curves"]["hub_spread"]["status"], "pending_collector")
         eth = [x for x in s["sources"] if x["agent_id"] == "Agent_NGL_MontBelvieu_Ethane"][0]
         self.assertEqual((eth["provenance"], eth["status"]), ("unverified_seed", "pending_collector"))
+        self.assertEqual((eth["feed_status"], eth["feed_label"]), ("INACTIVE_OR_PLANNED_GAP", "Feed Not Configured"))
         self.assertEqual([p["status"] for p in s["products"] if p["id"] == "ethane"], ["pending_collector"])
     def test_state_shape_and_ratio(self):
         s = me.build_state(self.db, "propane", "seasonal", "2025-10-01T00:00:00Z")
@@ -104,6 +105,12 @@ class PitState(unittest.TestCase):
         self.assertAlmostEqual(s["price"]["pct_of_wti"], me.wti_ratio(s["price"]["value"], 84.0), places=3)
         self.assertEqual(len(s["technicals"]["sma50"]), len(s["series"]["dates"]))
         self.assertTrue(all(f["schematic"] and f["value"] is None for f in s["geo"]["flows"]))
+        ov = s["geo"]["overlays"]
+        self.assertEqual(len(ov["routes"]), 3)
+        self.assertEqual(len(ov["chokepoints"]), 4)
+        self.assertEqual(len(ov["scenarios"]), 5)
+        self.assertTrue(all(r["netback_value"] is not None and r["freight_value"] is not None for r in ov["routes"]))
+        self.assertEqual({c["band"] for c in ov["chokepoints"]}, {"high", "elevated", "low"})
         import json; self.assertNotIn("NaN", json.dumps(s))
 
 

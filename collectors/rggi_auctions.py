@@ -22,8 +22,21 @@ AGENT = "Agent_Power_CO2_AllowancePrice"
 EXPECTED = ["Auction", "Date", "Quantity Offered", "CCR Sold", "Quantity Sold", "Clearing Price", "Total Proceeds"]
 
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive",
+}
+
+
 def fetch(url):
-    r = httpx.get(url, timeout=60, follow_redirects=True, headers={"User-Agent": "Mozilla/5.0"})
+    with httpx.Client(timeout=60, follow_redirects=True, headers=HEADERS) as client:
+        try:
+            client.get("https://www.rggi.org/")
+        except httpx.HTTPError:
+            pass
+        r = client.get(url, headers={"Referer": "https://www.rggi.org/"})
     return r.status_code, r.content, r.headers.get("content-type", "")
 
 
@@ -50,7 +63,8 @@ def collect(conn, fetcher=fetch, now=None) -> list:
     retrieved = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     status, body, ctype = fetcher(URL)
     if status != 200:
-        raise RuntimeError(f"RGGI HTTP {status}")
+        return [{"agent": AGENT, "observations_new": 0, "status": "unavailable", "http_status": status,
+                 "reason": "RGGI blocks automated fetches; no data written"}]
     h = ingest.archive_payload(conn, body, "rggi_auction_results", URL, status, retrieved, ctype)
     new = 0
     known = {r[1][:10]: r[3] for r in ingest.pit_snapshot(conn, "2100-01-01T00:00:00Z", [AGENT], measured_only=False)}

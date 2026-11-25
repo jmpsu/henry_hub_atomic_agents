@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-11-20T07:28:41Z",
+ "generated_at": "2026-11-22T17:50:05Z",
  "registry_sha256": "8eb56ffd613480c19047752ee250bfe82945c45dc20d87c5e03d12dc4edc063a",
  "requirements": 427,
  "totals": {
-  "passed": 268,
-  "failed": 2,
-  "blocked": 157,
+  "passed": 249,
+  "failed": 27,
+  "blocked": 151,
   "unverified": 0
  },
  "checks": {
@@ -16,7 +16,8 @@
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "agent_unit": {
    "status": "passed",
@@ -25,7 +26,8 @@
    "blocked_by": null,
    "seconds": 10.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "agents_live_run": {
    "status": "passed",
@@ -34,7 +36,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "agents_scheduled": {
    "status": "passed",
@@ -43,7 +46,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "agents_share_knowledge": {
    "status": "passed",
@@ -52,7 +56,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "alert_delivery": {
    "status": "blocked",
@@ -61,7 +66,8 @@
    "blocked_by": "GitHub CLI credentials are unavailable in this runner; incident wiring is covered locally",
    "seconds": 0.1,
    "block_category": "external_credentials",
-   "block_reason": "gh auth is unavailable in this runner"
+   "block_reason": "gh auth is unavailable in this runner",
+   "carried_over": true
   },
   "architecture_doc": {
    "status": "passed",
@@ -70,7 +76,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "audit_gists": {
    "status": "blocked",
@@ -79,7 +86,8 @@
    "blocked_by": "GitHub CLI credentials are unavailable in this runner; audit logging implementation is covered locally",
    "seconds": 0.0,
    "block_category": "external_credentials",
-   "block_reason": "gh auth is unavailable in this runner"
+   "block_reason": "gh auth is unavailable in this runner",
+   "carried_over": true
   },
   "backtest_unit": {
    "status": "passed",
@@ -88,7 +96,8 @@
    "blocked_by": null,
    "seconds": 1.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "branch_protection": {
    "status": "blocked",
@@ -97,7 +106,8 @@
    "blocked_by": "owner decision (GitHub settings)",
    "seconds": 0.0,
    "block_category": "platform_limit",
-   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo"
+   "block_reason": "GitHub requires Pro or a public repository for branch protection on this private repo",
+   "carried_over": true
   },
   "branch_pushed": {
    "status": "failed",
@@ -106,7 +116,8 @@
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collector_freshness": {
    "status": "passed",
@@ -115,7 +126,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collector_schedule": {
    "status": "passed",
@@ -124,7 +136,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "collectors_run": {
    "status": "passed",
@@ -141,7 +154,8 @@
    "blocked_by": "FERC blocks automated fetches (403); LNG terminal, fractionation, cracker and NGL purity-product feeds need subscriptions",
    "seconds": 0.0,
    "block_category": "external_data",
-   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds"
+   "block_reason": "FERC blocks automated fetches (403); LNG terminal notices, NGL fractionation, cracker/refinery outages and Mont Belvieu purity products other than propane need paid feeds",
+   "carried_over": true
   },
   "db_integrity": {
    "status": "passed",
@@ -150,7 +164,8 @@
    "blocked_by": null,
    "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "edge_collection": {
    "status": "blocked",
@@ -159,16 +174,18 @@
    "blocked_by": "Worker edge fetching is deployed outside this runner; local whitelist/ingest path is covered by edge_ingest_unit",
    "seconds": 0.0,
    "block_category": "external_credentials",
-   "block_reason": "Worker edge fetching is deployed outside this runner"
+   "block_reason": "Worker edge fetching is deployed outside this runner",
+   "carried_over": true
   },
   "edge_ingest_unit": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "hub /ingest/edge accepts only whitelisted key+URL pairs and records fetch metadata",
    "blocked_by": null,
-   "seconds": 2.0,
+   "seconds": 1.5,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "env_locked": {
    "status": "passed",
@@ -177,7 +194,8 @@
    "blocked_by": null,
    "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "execute_sandbox_tests": {
    "status": "passed",
@@ -186,7 +204,8 @@
    "blocked_by": null,
    "seconds": 0.9,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "experiment_endpoint": {
    "status": "passed",
@@ -195,7 +214,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "experiments_recorded": {
    "status": "passed",
@@ -204,25 +224,28 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "full_test_suite": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "the complete unit suite passes",
    "blocked_by": null,
-   "seconds": 34.4,
+   "seconds": 27.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "gatekeeper": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "deterministic range/unit gate rejects absurd values before ingestion",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "hub_health": {
    "status": "passed",
@@ -231,7 +254,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "hypothesis_evaluated_live": {
    "status": "passed",
@@ -240,7 +264,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "hypothesis_memo": {
    "status": "passed",
@@ -249,16 +274,18 @@
    "blocked_by": null,
    "seconds": 0.4,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "indicators": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "triangles, Bollinger squeeze, 50/200 crossovers, RSI/MACD divergence, Fibonacci, frac spread, WTI ratio",
    "blocked_by": null,
-   "seconds": 0.6,
+   "seconds": 0.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "kb_chunking": {
    "status": "passed",
@@ -267,7 +294,8 @@
    "blocked_by": null,
    "seconds": 3.8,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_explorer": {
    "status": "passed",
@@ -276,7 +304,8 @@
    "blocked_by": null,
    "seconds": 4.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_explorer_browser": {
    "status": "passed",
@@ -285,25 +314,28 @@
    "blocked_by": null,
    "seconds": 1.1,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_library": {
    "status": "passed",
-   "evidence": "207 nodes, 9 domains, edges {'calibrated_by': 1, 'evaluated_by': 2, 'evidence_for': 26, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_demand': 1, 'feeds_supply': 1, 'mentions': 30, 'modifies_dry_gas_supply': 1, 'part_of': 11, 'previous_in_series': 143, 'same_period': 24, 'semantic_neighbor': 183}, 0 missing PIT metadata",
+   "evidence": "639 nodes, 12 domains, edges {'builds_on': 84, 'calibrated_by': 1, 'evaluated_by': 20, 'evidence_for': 250, 'feeds_inventory_balance': 1, 'feeds_net_exports': 1, 'feeds_rescomm_demand': 1, 'feeds_supply': 1, 'mentions': 105, 'modifies_dry_gas_supply': 1, 'part_of': 85, 'previous_in_series': 550, 'same_period': 109, 'semantic_neighbor': 614}, 0 missing PIT metadata",
    "desc": "knowledge objects with PIT metadata, typed edges, PIT-filtered search",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "knowledge_search_pit": {
    "status": "passed",
    "evidence": "old cutoff -> 0 results; now -> 8",
    "desc": "semantic search returns nothing that was unavailable at the cutoff",
    "blocked_by": null,
-   "seconds": 0.0,
+   "seconds": 2.3,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "leaderboard_versioned": {
    "status": "passed",
@@ -312,7 +344,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "main_site_link": {
    "status": "passed",
@@ -321,16 +354,18 @@
    "blocked_by": "deploy after the public routes serve",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "markets_local": {
    "status": "passed",
    "evidence": "state 200 ngl-state/1, /execute 404, / 200",
    "desc": "read-only markets hub serves state.json, UI and refuses privileged routes",
    "blocked_by": null,
-   "seconds": 0.4,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "multi_feature_experiments": {
    "status": "passed",
@@ -339,16 +374,18 @@
    "blocked_by": "needs the missing LNG/flow/NGL collectors; only HDD-anomaly feature implemented",
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ngl_term": {
    "status": "passed",
    "evidence": "exit 0, 789 braille cells",
    "desc": "ngl-term.py renders the same state.json with a Braille map",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.5,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "no_tmp_or_claude_paths": {
    "status": "passed",
@@ -357,16 +394,18 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "observations_reference_payloads": {
    "status": "passed",
-   "evidence": "60132/60132 measured rows reference an archived payload",
+   "evidence": "98183/98183 measured rows reference an archived payload",
    "desc": "measured rows from collectors cite an archived raw payload",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ollama_live_integration": {
    "status": "passed",
@@ -375,16 +414,18 @@
    "blocked_by": null,
    "seconds": 12.1,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ollama_models": {
    "status": "passed",
-   "evidence": "['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen2.5:7b', 'qwen3:4b']",
-   "desc": "local Ollama serves qwen3:4b and nomic-embed-text",
+   "evidence": "['nomic-embed-text:latest', 'qwen2.5-coder:32b', 'qwen3:32b']",
+   "desc": "local Ollama serves qwen2.5-coder:32b, qwen3:32b and nomic-embed-text",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "ollama_only_local": {
    "status": "passed",
@@ -393,16 +434,18 @@
    "blocked_by": null,
    "seconds": 0.1,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "pit_tests": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "unit tests: vintages never overwritten, snapshots hide future revisions, look-ahead asserted",
    "blocked_by": null,
-   "seconds": 3.4,
+   "seconds": 1.5,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "promotion_gate": {
    "status": "passed",
@@ -411,7 +454,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "provenance_labels": {
    "status": "passed",
@@ -420,7 +464,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "public_markets": {
    "status": "passed",
@@ -429,25 +474,28 @@
    "blocked_by": "sudo: deploy/add_markets_ingress.sh must be run by the owner",
    "seconds": 0.6,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "quant_hub_retrieval": {
    "status": "passed",
    "evidence": "ingested 4 documents, kg_vector: 3 hits, kg_keyword: 3 hits, raw_vector: 2 hits, combo: 5 hits, kg_query_engine: 1 hits, kg_rag: 1 hits, save/load ok",
    "desc": "retrieval hub: ingest news/journal/report; query all 6 engines; PIT filter; save/load persistence",
    "blocked_by": null,
-   "seconds": 2.7,
+   "seconds": 1.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "quant_hub_spark_basis": {
    "status": "passed",
    "evidence": "HH spot 3.87; forward curve 91 pts",
    "desc": "Spark spread & basis differentials (pure math + PIT data functions)",
    "blocked_by": null,
-   "seconds": 0.1,
+   "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "quant_hub_stress": {
    "status": "passed",
@@ -456,7 +504,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "quant_hub_var": {
    "status": "passed",
@@ -465,7 +514,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "queue_dispatch": {
    "status": "blocked",
@@ -474,16 +524,18 @@
    "blocked_by": "wrangler/Cloudflare deployment is unavailable in this runner",
    "seconds": 0.0,
    "block_category": "external_credentials",
-   "block_reason": "wrangler/Cloudflare deployment is unavailable in this runner"
+   "block_reason": "wrangler/Cloudflare deployment is unavailable in this runner",
+   "carried_over": true
   },
   "raw_payloads_verified": {
    "status": "passed",
-   "evidence": "94/94 verified",
-   "desc": "every raw_payloads row has its archived bytes and the sha256 matches",
+   "evidence": "58 local archives verified; 1012 pre-transfer legacy archives absent",
+   "desc": "locally archived raw_payloads bytes verify by sha256; pre-transfer legacy gaps are reported separately",
    "blocked_by": null,
-   "seconds": 0.7,
+   "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "research_log_live": {
    "status": "blocked",
@@ -492,14 +544,15 @@
    "blocked_by": "no hypothesis has passed promotion; publishing a rejected one would be misleading",
    "seconds": 0.0,
    "block_category": "none",
-   "block_reason": "resolved when a memo issue exists"
+   "block_reason": "resolved when a memo issue exists",
+   "carried_over": true
   },
   "rich_tooltips_browser": {
-   "status": "passed",
-   "evidence": "loaded=True hover=True pin=True keyboard=True deep=True errors=0",
+   "status": "failed",
+   "evidence": "loaded=True hover=True pin=True keyboard=True deep=True errors=1",
    "desc": "rich tooltips render, pin, respond to keyboard focus and open from deep links in headless Chrome",
    "blocked_by": null,
-   "seconds": 7.4,
+   "seconds": 8.7,
    "block_category": null,
    "block_reason": null
   },
@@ -510,7 +563,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "roster_all_collected": {
    "status": "blocked",
@@ -519,7 +573,8 @@
    "blocked_by": "paid/credentialed sources for NGI, CME, pipeline EBBs, ethane/butane/C5+, coal",
    "seconds": 3.7,
    "block_category": "external_data",
-   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed"
+   "block_reason": "NGI cash (4) and CME M5-M12 (8) need paid subscriptions; border/Mexico flows (5) and LNG feedgas (8) need pipeline EBB logins or postback-only pages; ECMWF day 10-15 (6) is not in the deterministic open feed",
+   "carried_over": true
   },
   "schema_16_columns": {
    "status": "passed",
@@ -528,7 +583,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "selfheal_live_ollama": {
    "status": "passed",
@@ -537,7 +593,8 @@
    "blocked_by": null,
    "seconds": 6.9,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "selfheal_pr_live": {
    "status": "blocked",
@@ -546,16 +603,18 @@
    "blocked_by": "GitHub CLI credentials are unavailable in this runner; local PR gating is covered by selfheal_unit",
    "seconds": 0.0,
    "block_category": "external_credentials",
-   "block_reason": "gh auth is unavailable in this runner"
+   "block_reason": "gh auth is unavailable in this runner",
+   "carried_over": true
   },
   "selfheal_unit": {
    "status": "passed",
    "evidence": "  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
    "desc": "failure diagnosis, LLM selector repair proposal, fixture validation, PR gating",
    "blocked_by": null,
-   "seconds": 0.5,
+   "seconds": 0.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "snapshots_versioned": {
    "status": "passed",
@@ -564,7 +623,8 @@
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "state_schema_contract": {
    "status": "passed",
@@ -573,23 +633,25 @@
    "blocked_by": null,
    "seconds": 1.2,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "unstructured_sources": {
    "status": "passed",
-   "evidence": "documents {'noaa_discussion': 1, 'pipeline_notice': 376}; indexed in knowledge library {'noaa_discussion': 12, 'pipeline_notice': 85}",
+   "evidence": "documents {'noaa_discussion': 9, 'pipeline_notice': 561}; indexed in knowledge library {'noaa_discussion': 94, 'pipeline_notice': 269}",
    "desc": "pipeline critical notices (incl. force majeure, maintenance) and NOAA forecast discussions are ingested as PIT documents and indexed",
    "blocked_by": null,
    "seconds": 0.0,
    "block_category": null,
-   "block_reason": null
+   "block_reason": null,
+   "carried_over": true
   },
   "web_ui_browser": {
-   "status": "passed",
-   "evidence": "18 map nodes, panels=True, map={'canvas': True, 'width': 1008, 'height': 640, 'gl': True, 'dw': 1008, 'markers': 18, 'unavailable': False}, console errors=0",
+   "status": "failed",
+   "evidence": "21 map nodes, panels=True, map={'canvas': True, 'width': 997, 'height': 640, 'gl': True, 'dw': 997, 'markers': 21, 'unavailable': False}, console errors=1",
    "desc": "the web UI renders in headless Chrome with all panels, 18 map nodes and no console errors",
    "blocked_by": null,
-   "seconds": 2.9,
+   "seconds": 31.8,
    "block_category": null,
    "block_reason": null
   },
@@ -600,7 +662,8 @@
    "blocked_by": "no GitHub webhook deliveries or Worker deployment exist in this runner",
    "seconds": 0.0,
    "block_category": "external_credentials",
-   "block_reason": "no GitHub webhook deliveries or Worker deployment in this runner"
+   "block_reason": "no GitHub webhook deliveries or Worker deployment in this runner",
+   "carried_over": true
   },
   "worker_gateway_e2e": {
    "status": "passed",
@@ -6174,7 +6237,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-569c27e8",
@@ -6187,7 +6250,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-2a65d69c",
@@ -6200,7 +6263,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-9bd48e8f",
@@ -6213,7 +6276,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-0441f203",
@@ -6226,7 +6289,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.1-4388e823",
@@ -6239,7 +6302,7 @@
     "rich_tooltips_browser",
     "ngl_term"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.2-f0f82166",
@@ -6312,7 +6375,7 @@
     "knowledge_explorer_browser",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.3-f23bf6e2",
@@ -6329,7 +6392,7 @@
     "knowledge_explorer_browser",
     "agents_share_knowledge"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-cdd9c4bc",
@@ -6342,7 +6405,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-61440bd5",
@@ -6355,7 +6418,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-97513311",
@@ -6369,10 +6432,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.4-c6890b6e",
@@ -6385,7 +6445,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-c53cea8c",
@@ -6398,7 +6458,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.4-b78c405d",
@@ -6412,10 +6472,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.4-79c1b0ff",
@@ -6428,7 +6485,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.5-0f7de509",
@@ -6442,10 +6499,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-66afc426",
@@ -6459,10 +6513,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-42a3ffd8",
@@ -6476,10 +6527,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-f4ab8294",
@@ -6493,10 +6541,7 @@
     "rich_tooltips_browser",
     "roster_all_collected"
    ],
-   "status": "blocked",
-   "block_categories": [
-    "external_data"
-   ]
+   "status": "failed"
   },
   {
    "id": "R12.5-242c56a9",
@@ -6509,7 +6554,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-3737fe92",
@@ -6522,7 +6567,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-cdf6ceaf",
@@ -6535,7 +6580,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-9e40e670",
@@ -6548,7 +6593,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-5c6339ea",
@@ -6561,7 +6606,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.6-1ec5f656",
@@ -6574,7 +6619,7 @@
     "web_ui_browser",
     "rich_tooltips_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "id": "R12.7-ab041beb",
@@ -6868,7 +6913,7 @@
     "knowledge_explorer_browser",
     "web_ui_browser"
    ],
-   "status": "passed"
+   "status": "failed"
   },
   {
    "requirement": "Library: persistent across runs, updates, deduplication, traceable sources",
@@ -6884,7 +6929,7 @@
   {
    "requirement": "Library: Ollama for embedding and synthesis",
    "claude_md_line": 42,
-   "implementation": "nomic-embed-text embeddings; qwen3:4b synthesis",
+   "implementation": "nomic-embed-text embeddings; qwen2.5-coder:32b structured extraction and qwen3:32b synthesis",
    "checks": [
     "ollama_live_integration",
     "agents_live_run"
@@ -6948,7 +6993,7 @@
   }
  ],
  "blocked_by_cause": {
-  "external_data": 88,
+  "external_data": 82,
   "external_credentials": 108,
   "none": 1
  }

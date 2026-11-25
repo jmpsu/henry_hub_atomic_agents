@@ -1,0 +1,10 @@
+[Unit]
+Description=Henry Hub daily PIT collection
+
+[Timer]
+OnCalendar=*-*-* 09:30:00
+Persistent=true
+Unit=hh-collect-cpc.service
+
+[Install]
+WantedBy=timers.target
